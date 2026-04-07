@@ -1,0 +1,21 @@
+Mulan Permissive Software License，Version 2
+
+Mulan Permissive Software License，Version 2 (Mulan PSL v2)
+
+You may freely use, copy, modify, distribute, and deploy this software in any form or by any means, but you must comply with the following conditions:
+
+1. You must include a copy of this license document in all copies or substantial portions of the software.
+
+2. If you distribute or modify the software, you must cause the modified files to carry prominent notices stating that you changed the files and the date of any change.
+
+3. If you redistribute the software in source code form, you must retain the above copyright notice, this list of conditions, and the following disclaimer in the source code form.
+
+4. If you redistribute the software in compiled or other forms, you must reproduce the above copyright notice, this list of conditions, and the following disclaimer in the documentation or other materials provided with the distribution.
+
+5. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+Copyright (c) 2026 Jinhui Tong
+
+UBS Test - 针对 UB ServiceCore 进行多组件的特性测试和集成测试
