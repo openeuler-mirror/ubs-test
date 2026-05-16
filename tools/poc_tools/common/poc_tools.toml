@@ -1,0 +1,27 @@
+[default]
+timeout = 12000
+max_retry = 3
+retry_interval = 10
+
+async_max_retry = 360
+async_retry_interval = 10
+
+mem_flow_ratio = 1
+remote_memory_usage_percentage = 50
+collect_hugepage_type = 1024
+mem_borrow_per_socket_limit = 512
+image_base_path = "/opt/install/tmp/poc_tools/images"
+xml_path = "/etc/poc_tools/xml/template.xml"
+
+[task]
+monitor_interval = 10
+max_monitor_attempt = 720
+virsh_define_timeout = 1200
+virsh_start_timeout = 1200
+
+
+[log]
+log_path = "/var/log/poc_tools/poc_tools.log"
+log_level = "INFO"
+max_bytes = 10485760
+backup_count = 14
