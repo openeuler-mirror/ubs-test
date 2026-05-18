@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2025-2025. All rights reserved.
 import asyncio
 from typing import List
 from poc_tools.common.validator import validate_config, validate_vm_num_and_name, \

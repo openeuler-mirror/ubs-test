@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2025-2025. All rights reserved.
 from poc_tools.common.config import CONF
 from poc_tools.common.log import LOG
 from poc_tools.common.constant import VmStatusEnum, MemConvertEnum
