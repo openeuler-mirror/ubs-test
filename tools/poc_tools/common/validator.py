@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2025-2025. All rights reserved.
 import os
 from typing import List
 from ubse.ubs_virt_agent_case_conf import ubs_case_conf_info
