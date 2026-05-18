@@ -1,0 +1,98 @@
+#!/bin/bash
+mem_size=""
+image_name=""
+operation=""
+vm_name=""
+
+if [ $# -eq 0 ]; then
+	echo "Error: Please specify the operation type (create/delete)"
+	echo "Example："
+	echo "  Create a virtual machine: poc_tools create -size 1024 -img a.img -name vm_01"
+	echo "  Delete the virtual machine: poc_tools delete"
+	exit 1
+fi
+
+operation="$1"
+
+if [ "$operation" != "create" ] && [ "$operation" != "delete" ]; then
+	echo "Error: Unknown operation type '$operation', only supports create or delete"
+	exit 1
+fi
+
+shift
+
+if [[ $operation == "delete" && $# -gt 0 ]]; then
+    echo "Error: The delete operation does not accept any parameters"
+    exit 1
+fi
+
+while [ $# -gt 0 ]; do
+	case "$1" in
+	-size)
+		if [ -z "$2" ]; then
+			echo "Error: The -size option needs to be followed by a numeric parameter (e.g. -size 1024)"
+			exit 1
+		fi
+		mem_size="$2"
+		shift 2
+		;;
+	-img)
+		if [ -z "$2" ]; then
+			echo "Error: -img option requires following a mirror path (e.g. -img ubs.qcow2)"
+			exit 1
+		fi
+		image_name="$2"
+		shift 2
+		;;
+	-name)
+		if [ -z "$2" ]; then
+			echo "Error: The -name option needs to be followed by a virtual machine name (e.g. -name vm_01)"
+			exit 1
+		fi
+		vm_name="$2"
+		shift 2
+		;;
+	*)
+		echo "Error: Unknown option '$1', only supports -size, -img, -name"
+		exit 1
+		;;
+	esac
+done
+
+
+case "$operation" in
+create)
+
+	if ! command -v virsh &>/dev/null; then
+		echo "Error: Virsh command not found, please install libvirt client first (e.g. sudo apt install libvirt clients)"
+		exit 1
+	fi
+
+	if ! virsh list &>/dev/null; then
+		echo "Error: The execution of the virsh command failed, possibly due to the libvirtd service not being started (Attempt: sudo systemctl start libvirtd)"
+		exit 1
+	fi
+	total_vms=$(virsh list --all | grep -v -E 'Id|Name|State|----|^$' | wc -l)
+	total_vms=${total_vms:-0}
+	if [ "$total_vms" -gt 0 ]; then
+		echo "Error: Detected the existence of a surviving virtual machine, unable to continue operation"
+		echo "Currently running virtual machines:"
+		virsh list --all
+		exit 1
+	fi
+	if [ -z "$mem_size" ] || [ -z "$image_name" ] || [ -z "$vm_name" ]; then
+		echo "Error: Creating a virtual machine requires providing - size, - img, and - name simultaneously"
+		echo "Example: poc_tools create -size 1024  -img img/path/to/image.img -name vm_01"
+		exit 1
+	fi
+	echo "Operation: $operation"
+	echo "Image name: $image_name"
+	echo "Mem size: $mem_size GB"
+	echo "Vm name: $vm_name"
+	python3 /usr/lib/python3.11/site-packages/poc_tools/create_vm.py "$mem_size" "$image_name" "$vm_name"
+
+	;;
+delete)
+	python3 /usr/lib/python3.11/site-packages/poc_tools/delete_vm.py
+	;;
+esac
