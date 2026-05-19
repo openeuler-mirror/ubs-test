@@ -2,6 +2,7 @@ import argparse
 import asyncio
 import os
 import subprocess
+import math
 
 from typing import List, Tuple
 
@@ -22,7 +23,7 @@ from ubse.models.ubs_virt_agent_model import PageSwapPairT, NumaQuotaT
 
 REMOTE_MEMORY_USAGE_PERCENTAGE = 50
 ONE_HUNDRED_PERCENT = 100
-
+MEM_FLOW_RATIO = 1
 
 async def virsh_define_and_start_vm(xml_params: GenerateXmlParams, borrow_in_node: str):
     is_defined = False
@@ -56,29 +57,28 @@ async def get_local_node(node_info_list: List[NodeInfoT]) -> int:
             return node_info.node_id
     raise ValueError("Couldn't get local_node_id")
 
-async def get_borrow_mem(size: int, node_info_list: List[NodeInfoT]) -> int:
+async def get_borrow_mem(size: int, node_info_list: List[NodeInfoT], mem_borrow_unit: MemBorrowLimitParam) -> int:
 
     vm_size_mb = size * MemConvertEnum.GB_TO_MB
 
-    collect_hugepage_type = CONF.get("default", {}).get("collect_hugepage_type",
-                                                        CollectHugePageType.COLLECT_HUGE_PAGE_GB)
-    if collect_hugepage_type == CollectHugePageType.COLLECT_HUGE_PAGE_GB:
-        mem_borrow_unit = MemBorrowLimitParam.MEM_BORROW_UNIT_GB
-    else:
-        mem_borrow_unit = MemBorrowLimitParam.MEM_BORROW_UNIT_MB
-
     local_free_huge_page = 0
+    local_free_huge_page_for_flow = 0
+    mem_flow_ratio = CONF.get("default", {}).get("mem_flow_ratio", MEM_FLOW_RATIO)
     for node_info in node_info_list:
         if not node_info.is_current:
             continue
         for numa_info in node_info.numa_infos:
-            local_free_huge_page += numa_info.numa_huge_page_info[2 * MemConvertEnum.MB_TO_KB].huge_page_free
-    local_free_huge_page *= MemConvertEnum.HUGE_PAGE_TO_MB
+            huge_page_free = (numa_info.numa_huge_page_info[2 * MemConvertEnum.MB_TO_KB].huge_page_free
+                              * MemConvertEnum.HUGE_PAGE_TO_MB)
+            local_free_huge_page += huge_page_free
+            mem_flow = math.ceil((huge_page_free * mem_flow_ratio) / ONE_HUNDRED_PERCENT)
+            local_free_huge_page_for_flow += huge_page_free - mem_flow
     local_free_huge_page = local_free_huge_page // mem_borrow_unit * mem_borrow_unit
+    local_free_huge_page_for_flow = local_free_huge_page_for_flow // mem_borrow_unit * mem_borrow_unit
 
     borrow_mem = 0
     if vm_size_mb > local_free_huge_page:
-        borrow_mem = vm_size_mb - local_free_huge_page
+        borrow_mem = vm_size_mb - local_free_huge_page_for_flow
 
     remote_memory_usage_percentage = (CONF.get("default", {}).get("remote_memory_usage_percentage",
                                                                   REMOTE_MEMORY_USAGE_PERCENTAGE))
@@ -120,23 +120,31 @@ async def get_remote_local_dict(param: BorrowParamT, borrow_result: List):
     return remote_local_dict
 
 
-async def get_mem_infos(vm_size_gb: int, node_info_list: List[NodeInfoT]) -> Tuple:
+async def get_mem_infos(vm_size_gb: int, node_info_list: List[NodeInfoT], borrow_mem: int, mem_borrow_unit: int) -> Tuple:
     vm_size_mb = vm_size_gb * MemConvertEnum.GB_TO_MB
     total_mem_info = []
     numa_mem_dict = {}
+    mem_flow_ratio = CONF.get("default", {}).get("mem_flow_ratio", MEM_FLOW_RATIO)
     for node_info in node_info_list:
         if not node_info.is_current:
             continue
         for numa_info in node_info.numa_infos:
+            size = (numa_info.numa_huge_page_info[MemConvertEnum.HUGE_PAGE_TO_KB].huge_page_free *
+                    MemConvertEnum.HUGE_PAGE_TO_MB)
+            if numa_info.is_local and borrow_mem > 0:
+                mem_flow = math.ceil((size * mem_flow_ratio) / ONE_HUNDRED_PERCENT)
+                size -= mem_flow
+            size = size // mem_borrow_unit * mem_borrow_unit
+            if size > vm_size_mb:
+                size = vm_size_mb
             mem_info = MemInfo(
                 numa_id = int(numa_info.numa_id),
-                size = numa_info.numa_huge_page_info[MemConvertEnum.HUGE_PAGE_TO_KB].huge_page_free *
-                       MemConvertEnum.HUGE_PAGE_TO_MB,
+                size = size,
                 is_local = numa_info.is_local
             )
             total_mem_info.append(mem_info)
-            numa_mem_dict[mem_info.numa_id] = mem_info.size
-            vm_size_mb -= mem_info.size
+            numa_mem_dict[mem_info.numa_id] = size
+            vm_size_mb -= size
             if vm_size_mb <= 0:
                 break
     return total_mem_info, numa_mem_dict
@@ -202,7 +210,14 @@ async def create():
         LOG.info("get local_node and borrow_mem")
         local_node = await get_local_node(node_info_list)
 
-        borrow_mem = await get_borrow_mem(size, node_info_list)
+        collect_hugepage_type = CONF.get("default", {}).get("collect_hugepage_type",
+                                                            CollectHugePageType.COLLECT_HUGE_PAGE_GB)
+        if collect_hugepage_type == CollectHugePageType.COLLECT_HUGE_PAGE_GB:
+            mem_borrow_unit = MemBorrowLimitParam.MEM_BORROW_UNIT_GB
+        else:
+            mem_borrow_unit = MemBorrowLimitParam.MEM_BORROW_UNIT_MB
+
+        borrow_mem = await get_borrow_mem(size, node_info_list, mem_borrow_unit)
         new_numa_len , new_numa_infos = await get_numa_len_and_numa_info(node_info_list)
         param = BorrowParamT(
             node_id = local_node,
@@ -211,9 +226,10 @@ async def create():
         )
 
         # 借用
-        LOG.info("Borrow")
+
         borrow_result = []
         if borrow_mem > 0:
+            LOG.info("Borrow")
             borrow_result = ubs_mem_borrow(param, True)
             for i in range(len(borrow_result)):
                 task_id = borrow_result[i].task_id
@@ -235,7 +251,7 @@ async def create():
 
         node_info_list_after_borrow = ubs_mem_fragmentation_node_info_list()
         LOG.info("generate xml")
-        numa_infos, numa_mem_dict = await get_mem_infos(size, node_info_list_after_borrow)
+        numa_infos, numa_mem_dict = await get_mem_infos(size, node_info_list_after_borrow, borrow_mem, mem_borrow_unit)
         LOG.info(f"Vm name: {vm_name}, vm size: {size}GB, image full path: {image_full_path}.")
         xml_params = GenerateXmlParams(vm_name=vm_name, vm_size=size, numa_infos=numa_infos,
                                        image_full_path=image_full_path)
