@@ -1,5 +1,6 @@
 """Utility functions for test environment management."""
 
+import logging
 import os
 import tempfile
 from pathlib import Path
@@ -27,6 +28,19 @@ def setup_test_env(config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     config.setdefault("test_mode", True)
     config.setdefault("log_level", "DEBUG")
     config.setdefault("timeout", 30)
+
+    log_level = getattr(logging, config["log_level"].upper(), logging.DEBUG)
+    log_fmt = "%(asctime)s [TID:%(thread)d] %(levelname)s %(name)s - %(message)s"
+    log_datefmt = "%Y-%m-%d %H:%M:%S"
+    log_formatter = logging.Formatter(fmt=log_fmt, datefmt=log_datefmt)
+
+    root_logger = logging.getLogger()
+    for handler in root_logger.handlers:
+        handler.setFormatter(log_formatter)
+    if not root_logger.handlers:
+        logging.basicConfig(level=log_level, format=log_fmt, datefmt=log_datefmt)
+    root_logger.setLevel(log_level)
+    logging.getLogger("paramiko").setLevel(logging.WARNING)
 
     env_vars = {
         "TEST_MODE": "true",

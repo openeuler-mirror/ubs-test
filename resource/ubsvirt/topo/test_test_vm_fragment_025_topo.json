@@ -1,0 +1,24 @@
+{
+  "nodes":[{
+    "name": "node1",
+    "role": "master",
+    "hugePage": 2560
+  },
+  {
+    "name": "node2",
+    "role": "agent",
+    "hugePage": 1024
+  }],
+  "vms":[{
+    "name": "test_vm_fragment_013_01",
+    "image": "openEuler-22.03-everything",
+    "ram": 3072,
+    "node": "node1",
+    "removable": true,
+    "cpu": 4,
+    "enable_remote_memory": true,
+    "max_remote_memory_ratio": 25,
+    "enable_remote_create": true,
+    "remote_create_memory_ratio": 25
+  }]
+}

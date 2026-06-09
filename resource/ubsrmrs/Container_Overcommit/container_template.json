@@ -1,0 +1,9 @@
+{
+  "metadata": {
+    "name": "container_name"
+  },
+  "image": {
+    "image": "docker.io/library/numa-stress:v1.3"
+  },
+  "command": ["/bin/sh", "-c", "tail -f /dev/null"]
+}

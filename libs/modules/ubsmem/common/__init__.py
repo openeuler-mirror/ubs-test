@@ -1,0 +1,1 @@
+from libs.modules.ubsmem.common.utils import get_random_char

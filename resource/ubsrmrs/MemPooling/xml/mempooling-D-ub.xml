@@ -1,0 +1,54 @@
+<domain type="kvm">
+  <name>mempooling-D</name>
+  <uuid>94c20ea4-fd5a-11ee-947c-000ec6735b63</uuid>
+  <memory unit="g">2</memory>
+  <memoryBacking>
+        <hugepages/>
+  <allocation mode="immediate"/>
+  </memoryBacking>
+  <numatune>
+    <memory mode="strict" nodeset="1" />
+  </numatune>
+  <vcpu placement="static">1</vcpu>
+  <cputune>
+    <vcpupin vcpu="0" cpuset="8" />
+    <emulatorpin cpuset="8-15" />
+  </cputune>
+  <os>
+    <type arch="aarch64" machine="virt">hvm</type>
+    <loader readonly="yes" type="pflash">/usr/share/edk2/aarch64/QEMU_EFI-pflash.raw</loader>
+    <nvram>/var/lib/libvirt/qemu/nvram/mempooling_B_VARS.fd</nvram>
+    <boot dev="hd" />
+  </os>
+  <features>
+    <acpi />
+    <gic version="3" />
+  </features>
+  <cpu mode="host-passthrough" check="none">
+    <topology sockets='1' cores='1' threads='1'/>
+  </cpu>
+  <clock offset="utc">
+  </clock>
+  <on_poweroff>destroy</on_poweroff>
+  <on_reboot>restart</on_reboot>
+  <on_crash>restart</on_crash>
+  <devices>
+    <disk type="file" device="disk">
+      <driver name="qemu" type="qcow2" />
+      <source file='/home/mempooling-test/img/openEuler-22.03-LTS-SP1-aarch64-D.qcow2' />
+      <target dev="sda" bus="scsi" />
+      <address type="drive" controller="0" bus="0" target="0" unit="0" />
+    </disk>
+    <interface type="network">
+      <mac address="02:a9:fc:42:e8:f1" />
+      <source network="default" />
+      <model type="virtio" />
+    </interface>
+    <console type="pty" />
+    <controller type="scsi" index="0" model="virtio-scsi" />
+    <channel type="unix">
+      <source mode="bind" />
+      <target type="virtio" name="org.qemu.guest_agent.0" />
+    </channel>
+  </devices>
+</domain>
