@@ -1,0 +1,58 @@
+{
+    "case": {
+        "option": "--case",
+        "data_type": 1,
+        "server_type": ["server", "client"],
+        "value": "",
+        "description": "场景"
+    },
+    "role": {
+        "option": "--role",
+        "data_type": 1,
+        "server_type": ["server", "client"],
+        "value": "",
+        "description": "角色"
+    },
+    "driver_type": {
+        "option": "--protocol",
+        "data_type": 1,
+        "server_type": ["server", "client"],
+        "value": "",
+        "description": "协议"
+    },
+    "mode": {
+        "option": "-u",
+        "data_type": 1,
+        "server_type": ["server", "client"],
+        "value": "",
+        "description": "模式"
+    },
+    "ip_eid": {
+        "option": "-i",
+        "data_type": 1,
+        "server_type": ["server", "client"],
+        "value": "",
+        "description": "ip"
+    },
+    "port": {
+        "option": "-p",
+        "data_type": 0,
+        "server_type": ["server", "client"],
+        "value": "",
+        "description": "端口"
+    },
+    "data_size": {
+        "option": "-s",
+        "data_type": 0,
+        "server_type": ["server", "client"],
+        "value": "",
+        "description": "数据大小"
+    },
+    "pingpong": {
+        "option": "-n",
+        "data_type": 1,
+        "server_type": ["server", "client"],
+        "value": "",
+        "description": "pingpong次数"
+    }
+}

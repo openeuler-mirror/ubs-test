@@ -1,0 +1,67 @@
+<domain type='kvm'>
+  <name>test_vm_migrate_xml_001_vm</name>
+  <memory unit='GiB'>4</memory>
+  <currentMemory unit='GiB'>4</currentMemory>
+  <memoryBacking>
+    <hugepages>
+      <page size='2' unit='MiB'/>
+    </hugepages>
+    <access mode="shared"/>
+  </memoryBacking>
+  <numatune>
+    <memory mode="strict" nodeset="0"/>
+    <memnode cellid="0" mode="strict" nodeset="0"/>
+  </numatune>
+  <vcpu placement='static'>2</vcpu>
+  <cputune>
+    <shares>4096</shares>
+    <vcpupin vcpu='0' cpuset='0'/>
+    <vcpupin vcpu='1' cpuset='1'/>
+    <emulatorpin cpuset='0-7'/>
+  </cputune>
+  <os firmware='efi'>
+    <type arch='aarch64' machine='virt-8.2'>hvm</type>
+    <firmware>
+      <feature enabled='no' name='enrolled-keys'/>
+      <feature enabled='no' name='secure-boot'/>
+    </firmware>
+    <loader readonly='yes' type='pflash'>/usr/share/edk2/aarch64/QEMU_EFI-pflash.raw</loader>
+    <nvram template='/usr/share/edk2/aarch64/vars-template-pflash.raw'>/var/lib/libvirt/qemu/nvram/test_vm_migrate_xml_001_vm_VARS.raw</nvram>
+    <boot dev='hd'/>
+  </os>
+  <features>
+    <acpi/>
+    <gic version='3'/>
+  </features>
+  <cpu mode="host-passthrough" check="none">
+    <topology sockets="1" cores="2" threads="1" />
+    <numa>
+      <cell id="0" memory="4" unit="g">4</cell>
+    </numa>
+  </cpu>
+  <clock offset='utc'>
+    <timer name='rtc' tickpolicy='catchup'/>
+    <timer name='hpet' present='no'/>
+  </clock>
+  <on_poweroff>destroy</on_poweroff>
+  <on_reboot>restart</on_reboot>
+  <on_crash>restart</on_crash>
+  <devices>
+    <emulator>/usr/bin/qemu-kvm</emulator>
+    <disk type='file' device='disk'>
+      <driver name='qemu' type='qcow2' cache='none' io='native'/>
+      <source file='/opt/install/tmp/openstack/images/openEuler-22.03-SP2-aarch64-everything-redis-Performance.qcow2'/>
+      <target dev='vda' bus='virtio'/>
+    </disk>
+    <controller type='virtio-serial' index='0'>
+      <address type='pci' domain='0x0000' bus='0x03' slot='0x00' function='0x0'/>
+    </controller>
+    <console type='pty' model='virtio'>
+      <target type='virtio' port='0'/>
+      <address type='virtio-serial' controller='0' bus='0' port='0'/>
+    </console>
+    <graphics type='vnc' port='5900' autoport='yes' listen='0.0.0.0'>
+      <listen type='address' address='0.0.0.0'/>
+    </graphics>
+  </devices>
+</domain>

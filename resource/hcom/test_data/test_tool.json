@@ -1,0 +1,8 @@
+{
+    "basic_001": {
+        "role": {"server": "server", "client": "client"},
+        "driver_type": "UBC",
+        "port": "9900",
+        "pingpong": "1000"
+    }
+}
