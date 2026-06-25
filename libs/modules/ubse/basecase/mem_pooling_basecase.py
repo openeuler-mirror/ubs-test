@@ -241,33 +241,7 @@ class MEM_Pooling_BaseCase(CMBaseCase):
                 return True
             else:
                 return False
-    
-    # def mem_numa_borrow(
-    #     self,
-    #     node: Any,
-    #     masking: bool = True,
-    #     option: str = 'create',
-    #     name: str = 'mem_borrow_test',
-    #     size: str = '256M',
-    #     slot_ids: str = '',
-    #     **kwargs
-    # ) -> str:
-    #     """Execute NUMA memory borrow operation."""
-    #     cmd_parts = [f"{self.mem_sdk_path}/test/bin/mem_numa_borrow"]
-    #
-    #     cmd_parts.append(f"--{option}")
-    #     cmd_parts.append(f"--name {name}")
-    #     cmd_parts.append(f"--size {size}")
-    #
-    #     if slot_ids:
-    #         cmd_parts.append(f"--slots {slot_ids}")
-    #
-    #     for key, value in kwargs.items():
-    #         cmd_parts.append(f"--{key} {value}")
-    #
-    #     cmd = ' '.join(cmd_parts)
-    #     result = node.run({"command": [cmd], "timeout": 120})
-    #     return result.get("stdout", "")
+
 
     def mem_numa_borrow(
         self,
@@ -290,6 +264,8 @@ class MEM_Pooling_BaseCase(CMBaseCase):
         timeout:命令结果等待时间
         """
         result = ''
+        if params_dict is None:
+            params_dict = {}
         if masking:
             node.run({'command': ["cd {}".format(C_path)]})
             node.run({'command': ["python3 ubse_mem_app.py"], 'waitstr': 'ubse_mem_app>', 'returnCode': False})
@@ -364,33 +340,7 @@ class MEM_Pooling_BaseCase(CMBaseCase):
         """Post-test cleanup."""
         super().postTestCase()
         logger.info("MEM_Pooling_BaseCase postTestCase")
-    
-    # def clear_all_borrow_mem(self) -> bool:
-    #     """Clear all borrowed memory (FD, NUMA, SHM)."""
-    #     for node in self.nodes:
-    #         result = node.run({"command": [f"{self.mem_sdk_path}/test/bin/mem_fd_borrow --list"]})
-    #         if result.get("stdout"):
-    #             lines = result.get("stdout").split("\n")
-    #             for line in lines:
-    #                 if "name=" in line:
-    #                     name = line.split("name=")[1].split()[0]
-    #                     node.run({"command": [f"{self.mem_sdk_path}/test/bin/mem_fd_borrow --delete --name {name}"]})
-    #
-    #     for node in self.nodes:
-    #         result = node.run({"command": [f"{self.mem_sdk_path}/test/bin/mem_numa_borrow --list"]})
-    #         if result.get("stdout"):
-    #             lines = result.get("stdout").split("\n")
-    #             for line in lines:
-    #                 if "name=" in line:
-    #                     name = line.split("name=")[1].split()[0]
-    #                     node.run({"command": [f"{self.mem_sdk_path}/test/bin/mem_numa_borrow --delete --name {name}"]})
-    #
-    #     logger.info("Cleared all borrowed memory")
-    #     return True
-    
-    def set_hugepages(self, nodes: List[Any], value: Any, size: str = "1G", numa: str = "") -> bool:
-        """Set hugepages configuration."""
-        return mem_ops.set_hugepages(nodes, int(value) if isinstance(value, str) else value, size, numa)
+
     
     def backup_rack_log(self, node: Any) -> bool:
         """Backup rackmanager.log directory."""
@@ -542,6 +492,7 @@ class MEM_Pooling_BaseCase(CMBaseCase):
         name: str = 'mem_borrow_test',
         size: str = '256M',
         slot_ids: str = '',
+        params_dict: Optional[Dict[str, Any]] = None,
         proviers: str = '',
         wait_time: int = 120
     ) -> bool:
@@ -563,7 +514,8 @@ class MEM_Pooling_BaseCase(CMBaseCase):
         """
         C_path = "/home/autotest"
         result = ''
-        
+        if params_dict is None:
+            params_dict = {}
         node.run({'command': ["cd {}".format(C_path)]})
         node.run({'command': ["python3 ubse_mem_app.py"], 'waitstr': 'ubse_mem_app>', 'returnCode': False})
         
@@ -576,13 +528,17 @@ class MEM_Pooling_BaseCase(CMBaseCase):
                 res = node.run({'command': [f"shm_create {name} {size}"], 'waitstr': 'ubse_mem_app>', 'returnCode': False})
             result = str(res.get('stdout', '')) + str(res.get('stderr', ''))
         elif option == 'shm_create_with_lender':
-            res = node.run({'command': [f"shm_create_with_lender {name} {size} {slot_ids}"], 'waitstr': 'ubse_mem_app>', 'timeout': wait_time, 'returnCode': False})
+            res = node.run({'command': [f"shm_create_with_lender {name} {size} "
+                                        f"{params_dict.get('lender_slot_id', '')} "
+                                        f"--socket_id={params_dict.get('lender_socket_id', '')} "
+                                        f"--numa_id={params_dict.get('lender_numa_id', '')}"],
+                            'waitstr': 'ubse_mem_app>', 'returnCode': False, 'timeout': wait_time})
             result = str(res.get('stdout', '')) + str(res.get('stderr', ''))
         elif option == 'shm_attach':
-            res = node.run({'command': [f"shm_attach {name}"], 'waitstr': 'ubse_mem_app>', 'returnCode': False})
+            res = node.run({'command': [f"shm_attach {name}"], 'waitstr': 'ubse_mem_app>', 'returnCode': False, 'timeout': wait_time})
             result = str(res.get('stdout', '')) + str(res.get('stderr', ''))
         elif option == 'shm_detach':
-            res = node.run({'command': [f"shm_detach {name}"], 'waitstr': 'ubse_mem_app>', 'returnCode': False})
+            res = node.run({'command': [f"shm_detach {name}"], 'waitstr': 'ubse_mem_app>', 'returnCode': False, 'timeout': wait_time})
             result = str(res.get('stdout', '')) + str(res.get('stderr', ''))
         elif option == 'shm_delete':
             res = node.run({'command': [f"shm_delete {name}"], 'waitstr': 'ubse_mem_app>', 'returnCode': False, 'timeout': wait_time})
@@ -783,3 +739,86 @@ class MEM_Pooling_BaseCase(CMBaseCase):
                     node_dict[socket] = [numa]
                 result[node] = node_dict
         return result
+
+    def parse_sdk_numa_info(self, info: str) -> Dict[str, Dict[str, str]]:
+        """Parse SDK NUMA memory info from output string.
+
+        Args:
+            info: Output string containing ubse_numa_mem_info entries
+
+        Returns:
+            Dict mapping numa id to NUMA info dict containing:
+            - 'numa id': NUMA node ID
+            - 'mem total': Total memory in GB
+            - 'huge pages 2M': Total 2M huge pages
+            - 'free huge pages 2M': Free 2M huge pages
+        """
+        res = {}
+        temp = {}
+        keys = ['numa id', 'mem total', 'huge pages 2M', 'free huge pages 2M']
+        for line in info.split('\r\n'):
+            if 'ubse_numa_mem_info' in line:
+                if temp:
+                    numa_id = temp.get('numa id')
+                    if numa_id:
+                        res[numa_id] = temp
+                temp = {}
+                continue
+            if '=' in line:
+                key, value = line.split('=', 1)
+                key = key.strip()
+                if key not in keys:
+                    continue
+                if key == 'mem total':
+                    value = value.split('bytes')[0].strip()
+                    try:
+                        value = str(int(value) // 1024 // 1024 // 1024)
+                    except ValueError:
+                        pass
+                else:
+                    value = value.strip()
+                temp[key] = value
+        if temp:
+            numa_id = temp.get('numa id')
+            if numa_id:
+                res[numa_id] = temp
+        return res
+
+
+    def get_env_numa_info(self, node: Any) -> Dict[str, Dict[str, str]]:
+        """Get environment NUMA memory info from node.
+
+        Args:
+            node: Node object to query
+
+        Returns:
+            Dict mapping numa id to NUMA info dict containing:
+            - 'numa id': NUMA node ID
+            - 'mem total': Total memory in GB
+            - 'huge pages 2M': Total 2M huge pages
+            - 'free huge pages 2M': Free 2M huge pages
+        """
+        res = {}
+        keys = {'size': 'mem total'}
+        numa_stat = node.run({"command": ['numactl -H']}).get('stdout')
+        info_list = numa_stat.rstrip('node distances').split('\r\n')
+        for line in info_list:
+            items = line.split(':')
+            key = items[0].split(' ')
+            if 'cpus' in items[0]:
+                res.update({f'{key[1]}':{'numa id': key[1]}})
+                continue
+            if 'size' in items[0]:
+                val = int(items[1].split('MB')[0].strip())
+                res.get(key[1]).update({keys.get(key[2]): str(val //1024)})
+        for i in list(res.keys()):
+            total_2M = node.run(
+                {"command": [f"cat /sys/devices/system/node/node{i}/hugepages/hugepages-2048kB/nr_hugepages"]}
+            )
+            free_2M = node.run(
+                {"command": [f"cat /sys/devices/system/node/node{i}/hugepages/hugepages-2048kB/free_hugepages"]}
+            )
+            res.get(i).update({"huge pages 2M": total_2M.get("stdout").split('\r\n')[0],
+                               "free huge pages 2M": free_2M.get("stdout").split('\r\n')[0]
+                               })
+        return res

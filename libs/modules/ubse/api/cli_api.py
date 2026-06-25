@@ -25,8 +25,6 @@ logger = logging.getLogger(__name__)
 def display_cluster(node: Any) -> List[Dict[str, str]]:
     """Display cluster information using ubsectl.
 
-    Legacy method: display_cluster(node)
-
     Args:
         node: Node object
 
@@ -85,8 +83,6 @@ def display_cluster(node: Any) -> List[Dict[str, str]]:
 def display_election(node: Any, role: str) -> Optional[str]:
     """Display election information for specified role.
 
-    Legacy method: display_election(node, role)
-
     Args:
         node: Node object
         role: Role to search ('master' or 'standby')
@@ -112,28 +108,16 @@ def display_election(node: Any, role: str) -> Optional[str]:
     logger.info(f"No {role} node found")
     return None
 
-def display_mem_borrow_detail(node: Any) -> List[Dict[str, str]]:
-    """Display memory borrow detail accounts."""
-    result = node.run({"command": ["ubsectl display memory -d"]})
-    stdout = result.get("stdout", "") + result.get("stderr", "")
-    
-    if "root@#>" in stdout:
-        stdout = stdout.split("root@#>")[0]
-    
-    accounts = []
-    lines = stdout.strip().split("\n")
-    
-    for line in lines:
-        if line.strip() and ":" in line:
-            parts = line.split(":")
-            if len(parts) >= 2:
-                accounts.append({"name": parts[0].strip(), **{p.split("=")[0]: p.split("=")[1] for p in parts[1].split() if "=" in p}})
-    
-    return accounts
-
 
 def query_link_info(node: Any) -> List[Dict[str, str]]:
-    """Query link topology information."""
+    """Query link topology information.
+
+    Args:
+        node: Node object
+
+    Returns:
+        List of link info dictionaries containing 'link-id'
+    """
     result = node.run({"command": ["ubsectl display topo -t cpu"]})
     stdout = result.get("stdout", "") + result.get("stderr", "")
     
@@ -153,7 +137,16 @@ def query_link_info(node: Any) -> List[Dict[str, str]]:
 
 
 def check_mem_query(node: Any, query_item="borrow_detail", timeout=0) -> Optional[str]:
-    """Check memory query result."""
+    """Check memory query result.
+
+    Args:
+        node: Node object
+        query_item: Query item type (default: 'borrow_detail')
+        timeout: Sleep time before query (default: 0)
+
+    Returns:
+        Query result string, None if failed
+    """
     time.sleep(timeout)
     res = node.run(
         {'command': [f"ubsectl display memory -t {query_item}"]})
@@ -163,7 +156,14 @@ def check_mem_query(node: Any, query_item="borrow_detail", timeout=0) -> Optiona
 
 
 def check_memmory(node: Any) -> List[Dict[str, Any]]:
-    """Check memory status via CLI."""
+    """Check memory status via CLI.
+
+    Args:
+        node: Node object
+
+    Returns:
+        List of memory status dictionaries
+    """
     result = node.run({"command": ["ubsectl check memory"]})
     stdout = result.get("stdout", "")
     
@@ -198,7 +198,14 @@ def check_memmory(node: Any) -> List[Dict[str, Any]]:
 
 
 def check_memmory_status(node: Any) -> Dict[str, str]:
-    """Check memory status as dict."""
+    """Check memory status as dict.
+
+    Args:
+        node: Node object
+
+    Returns:
+        Dict mapping node ID to status string
+    """
     result = node.run({"command": ["ubsectl check memory"]})
     stdout = str(result.get("stdout", "")) + str(result.get("stderr", ""))
     
@@ -221,7 +228,15 @@ def check_memmory_status(node: Any) -> Dict[str, str]:
 
 
 def display_numa_status_info(node: Any, options: str = "numa_status") -> List[Dict[str, str]]:
-    """Display NUMA status info."""
+    """Display NUMA status info.
+
+    Args:
+        node: Node object
+        options: Query options (default: 'numa_status')
+
+    Returns:
+        List of NUMA status info dictionaries
+    """
     result = node.run({"command": [f"ubsectl display memory -t {options}"]})
     stdout = result.get("stdout")
     if "root@#>" in stdout:
@@ -243,7 +258,15 @@ def display_numa_status_info(node: Any, options: str = "numa_status") -> List[Di
 
 
 def get_node_memory_status_by_node_id(node: Any, node_id: str) -> str:
-    """Get memory status for a specific node by ID."""
+    """Get memory status for a specific node by ID.
+
+    Args:
+        node: Node object
+        node_id: Node ID string
+
+    Returns:
+        Memory status string (lowercase), empty string if not found
+    """
     res = node.run(
         {'command': [f"ubsectl check memory"]}).get('stdout')
     # 解析字符串为字典列表
@@ -254,84 +277,6 @@ def get_node_memory_status_by_node_id(node: Any, node_id: str) -> str:
             if "(" + node_id + ")" in parts[0]:
                 return parts[4].strip(';').lower()
     return ""
-
-
-def _extract_mem_info(mem_info_dict: Dict[str, str], switch: str = 'normal', need_name: bool = False) -> Dict[str, str]:
-    """Extract memory info from parsed dict.
-    
-    Args:
-        mem_info_dict: Parsed memory info dict
-        switch: 'normal' or other for status field
-        need_name: Include name field
-        
-    Returns:
-        Extracted memory info dict
-    """
-    borrow_node = mem_info_dict.get("borrow_node", "")
-    lend_node = mem_info_dict.get("lend_node", "")
-    
-    temp = {
-        'MemBorrowNode': borrow_node.split('(')[1].split(')')[0] if '(' in borrow_node else borrow_node,
-        'MemLendNode': lend_node.split('(')[1].split(')')[0] if '(' in lend_node else lend_node,
-        'Size(MB)': mem_info_dict.get("lend_size", "")
-    }
-    
-    if need_name:
-        temp['name'] = mem_info_dict.get("name", "")
-    
-    if switch != 'normal':
-        temp['status'] = mem_info_dict.get("status", "")
-    
-    return temp
-
-
-def display_mem_info(node: Any, switch: str = 'normal', need_name: bool = False) -> List[Dict[str, str]]:
-    """Display memory borrow information.
-    
-    Legacy method: cli_api.display_mem_info(node, options='borrow_account')
-    
-    Args:
-        node: Node object
-        options: Query type (borrow_detail, borrow_account, etc.)
-        switch: 'normal' or other for status field
-        need_name: Include name in result
-        
-    Returns:
-        List of memory info dicts, empty list if no data or error
-        
-    Example:
-        data = cli_api.display_mem_info(node, options='borrow_account')
-        for item in data:
-            print(f"Size: {item['Size(MB)']} MB")
-    """
-    result = node.run({"command": ["ubsectl display memory -t borrow_detail"]})
-    stdout = result.get("stdout", "")
-    
-    if "root@#>" in stdout:
-        stdout = stdout.rstrip("\r\nroot@#>")
-    
-    if not stdout or 'information is empty' in stdout:
-        return []
-    
-    try:
-        parser = AweTableParser(stdout)
-        mem_list = parser.parse_text()
-    except ValueError:
-        logger.warning(f"Failed to parse memory info: {stdout[:200]}")
-        return []
-    
-    mems = []
-    for mem_info_dict in mem_list:
-        borrow_node = mem_info_dict.get('borrow_node', '')
-        if borrow_node == '':
-            mem_info_dict['borrow_node'] = '(none)'
-        
-        status = mem_info_dict.get("status", "")
-        if status == 'done' or status == 'fault':
-            temp = _extract_mem_info(mem_info_dict, switch, need_name)
-            mems.append(temp)
-    
-    return mems
 
 
 def import_cert(
@@ -446,30 +391,50 @@ def import_crl(node: Any, ca_crl_file: str, is_use_long_option: bool = False) ->
     
     return str(result.get('stdout', '')) + str(result.get('stderr', ''))
 
-def display_mem_borrow_detail(node):
+def display_mem_borrow_detail(node, name=None, borrow_type=None, is_use_long_option=False):
+    """Display memory borrow detail information.
+
+    Args:
+        node: Node object
+        name: Memory name (optional)
+        borrow_type: Borrow type (optional)
+        is_use_long_option: Use long option format
+
+    Returns:
+        List of memory borrow detail dictionaries, empty list if failed
     """
-    查询内存借用账本详细信息
-    :param node: 执行节点
-    :return: 查询失败：返回空列表[]，查询成功：返回字典列表
-    """
-    res = node.run({'command': [f"ubsectl display memory -t borrow_detail"]}).get('stdout').rstrip('\r\nroot@#>')
+    if is_use_long_option:
+        command = f"ubsectl display memory --type borrow_detail"
+        if name:
+            command += f" --name {name}"
+        if borrow_type:
+            command += f" --borrow-type {borrow_type}"
+    else:
+        command = f"ubsectl display memory -t borrow_detail"
+        if name:
+            command += f" -n {name}"
+        if borrow_type:
+            command += f" -bt {borrow_type}"
+    res = node.run({'command': [command]}).get('stdout').rstrip('\r\nroot@#>')
     if not res or 'information is empty' in res:
         return []
-
-    awe_table_parser = AweTableParser(res)
-    mem_list = awe_table_parser.parse_text()
+    try:
+        parser = AweTableParser(res)
+        mem_list = parser.parse_text()
+    except ValueError:
+        logger.warning(f"Failed to parse memory info: {res[:200]}")
+        return []
     mems = []
-    keys = []
     for mem_info_dict in mem_list:
-        if mem_info_dict.get('borrow_node') == '':
-            mem_info_dict['borrow_node'] = '(none)'
-        temp = {'name': mem_info_dict.get("name"),
-                'type': mem_info_dict.get("type"),
-                'borrow_node': mem_info_dict.get("borrow_node").split('(')[1].split(')')[0],
-                'lend_node': mem_info_dict.get("lend_node").split('(')[1].split(')')[0],
-                'lend_size': mem_info_dict.get("lend_size"),
-                'status': mem_info_dict.get("status"),
-                'handle': mem_info_dict.get("handle")
+        borrow_node = mem_info_dict.get("borrow_node", "")
+        lend_node = mem_info_dict.get("lend_node", "")
+        temp = {'name': mem_info_dict.get("name", ""),
+                'type': mem_info_dict.get("type", ""),
+                'borrow_node': borrow_node.split('(')[1].split(')')[0] if '(' in borrow_node else borrow_node,
+                'lend_node': lend_node.split('(')[1].split(')')[0] if '(' in lend_node else lend_node,
+                'lend_size': mem_info_dict.get("lend_size", ""),
+                'status': mem_info_dict.get("status", ""),
+                'handle': mem_info_dict.get("handle", "")
                 }
         mem_info_dict.update(temp)
         mems.append(mem_info_dict)
@@ -477,6 +442,14 @@ def display_mem_borrow_detail(node):
 
 
 def query_topo_info(node):
+    """Query topology information.
+
+    Args:
+        node: Node object
+
+    Returns:
+        List of link info dictionaries
+    """
     res = node.run({
         'command': [f"ubsectl display topo -t cpu"]
     }).get('stdout').rstrip('\r\nroot@#>')
@@ -495,6 +468,200 @@ def query_topo_info(node):
             if link_info_dict:
                 link_info.append(link_info_dict)
     return link_info
+
+
+def parse_mem_res_dynamic(res):
+    """Parse memory result dynamic output.
+
+    Args:
+        res: Result string from memory command
+
+    Returns:
+        Tuple of (success, info_dict)
+    """
+    if 'ERROR:' in res:
+        return False, []
+    mem_info_dict = {}
+    for line in filter(None, res.splitlines()):
+        if ':' in line:
+            k, v = line.split(':', 1)
+            mem_info_dict[k.strip()] = v.strip()
+    if not mem_info_dict:
+        return False, []
+    return True, mem_info_dict
+
+
+def create_fd_memory(node, name, size='128M', is_use_long_option=False):
+    """Create FD memory.
+
+    Args:
+        node: Node object
+        name: Memory name
+        size: Memory size (default: '128M')
+        is_use_long_option: Use long option format
+
+    Returns:
+        Tuple of (success, info_dict)
+    """
+    if is_use_long_option:
+        command = f"ubsectl create memory --type fd --size {size} --name {name}"
+    else:
+        command = f"ubsectl create memory -t fd -s {size} -n {name}"
+    res = node.run({'command': [command]}).get('stdout').rstrip('\r\n')
+    return parse_mem_res_dynamic(res)
+
+
+def create_numa_memory(node, name, size='128M', link=None, is_use_long_option=False):
+    """Create NUMA memory.
+
+    Args:
+        node: Node object
+        name: Memory name
+        size: Memory size (default: '128M')
+        link: Link ID (optional)
+        is_use_long_option: Use long option format
+
+    Returns:
+        Tuple of (success, info_dict)
+    """
+    if is_use_long_option:
+        base_cmd = f"ubsectl create memory --type numa --size {size} --name {name}"
+        link_flag = "--link"
+    else:
+        base_cmd = f"ubsectl create memory -t numa -s {size} -n {name}"
+        link_flag = "-l"
+    if link:
+        command = f"{base_cmd} {link_flag} {link}"
+    else:
+        command = base_cmd
+    res = node.run({'command': [command]}).get('stdout').rstrip('\r\n')
+    return parse_mem_res_dynamic(res)
+
+
+def create_shm_memory(node, name, size='128M', region=None, is_use_long_option=False):
+    """Create shared memory.
+
+    Args:
+        node: Node object
+        name: Memory name
+        size: Memory size (default: '128M')
+        region: Region ID (optional)
+        is_use_long_option: Use long option format
+
+    Returns:
+        Tuple of (success, info_dict)
+    """
+    if is_use_long_option:
+        base_cmd = f"ubsectl create memory --type share --size {size} --name {name}"
+        region_flag = "--region"
+    else:
+        base_cmd = f"ubsectl create memory -t share -s {size} -n {name}"
+        region_flag = "-r"
+    if region:
+        command = f"{base_cmd} {region_flag} {region}"
+    else:
+        command = base_cmd
+    res = node.run({'command': [command]}).get('stdout').rstrip('\r\n')
+    return parse_mem_res_dynamic(res)
+
+
+def attach_shm_memory(node, name, is_use_long_option=False):
+    """Attach shared memory.
+
+    Args:
+        node: Node object
+        name: Memory name
+        is_use_long_option: Use long option format
+
+    Returns:
+        Tuple of (success, info_dict)
+    """
+    if is_use_long_option:
+        command = f"ubsectl attach memory --name {name}"
+    else:
+        command = f"ubsectl attach memory -n {name}"
+    res = node.run({'command': [command]}).get('stdout').rstrip('\r\n')
+    return parse_mem_res_dynamic(res)
+
+
+def detach_shm_memory(node, name, is_use_long_option=False):
+    """Detach shared memory.
+
+    Args:
+        node: Node object
+        name: Memory name
+        is_use_long_option: Use long option format
+
+    Returns:
+        True if successful, False otherwise
+    """
+    if is_use_long_option:
+        command = f"ubsectl detach memory --name {name}"
+    else:
+        command = f"ubsectl detach memory -n {name}"
+    res = node.run({'command': [command]}).get('stdout').rstrip('\r\n')
+    if "successfully" in res:
+        return True
+    return False
+
+
+def delete_memory(node, name, mem_type='', is_use_long_option=False):
+    """Delete memory.
+
+    Args:
+        node: Node object
+        name: Memory name
+        mem_type: Memory type (optional)
+        is_use_long_option: Use long option format
+
+    Returns:
+        True if successful, False otherwise
+    """
+    if is_use_long_option:
+        base_cmd = f"ubsectl delete memory --name {name}"
+        mem_type_flag = "--type"
+    else:
+        base_cmd = f"ubsectl delete memory -n {name}"
+        mem_type_flag = "-t"
+    if mem_type:
+        command = f"{base_cmd} {mem_type_flag} {mem_type}"
+    else:
+        command = base_cmd
+    res = node.run({'command': [command]}).get('stdout').rstrip('\r\n')
+    if "successfully" in res:
+        return True
+    return False
+
+
+def display_borrow(node, options='borrow_detail', is_use_long_option=False):
+    """Display borrow information.
+
+    Args:
+        node: Node object
+        options: Query options (default: 'borrow_detail')
+        is_use_long_option: Use long option format
+
+    Returns:
+        List of borrow info dictionaries
+    """
+    if is_use_long_option:
+        command = f"ubsectl display memory --type {options}"
+    else:
+        command = f"ubsectl display memory -t {options}"
+    res = node.run({'command': [command]}).get('stdout').rstrip('\r\nroot@#>')
+    mem_list = []
+    if not res or 'information is empty' in res:
+        return mem_list
+    try:
+        parser = AweTableParser(res)
+        mems = parser.parse_text()
+    except ValueError:
+        logger.warning(f"Failed to parse memory info: {res[:200]}")
+        return []
+    for mem in mems:
+        if mem:
+            mem_list.append(mem)
+    return mem_list
 
 
 def _compare_cli_help_message(node: Any, result: Dict[str, Any], expected_file: str) -> bool:
@@ -552,8 +719,6 @@ def _compare_cli_help_message(node: Any, result: Dict[str, Any], expected_file: 
 def cli_h(node: Any, expected_help_file: str = None) -> bool:
     """Execute ubsectl -h and verify help message.
 
-    Legacy method: cli_h(node)
-
     Args:
         node: Node object
         expected_help_file: Path to expected help message file (optional)
@@ -577,8 +742,6 @@ def cli_h(node: Any, expected_help_file: str = None) -> bool:
 
 def cli_help(node: Any, expected_help_file: str = None) -> bool:
     """Execute ubsectl --help and verify help message.
-
-    Legacy method: cli_help(node)
 
     Args:
         node: Node object
@@ -611,11 +774,18 @@ __all__ = [
     'check_memmory_status',
     'display_numa_status_info',
     'get_node_memory_status_by_node_id',
-    'display_mem_info',
     'import_cert',
     'remove_cert',
     'import_crl',
     'query_topo_info',
+    'parse_mem_res_dynamic',
+    'create_fd_memory',
+    'create_numa_memory',
+    'create_shm_memory',
+    'attach_shm_memory',
+    'detach_shm_memory',
+    'delete_memory',
+    'display_borrow',
     'cli_h',
     'cli_help',
 ]
