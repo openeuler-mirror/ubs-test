@@ -313,7 +313,6 @@ def display_mem_info(node: Any, switch: str = 'normal', need_name: bool = False)
 
     Args:
         node: Node object
-        options: Query type (borrow_detail, borrow_account, etc.)
         switch: 'normal' or other for status field
         need_name: Include name in result
         
@@ -321,9 +320,9 @@ def display_mem_info(node: Any, switch: str = 'normal', need_name: bool = False)
         List of memory info dicts, empty list if no data or error
         
     Example:
-        data = cli_api.display_mem_info(node, options='borrow_account')
+        data = display_mem_info(node, switch='normal', need_name=True)
         for item in data:
-            print(f"Size: {item['Size(MB)']} MB")
+            print(f"BorrowNode: {item['MemBorrowNode']}, LendNode: {item['MemLendNode']}, Size: {item['Size(MB)']} MB")
     """
     result = node.run({"command": ["ubsectl display memory -t borrow_detail"]})
     stdout = result.get("stdout", "")

@@ -783,3 +783,86 @@ class MEM_Pooling_BaseCase(CMBaseCase):
                     node_dict[socket] = [numa]
                 result[node] = node_dict
         return result
+
+    def parse_sdk_numa_info(self, info: str) -> Dict[str, Dict[str, str]]:
+        """Parse SDK NUMA memory info from output string.
+
+        Args:
+            info: Output string containing ubse_numa_mem_info entries
+
+        Returns:
+            Dict mapping numa id to NUMA info dict containing:
+            - 'numa id': NUMA node ID
+            - 'mem total': Total memory in GB
+            - 'huge pages 2M': Total 2M huge pages
+            - 'free huge pages 2M': Free 2M huge pages
+        """
+        res = {}
+        temp = {}
+        keys = ['numa id', 'mem total', 'huge pages 2M', 'free huge pages 2M']
+        for line in info.split('\r\n'):
+            if 'ubse_numa_mem_info' in line:
+                if temp:
+                    numa_id = temp.get('numa id')
+                    if numa_id:
+                        res[numa_id] = temp
+                temp = {}
+                continue
+            if '=' in line:
+                key, value = line.split('=', 1)
+                key = key.strip()
+                if key not in keys:
+                    continue
+                if key == 'mem total':
+                    value = value.split('bytes')[0].strip()
+                    try:
+                        value = str(int(value) // 1024 // 1024 // 1024)
+                    except ValueError:
+                        pass
+                else:
+                    value = value.strip()
+                temp[key] = value
+        if temp:
+            numa_id = temp.get('numa id')
+            if numa_id:
+                res[numa_id] = temp
+        return res
+
+
+    def get_env_numa_info(self, node: Any) -> Dict[str, Dict[str, str]]:
+        """Get environment NUMA memory info from node.
+
+        Args:
+            node: Node object to query
+
+        Returns:
+            Dict mapping numa id to NUMA info dict containing:
+            - 'numa id': NUMA node ID
+            - 'mem total': Total memory in GB
+            - 'huge pages 2M': Total 2M huge pages
+            - 'free huge pages 2M': Free 2M huge pages
+        """
+        res = {}
+        keys = {'size': 'mem total'}
+        numa_stat = node.run({"command": ['numactl -H']}).get('stdout')
+        info_list = numa_stat.rstrip('node distances').split('\r\n')
+        for line in info_list:
+            items = line.split(':')
+            key = items[0].split(' ')
+            if 'cpus' in items[0]:
+                res.update({f'{key[1]}':{'numa id': key[1]}})
+                continue
+            if 'size' in items[0]:
+                val = int(items[1].split('MB')[0].strip())
+                res.get(key[1]).update({keys.get(key[2]): str(val //1024)})
+        for i in list(res.keys()):
+            total_2M = node.run(
+                {"command": [f"cat /sys/devices/system/node/node{i}/hugepages/hugepages-2048kB/nr_hugepages"]}
+            )
+            free_2M = node.run(
+                {"command": [f"cat /sys/devices/system/node/node{i}/hugepages/hugepages-2048kB/free_hugepages"]}
+            )
+            res.get(i).update({"huge pages 2M": total_2M.get("stdout").split('\r\n')[0],
+                               "free huge pages 2M": free_2M.get("stdout").split('\r\n')[0]
+                               })
+        return res
