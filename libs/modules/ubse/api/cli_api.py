@@ -499,10 +499,12 @@ def display_mem_borrow_detail(node, name=None, borrow_type=None, is_use_long_opt
     for mem_info_dict in mem_list:
         if mem_info_dict.get('borrow_node') == '':
             mem_info_dict['borrow_node'] = '(none)'
+        borrow_node = mem_info_dict.get("borrow_node", "")
+        lend_node = mem_info_dict.get("lend_node", "")
         temp = {'name': mem_info_dict.get("name"),
                 'type': mem_info_dict.get("type"),
-                'borrow_node': mem_info_dict.get("borrow_node").split('(')[1].split(')')[0],
-                'lend_node': mem_info_dict.get("lend_node").split('(')[1].split(')')[0],
+                'borrow_node': borrow_node.split('(')[1].split(')')[0] if '(' in borrow_node else borrow_node,
+                'lend_node': lend_node.split('(')[1].split(')')[0] if '(' in lend_node else lend_node,
                 'lend_size': mem_info_dict.get("lend_size"),
                 'status': mem_info_dict.get("status"),
                 'handle': mem_info_dict.get("handle")
@@ -719,7 +721,7 @@ def display_borrow(node, options='borrow_detail', is_use_long_option=False):
         command = f"ubsectl display memory --type {options}"
     else:
         command = f"ubsectl display memory -t {options}"
-    res = node.run({'command': [command]}).get('stdout').rstrip('\r\n')
+    res = node.run({'command': [command]}).get('stdout').rstrip('\r\nroot@#>')
     mem_list = []
     if not res or 'information is empty' in res:
         return mem_list
