@@ -264,6 +264,8 @@ class MEM_Pooling_BaseCase(CMBaseCase):
         timeout:命令结果等待时间
         """
         result = ''
+        if params_dict is None:
+            params_dict = {}
         if masking:
             node.run({'command': ["cd {}".format(C_path)]})
             node.run({'command': ["python3 ubse_mem_app.py"], 'waitstr': 'ubse_mem_app>', 'returnCode': False})
@@ -512,7 +514,8 @@ class MEM_Pooling_BaseCase(CMBaseCase):
         """
         C_path = "/home/autotest"
         result = ''
-        
+        if params_dict is None:
+            params_dict = {}
         node.run({'command': ["cd {}".format(C_path)]})
         node.run({'command': ["python3 ubse_mem_app.py"], 'waitstr': 'ubse_mem_app>', 'returnCode': False})
         
@@ -529,13 +532,13 @@ class MEM_Pooling_BaseCase(CMBaseCase):
                                         f"{params_dict.get('lender_slot_id', '')} "
                                         f"--socket_id={params_dict.get('lender_socket_id', '')} "
                                         f"--numa_id={params_dict.get('lender_numa_id', '')}"],
-                            'waitstr': 'ubse_mem_app>', 'returnCode': False})
+                            'waitstr': 'ubse_mem_app>', 'returnCode': False, 'timeout': wait_time})
             result = str(res.get('stdout', '')) + str(res.get('stderr', ''))
         elif option == 'shm_attach':
-            res = node.run({'command': [f"shm_attach {name}"], 'waitstr': 'ubse_mem_app>', 'returnCode': False})
+            res = node.run({'command': [f"shm_attach {name}"], 'waitstr': 'ubse_mem_app>', 'returnCode': False, 'timeout': wait_time})
             result = str(res.get('stdout', '')) + str(res.get('stderr', ''))
         elif option == 'shm_detach':
-            res = node.run({'command': [f"shm_detach {name}"], 'waitstr': 'ubse_mem_app>', 'returnCode': False})
+            res = node.run({'command': [f"shm_detach {name}"], 'waitstr': 'ubse_mem_app>', 'returnCode': False, 'timeout': wait_time})
             result = str(res.get('stdout', '')) + str(res.get('stderr', ''))
         elif option == 'shm_delete':
             res = node.run({'command': [f"shm_delete {name}"], 'waitstr': 'ubse_mem_app>', 'returnCode': False, 'timeout': wait_time})

@@ -652,8 +652,12 @@ def display_borrow(node, options='borrow_detail', is_use_long_option=False):
     mem_list = []
     if not res or 'information is empty' in res:
         return mem_list
-    awe_table_parser = AweTableParser(res)
-    mems = awe_table_parser.parse_text()
+    try:
+        parser = AweTableParser(res)
+        mems = parser.parse_text()
+    except ValueError:
+        logger.warning(f"Failed to parse memory info: {res[:200]}")
+        return []
     for mem in mems:
         if mem:
             mem_list.append(mem)
