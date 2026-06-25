@@ -279,81 +279,6 @@ def get_node_memory_status_by_node_id(node: Any, node_id: str) -> str:
     return ""
 
 
-def _extract_mem_info(mem_info_dict: Dict[str, str], switch: str = 'normal', need_name: bool = False) -> Dict[str, str]:
-    """Extract memory info from parsed dict.
-    
-    Args:
-        mem_info_dict: Parsed memory info dict
-        switch: 'normal' or other for status field
-        need_name: Include name field
-        
-    Returns:
-        Extracted memory info dict
-    """
-    borrow_node = mem_info_dict.get("borrow_node", "")
-    lend_node = mem_info_dict.get("lend_node", "")
-    
-    temp = {
-        'MemBorrowNode': borrow_node.split('(')[1].split(')')[0] if '(' in borrow_node else borrow_node,
-        'MemLendNode': lend_node.split('(')[1].split(')')[0] if '(' in lend_node else lend_node,
-        'Size(MB)': mem_info_dict.get("lend_size", "")
-    }
-    
-    if need_name:
-        temp['name'] = mem_info_dict.get("name", "")
-    
-    if switch != 'normal':
-        temp['status'] = mem_info_dict.get("status", "")
-    
-    return temp
-
-
-def display_mem_info(node: Any, switch: str = 'normal', need_name: bool = False) -> List[Dict[str, str]]:
-    """Display memory borrow information.
-
-    Args:
-        node: Node object
-        switch: 'normal' or other for status field
-        need_name: Include name in result
-        
-    Returns:
-        List of memory info dicts, empty list if no data or error
-        
-    Example:
-        data = display_mem_info(node, switch='normal', need_name=True)
-        for item in data:
-            print(f"BorrowNode: {item['MemBorrowNode']}, LendNode: {item['MemLendNode']}, Size: {item['Size(MB)']} MB")
-    """
-    result = node.run({"command": ["ubsectl display memory -t borrow_detail"]})
-    stdout = result.get("stdout", "")
-    
-    if "root@#>" in stdout:
-        stdout = stdout.rstrip("\r\nroot@#>")
-    
-    if not stdout or 'information is empty' in stdout:
-        return []
-    
-    try:
-        parser = AweTableParser(stdout)
-        mem_list = parser.parse_text()
-    except ValueError:
-        logger.warning(f"Failed to parse memory info: {stdout[:200]}")
-        return []
-    
-    mems = []
-    for mem_info_dict in mem_list:
-        borrow_node = mem_info_dict.get('borrow_node', '')
-        if borrow_node == '':
-            mem_info_dict['borrow_node'] = '(none)'
-        
-        status = mem_info_dict.get("status", "")
-        if status == 'done' or status == 'fault':
-            temp = _extract_mem_info(mem_info_dict, switch, need_name)
-            mems.append(temp)
-    
-    return mems
-
-
 def import_cert(
     node: Any,
     server_cert_file: str,
@@ -493,21 +418,23 @@ def display_mem_borrow_detail(node, name=None, borrow_type=None, is_use_long_opt
     res = node.run({'command': [command]}).get('stdout').rstrip('\r\nroot@#>')
     if not res or 'information is empty' in res:
         return []
-    awe_table_parser = AweTableParser(res)
-    mem_list = awe_table_parser.parse_text()
+    try:
+        parser = AweTableParser(res)
+        mem_list = parser.parse_text()
+    except ValueError:
+        logger.warning(f"Failed to parse memory info: {res[:200]}")
+        return []
     mems = []
     for mem_info_dict in mem_list:
-        if mem_info_dict.get('borrow_node') == '':
-            mem_info_dict['borrow_node'] = '(none)'
         borrow_node = mem_info_dict.get("borrow_node", "")
         lend_node = mem_info_dict.get("lend_node", "")
-        temp = {'name': mem_info_dict.get("name"),
-                'type': mem_info_dict.get("type"),
+        temp = {'name': mem_info_dict.get("name", ""),
+                'type': mem_info_dict.get("type", ""),
                 'borrow_node': borrow_node.split('(')[1].split(')')[0] if '(' in borrow_node else borrow_node,
                 'lend_node': lend_node.split('(')[1].split(')')[0] if '(' in lend_node else lend_node,
-                'lend_size': mem_info_dict.get("lend_size"),
-                'status': mem_info_dict.get("status"),
-                'handle': mem_info_dict.get("handle")
+                'lend_size': mem_info_dict.get("lend_size", ""),
+                'status': mem_info_dict.get("status", ""),
+                'handle': mem_info_dict.get("handle", "")
                 }
         mem_info_dict.update(temp)
         mems.append(mem_info_dict)
@@ -843,7 +770,6 @@ __all__ = [
     'check_memmory_status',
     'display_numa_status_info',
     'get_node_memory_status_by_node_id',
-    'display_mem_info',
     'import_cert',
     'remove_cert',
     'import_crl',
