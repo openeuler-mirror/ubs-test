@@ -241,33 +241,7 @@ class MEM_Pooling_BaseCase(CMBaseCase):
                 return True
             else:
                 return False
-    
-    # def mem_numa_borrow(
-    #     self,
-    #     node: Any,
-    #     masking: bool = True,
-    #     option: str = 'create',
-    #     name: str = 'mem_borrow_test',
-    #     size: str = '256M',
-    #     slot_ids: str = '',
-    #     **kwargs
-    # ) -> str:
-    #     """Execute NUMA memory borrow operation."""
-    #     cmd_parts = [f"{self.mem_sdk_path}/test/bin/mem_numa_borrow"]
-    #
-    #     cmd_parts.append(f"--{option}")
-    #     cmd_parts.append(f"--name {name}")
-    #     cmd_parts.append(f"--size {size}")
-    #
-    #     if slot_ids:
-    #         cmd_parts.append(f"--slots {slot_ids}")
-    #
-    #     for key, value in kwargs.items():
-    #         cmd_parts.append(f"--{key} {value}")
-    #
-    #     cmd = ' '.join(cmd_parts)
-    #     result = node.run({"command": [cmd], "timeout": 120})
-    #     return result.get("stdout", "")
+
 
     def mem_numa_borrow(
         self,
@@ -364,33 +338,7 @@ class MEM_Pooling_BaseCase(CMBaseCase):
         """Post-test cleanup."""
         super().postTestCase()
         logger.info("MEM_Pooling_BaseCase postTestCase")
-    
-    # def clear_all_borrow_mem(self) -> bool:
-    #     """Clear all borrowed memory (FD, NUMA, SHM)."""
-    #     for node in self.nodes:
-    #         result = node.run({"command": [f"{self.mem_sdk_path}/test/bin/mem_fd_borrow --list"]})
-    #         if result.get("stdout"):
-    #             lines = result.get("stdout").split("\n")
-    #             for line in lines:
-    #                 if "name=" in line:
-    #                     name = line.split("name=")[1].split()[0]
-    #                     node.run({"command": [f"{self.mem_sdk_path}/test/bin/mem_fd_borrow --delete --name {name}"]})
-    #
-    #     for node in self.nodes:
-    #         result = node.run({"command": [f"{self.mem_sdk_path}/test/bin/mem_numa_borrow --list"]})
-    #         if result.get("stdout"):
-    #             lines = result.get("stdout").split("\n")
-    #             for line in lines:
-    #                 if "name=" in line:
-    #                     name = line.split("name=")[1].split()[0]
-    #                     node.run({"command": [f"{self.mem_sdk_path}/test/bin/mem_numa_borrow --delete --name {name}"]})
-    #
-    #     logger.info("Cleared all borrowed memory")
-    #     return True
-    
-    def set_hugepages(self, nodes: List[Any], value: Any, size: str = "1G", numa: str = "") -> bool:
-        """Set hugepages configuration."""
-        return mem_ops.set_hugepages(nodes, int(value) if isinstance(value, str) else value, size, numa)
+
     
     def backup_rack_log(self, node: Any) -> bool:
         """Backup rackmanager.log directory."""
@@ -542,6 +490,7 @@ class MEM_Pooling_BaseCase(CMBaseCase):
         name: str = 'mem_borrow_test',
         size: str = '256M',
         slot_ids: str = '',
+        params_dict: Optional[Dict[str, Any]] = None,
         proviers: str = '',
         wait_time: int = 120
     ) -> bool:
@@ -576,7 +525,11 @@ class MEM_Pooling_BaseCase(CMBaseCase):
                 res = node.run({'command': [f"shm_create {name} {size}"], 'waitstr': 'ubse_mem_app>', 'returnCode': False})
             result = str(res.get('stdout', '')) + str(res.get('stderr', ''))
         elif option == 'shm_create_with_lender':
-            res = node.run({'command': [f"shm_create_with_lender {name} {size} {slot_ids}"], 'waitstr': 'ubse_mem_app>', 'timeout': wait_time, 'returnCode': False})
+            res = node.run({'command': [f"shm_create_with_lender {name} {size} "
+                                        f"{params_dict.get('lender_slot_id', '')} "
+                                        f"--socket_id={params_dict.get('lender_socket_id', '')} "
+                                        f"--numa_id={params_dict.get('lender_numa_id', '')}"],
+                            'waitstr': 'ubse_mem_app>', 'returnCode': False})
             result = str(res.get('stdout', '')) + str(res.get('stderr', ''))
         elif option == 'shm_attach':
             res = node.run({'command': [f"shm_attach {name}"], 'waitstr': 'ubse_mem_app>', 'returnCode': False})
