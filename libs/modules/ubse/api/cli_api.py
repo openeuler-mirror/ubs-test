@@ -245,26 +245,30 @@ def check_memmory(node: Any) -> List[Dict[str, Any]]:
     if "root@#>" in stdout:
         stdout = stdout.split("root@#>")[0]
     
-    status_list = []
-    lines = stdout.strip().split("\n")
+    try:
+        parser = AweTableParser(stdout)
+        mem_list = parser.parse_text()
+    except ValueError:
+        logger.warning(f"Failed to parse memory status: {stdout[:200]}")
+        return []
     
-    for line in lines:
-        if line.strip() and "--" not in line:
-            parts = line.split()
-            if len(parts) >= 5:
-                detail_str = parts[4] if len(parts) > 4 else ""
-                detail_dict = {}
-                
+    status_list = []
+    for mem_info in mem_list:
+        if mem_info:
+            detail_str = mem_info.get("detail", "")
+            detail_dict = {}
+            
+            if detail_str:
                 for key_value in detail_str.split(";"):
                     if ":" in key_value:
                         key, value = key_value.split(":")
                         detail_dict[key.strip()] = value.strip()
-                
-                status_list.append({
-                    "node": parts[0],
-                    "status": parts[1] if len(parts) > 1 else "",
-                    "detail": detail_dict
-                })
+            
+            status_list.append({
+                "node": mem_info.get("node", ""),
+                "status": mem_info.get("status", ""),
+                "detail": detail_dict
+            })
     
     return status_list
 
