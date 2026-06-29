@@ -218,7 +218,7 @@ def import_crl(node: Any, ca_crl_file: str, is_use_long_option: bool = False) ->
 
 # ========== 内存池化 ==========
 
-def check_memmory(node: Any) -> List[Dict[str, Any]]:
+def check_memory(node: Any) -> List[Dict[str, Any]]:
     """通过ubsectl check memory命令检查各节点内存池化功能健康状态。
 
     Args:
@@ -273,42 +273,6 @@ def check_memmory(node: Any) -> List[Dict[str, Any]]:
     return status_list
 
 
-def check_memmory_status(node: Any) -> Dict[str, str]:
-    """通过ubsectl check memory命令获取内存状态字典。
-
-    Args:
-        node: Node object with run() method
-
-    Returns:
-        Dictionary mapping node ID to status string
-        Empty dict if 'ERROR' found in output
-
-    Example:
-        status_dict = cli_api.check_memmory_status(node)
-        for node_id, status in status_dict.items():
-            print(f"Node {node_id}: {status}")
-    """
-    result = node.run({"command": ["ubsectl check memory"]})
-    stdout = str(result.get("stdout", "")) + str(result.get("stderr", ""))
-    
-    if "ERROR" in stdout:
-        return {}
-    
-    stdout = stdout.rstrip("\r\nroot@#>None")
-    status_dict = {}
-    
-    lines = [line.strip() for line in stdout.splitlines() if line.strip() and "--" not in line]
-    
-    for line in lines[1:]:
-        parts = line.split()
-        if len(parts) >= 5:
-            node_id = parts[0]
-            status = parts[4].strip(";")
-            status_dict[node_id] = status
-    
-    return status_dict
-
-
 def check_mem_query(
     node: Any,
     query_item: str = "borrow_detail",
@@ -338,7 +302,7 @@ def check_mem_query(
 
 
 def get_node_memory_status_by_node_id(node: Any, node_id: str) -> str:
-    """通过ubsectl check memory命令获取指定节点的内存状态。
+    """通过check_memory获取指定节点的内存状态。
 
     Args:
         node: Node object with run() method
@@ -353,14 +317,13 @@ def get_node_memory_status_by_node_id(node: Any, node_id: str) -> str:
         if status == 'ok':
             print("Node memory status is OK")
     """
-    res = node.run(
-        {'command': [f"ubsectl check memory"]}).get('stdout')
-    lines = [e for e in res.split('\r\nroot@#>')[0].split('\r\n') if e.strip() and not e.startswith('-')]
-    for line in lines[1:]:
-        if line.strip():
-            parts = line.split()
-            if "(" + node_id + ")" in parts[0]:
-                return parts[4].strip(';').lower()
+    status_list = check_memory(node)
+    
+    for status_info in status_list:
+        node_str = status_info.get("node", "")
+        if "(" + node_id + ")" in node_str:
+            return status_info.get("status", "").lower()
+    
     return ""
 
 
@@ -834,36 +797,12 @@ def display_cluster(node: Any) -> List[Dict[str, str]]:
     output = output.split("root@#>")[0].strip()
     output = output.replace("-", "")
 
-    lines = [line.strip() for line in output.split("\r\n") if line.strip()]
-
-    if not lines:
+    try:
+        parser = AweTableParser(output)
+        cluster_info_list = parser.parse_text()
+    except ValueError:
+        logger.warning(f"Failed to parse cluster info: {output[:200]}")
         return []
-
-    keys = [key.strip() for key in lines[0].split(" ") if key.strip()]
-
-    cluster_info_list = []
-    cluster_info = {}
-
-    for line in lines[1:]:
-        values = [value.strip() for value in line.split(" ") if value.strip()]
-
-        if len(values) == 2:
-            cluster_info[keys[0]] = values[0]
-            cluster_info[keys[1]] = ""
-            cluster_info[keys[2]] = values[1]
-            cluster_info_list.append(cluster_info.copy())
-        elif len(values) == 1:
-            if "(0)" in values[0]:
-                continue
-            if cluster_info_list:
-                temp = cluster_info_list.pop()
-                temp["node"] = temp.get("node", "") + values[0]
-                cluster_info_list.append(temp)
-        else:
-            for i, key in enumerate(keys):
-                if i < len(values):
-                    cluster_info[key] = values[i]
-            cluster_info_list.append(cluster_info.copy())
 
     logger.info(f"Found {len(cluster_info_list)} cluster nodes")
     return cluster_info_list
