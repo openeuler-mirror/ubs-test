@@ -296,34 +296,6 @@ def get_node_memory_status_by_node_id(node: Any, node_id: str) -> str:
     return ""
 
 
-def display_memory(
-    node: Any,
-    query_item: str = "borrow_detail",
-    timeout: int = 0
-) -> str:
-    """通过ubsectl display memory命令查询内存借用信息原始输出。
-
-    Args:
-        node: Node object with run() method
-        query_item: Query item type (default: 'borrow_detail')
-        timeout: Sleep time in seconds before query (default: 0)
-
-    Returns:
-        Query result string (stdout + stderr combined)
-
-    Example:
-        result = cli_api.display_memory(node, query_item='borrow_account', timeout=2)
-        if 'information is empty' not in result:
-            print("Memory data found")
-    """
-    time.sleep(timeout)
-    res = node.run(
-        {'command': [f"ubsectl display memory -t {query_item}"]})
-    res = str(res.get("stdout", "")) + str(res.get("stderr", ""))
-    logger.info(res)
-    return res
-
-
 def display_mem_borrow_detail(
     node: Any,
     name: Optional[str] = None,
@@ -388,7 +360,7 @@ def display_mem_borrow_detail(
     return mems
 
 
-def display_borrow(
+def display_memory(
     node: Any,
     options: str = 'borrow_detail',
     is_use_long_option: bool = False
@@ -405,7 +377,7 @@ def display_borrow(
         Empty list if query failed or 'information is empty'
 
     Example:
-        mems = cli_api.display_borrow(node, options='borrow_account')
+        mems = cli_api.display_memory(node, options='borrow_account')
         for mem in mems:
             print(f"Name: {mem.get('name')}, Size: {mem.get('lend_size')}")
     """
@@ -871,7 +843,6 @@ __all__ = [
     'display_memory',
     'get_node_memory_status_by_node_id',
     'display_mem_borrow_detail',
-    'display_borrow',
     'display_numa_status_info',
     'create_numa_memory',
     'create_fd_memory',

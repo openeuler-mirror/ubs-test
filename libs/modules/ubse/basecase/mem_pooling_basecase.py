@@ -105,7 +105,17 @@ class MEM_Pooling_BaseCase(CMBaseCase):
         """Pre-test setup - verify MEM pooling environment."""
         super().preTestCase()
         logger.info("MEM pooling environment verified")
-    
+
+    def procedure(self) -> None:
+        """Main test logic."""
+        super().procedure()
+
+    def postTestCase(self) -> None:
+        """Post-test cleanup."""
+        super().postTestCase()
+        logger.info("MEM_Pooling_BaseCase postTestCase")
+
+
     def python_sdk_MemPublic(
         self,
         node: Any,
@@ -331,15 +341,6 @@ class MEM_Pooling_BaseCase(CMBaseCase):
         curl_cmd = f'curl --unix-socket /var/run/scbus/rackAgentUds.socket "http://localhost/redfish/v1/Managers/1/MemPoolService" -d \'{{"option": "{option}"}}\''
         result = node.run({"command": [curl_cmd], "timeout": 30})
         return result.get("stdout", "")
-    
-    def procedure(self) -> None:
-        """Main test logic."""
-        super().procedure()
-    
-    def postTestCase(self) -> None:
-        """Post-test cleanup."""
-        super().postTestCase()
-        logger.info("MEM_Pooling_BaseCase postTestCase")
 
     
     def backup_rack_log(self, node: Any) -> bool:
@@ -561,21 +562,21 @@ class MEM_Pooling_BaseCase(CMBaseCase):
         else:
             return False
     
-    def get_fd_desc_list(self, fd_desc: str) -> List[Dict[str, str]]:
-        """解析FD描述信息返回列表.
+    def get_mem_desc_list(self, mem_desc: str) -> List[Dict[str, str]]:
+        """解析内存描述信息返回列表.
         
-        Legacy method: get_fd_desc_list(fd_desc)
+        Legacy method: get_mem_desc_list(mem_desc)
         
         Args:
-            fd_desc: FD描述字符串
+            mem_desc: 内存描述字符串
             
         Returns:
             包含内存信息的字典列表
         """
         import re
         pattern = r'\([^)]*\)'
-        matches = re.findall(pattern, fd_desc)
-        fd_desc_list = []
+        matches = re.findall(pattern, mem_desc)
+        mem_desc_list = []
         
         for item in matches:
             if 'name' not in item:
@@ -588,9 +589,9 @@ class MEM_Pooling_BaseCase(CMBaseCase):
                 continue
             mem_info_value = [key_value.split('=')[1] for key_value in mem_info[:-1]]
             mem_info_dict = dict(zip(mem_info_key, mem_info_value))
-            fd_desc_list.append(mem_info_dict)
+            mem_desc_list.append(mem_info_dict)
         
-        return fd_desc_list
+        return mem_desc_list
     
     def clear_all_borrow_mem(self) -> bool:
         """清理所有借用内存（FD、NUMA、共享内存）- 完整版本.
@@ -606,21 +607,21 @@ class MEM_Pooling_BaseCase(CMBaseCase):
         # 清理fd内存
         for node in self.nodes:
             res = self.mem_borrow_common_result(node, 'fd_list')
-            fd_list = self.get_fd_desc_list(res)
+            fd_list = self.get_mem_desc_list(res)
             for item in fd_list:
                 res = self.mem_fd_borrow(node, masking=False, name=item['name'])
         
         # 清理numa内存
         for node in self.nodes:
             res = self.mem_borrow_common_result(node, 'numa_list')
-            numa_list = self.get_fd_desc_list(res)
+            numa_list = self.get_mem_desc_list(res)
             for item in numa_list:
                 res = self.mem_numa_borrow(node, masking=False, name=item['name'])
         
         # 清理共享内存
         names = []
         res = self.mem_borrow_common_result(self.nodes[0], 'shm_list')
-        shm_list = self.get_fd_desc_list(res)
+        shm_list = self.get_mem_desc_list(res)
         for item in shm_list:
             names.append(item['name'])
         
@@ -637,10 +638,8 @@ class MEM_Pooling_BaseCase(CMBaseCase):
             self.logInfo(f"清理结果: {res}")
         
         self.logStep('清理后账本信息')
-        res = self.cli_api.check_mem_query(self.nodes[0])
-        if res and account_empty_text not in res:
-            return False
-        return True
+        res = self.cli_api.display_memory(self.nodes[0])
+        return len(res) == 0
 
     def get_file_permissions(self, node, memid):
         """
@@ -661,28 +660,39 @@ class MEM_Pooling_BaseCase(CMBaseCase):
         except ValueError:
             return None
 
-    def check_obmm_files(self, node, memid, uid, gid):
+    def get_consumer_by_share(self, account_list, share_name, query_item='consumer'):
+        res = []
+        for item in account_list:
+            if item.get('name') == share_name:
+                if query_item == 'consumer':
+                    res.append(item.get('borrow_node',None))
+                else:
+                    res.append(item.get('lend_node',None))
+        return ','.join(res)
+
+
+    def check_obmm_files(self, node, memid, uid, gid, perms):
         file_path = f"/dev/obmm_shmdev{memid}"
 
         result = node.run({'command': [f'test -e {file_path} && echo EXISTS || echo NOTEXISTS']})
         if 'NOTEXISTS' in result.get('stdout', ''):
             return False
 
-        result = node.run({'command': [f'stat -c "%u %g" {file_path}']})
+        result = node.run({'command': [f'stat -c "%u %g %a" {file_path}']})
         output = result.get('stdout', '').strip()
         try:
             parts = output.split()
-            file_uid, file_gid = parts[0], parts[1]
+            file_uid, file_gid, file_perms = parts[0], parts[1], parts[2]
         except ValueError:
             return False
 
-        if file_uid == uid and file_gid == gid:
+        if file_uid == str(uid) and file_gid == str(gid) and file_perms == str(perms):
             return True
         else:
             return False
 
     def get_socket_info(self, node):
-        topo_info = cli_api.query_topo_info(node)
+        topo_info = cli_api.display_topo_cpu(node)
         result = {}
         for item in topo_info:
             if item['node'] not in result:
@@ -714,11 +724,9 @@ class MEM_Pooling_BaseCase(CMBaseCase):
             result[key] = sort_value
         return result
 
-    def build_numa_hierarchy(self, mems, node_Info=''):
+    def build_numa_hierarchy(self, node_Info=''):
         """
         构建NUMA层次结构：node -> socket -> numa
-        Args:
-            mems: 包含NumaLoc信息的列表
         Returns:
             dict: 层次结构字典 {node: {socket: [numa1, numa2, ...]}}
         """
