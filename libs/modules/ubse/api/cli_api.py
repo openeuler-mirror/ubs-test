@@ -112,8 +112,8 @@ def import_cert(
     server_cert_file: str,
     server_key_file: str,
     ca_cert_file: str,
+    password: str,
     ca_crl_file: Optional[str] = None,
-    password: Optional[str] = None,
     is_use_long_option: bool = False
 ) -> bool:
     """通过ubsectl import cert命令向UBSE导入证书
@@ -124,7 +124,7 @@ def import_cert(
         server_key_file: Server key file path
         ca_cert_file: CA certificate file path
         ca_crl_file: CA CRL file path (optional, None to skip)
-        password: Password for certificate (optional, default: 'huawei12#$')
+        password: Password for certificate
         is_use_long_option: Use long option format (--server-cert-file etc.)
         
     Returns:
@@ -136,9 +136,6 @@ def import_cert(
         ):
             print("Import success")
     """
-    if not password:
-        password = 'huawei12#$'
-    
     if ca_crl_file:
         if not is_use_long_option:
             result = node.run({
@@ -296,7 +293,7 @@ def check_mem_query(
     time.sleep(timeout)
     res = node.run(
         {'command': [f"ubsectl display memory -t {query_item}"]})
-    res = str(res.get('stdout')) + str(res.get('stderr'))
+    res = str(res.get("stdout", "")) + str(res.get("stderr", ""))
     logger.info(res)
     return res
 
@@ -341,7 +338,7 @@ def display_mem_borrow_detail(
         borrow_type: Borrow type for filtering (optional)
         is_use_long_option: Use long option format (--type, --name)
 
-Returns:
+    Returns:
         List of memory borrow detail dictionaries containing:
         - 'name': Memory name
         - 'type': Memory type (fd/numa/share)
@@ -370,7 +367,7 @@ Returns:
             command += f" -n {name}"
         if borrow_type:
             command += f" -bt {borrow_type}"
-    res = node.run({'command': [command]}).get('stdout').rstrip('\r\nroot@#>')
+    res = node.run({'command': [command]}).get("stdout", "").rstrip('\r\nroot@#>')
     if not res or 'information is empty' in res:
         return []
     try:
@@ -416,7 +413,7 @@ def display_borrow(
         command = f"ubsectl display memory --type {options}"
     else:
         command = f"ubsectl display memory -t {options}"
-    res = node.run({'command': [command]}).get('stdout').rstrip('\r\nroot@#>')
+    res = node.run({'command': [command]}).get("stdout", "").rstrip('\r\nroot@#>')
     mem_list = []
     if not res or 'information is empty' in res:
         return mem_list
@@ -516,7 +513,7 @@ def create_numa_memory(
         command = f"{base_cmd} {link_flag} {link}"
     else:
         command = base_cmd
-    res = node.run({'command': [command]}).get('stdout').rstrip('\r\n')
+    res = node.run({'command': [command]}).get("stdout", "").rstrip('\r\n')
     return parse_mem_res_dynamic(res)
 
 
@@ -548,7 +545,7 @@ def create_fd_memory(
         command = f"ubsectl create memory --type fd --size {size} --name {name}"
     else:
         command = f"ubsectl create memory -t fd -s {size} -n {name}"
-    res = node.run({'command': [command]}).get('stdout').rstrip('\r\n')
+    res = node.run({'command': [command]}).get("stdout", "").rstrip('\r\n')
     return parse_mem_res_dynamic(res)
 
 
@@ -588,7 +585,7 @@ def create_shm_memory(
         command = f"{base_cmd} {region_flag} {region}"
     else:
         command = base_cmd
-    res = node.run({'command': [command]}).get('stdout').rstrip('\r\n')
+    res = node.run({'command': [command]}).get("stdout", "").rstrip('\r\n')
     return parse_mem_res_dynamic(res)
 
 
@@ -628,7 +625,7 @@ def delete_memory(
         command = f"{base_cmd} {mem_type_flag} {mem_type}"
     else:
         command = base_cmd
-    res = node.run({'command': [command]}).get('stdout').rstrip('\r\n')
+    res = node.run({'command': [command]}).get("stdout", "").rstrip('\r\n')
     return "successfully" in res
 
 
@@ -658,7 +655,7 @@ def attach_shm_memory(
         command = f"ubsectl attach memory --name {name}"
     else:
         command = f"ubsectl attach memory -n {name}"
-    res = node.run({'command': [command]}).get('stdout').rstrip('\r\n')
+    res = node.run({'command': [command]}).get("stdout", "").rstrip('\r\n')
     return parse_mem_res_dynamic(res)
 
 
@@ -686,7 +683,7 @@ def detach_shm_memory(
         command = f"ubsectl detach memory --name {name}"
     else:
         command = f"ubsectl detach memory -n {name}"
-    res = node.run({'command': [command]}).get('stdout').rstrip('\r\n')
+    res = node.run({'command': [command]}).get("stdout", "").rstrip('\r\n')
     return "successfully" in res
 
 
@@ -718,7 +715,7 @@ def query_topo_info(node: Any) -> List[Dict[str, str]]:
     """
     res = node.run({
         'command': [f"ubsectl display topo -t cpu"]
-    }).get('stdout').rstrip('\r\nroot@#>')
+    }).get("stdout", "").rstrip('\r\nroot@#>')
     link_list = [item for item in res.replace('-', '').split('\r\n') if item]
     if len(link_list) <= 1:
         return []
@@ -788,7 +785,7 @@ def display_cluster(node: Any) -> List[Dict[str, str]]:
             print(f"Node: {info['node']}, Role: {info['role']}")
     """
     result = node.run({"command": ["ubsectl display cluster"]})
-    output = str(result.get('stdout')) + str(result.get('stderr'))
+    output = str(result.get("stdout", "")) + str(result.get("stderr", ""))
 
     if "ERROR" in output or "failed" in output.lower():
         logger.error("Failed to display cluster info")
