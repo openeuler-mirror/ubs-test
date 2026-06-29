@@ -59,8 +59,7 @@ class TestTcMemNumaWithLenderSdk001(MEM_Pooling_BaseCase):
 
         self.logStep("S1.调用ubse_mem_numa_create_with_lender接口，参数正常")
         name = "mem_numa_with_lender_sdk_001"
-        numa_status = self.cli_api.display_numa_status_info(self.nodes[0], options="numa_status")
-        node_hierarchy = self.build_numa_hierarchy(numa_status)
+        node_hierarchy = self.build_numa_hierarchy()
         node_id = self.nodes[1].nodeId
         if node_id not in node_hierarchy or not node_hierarchy[node_id]:
             raise RuntimeError("获取numa_status失败")
