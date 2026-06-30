@@ -68,8 +68,6 @@ class MEM_Pooling_BaseCase(CMBaseCase):
     - NUMA management
     - Memory status query
 
-    Legacy inheritance: MEM_Pooling_BaseCase(CMBaseCase)
-
     外部依赖参数（父类CMBaseCase.fixture注入）:
         - nodes: list[Any] - 测试节点列表
         - resource: dict[str, Any] - 资源配置字典
@@ -648,7 +646,7 @@ class MEM_Pooling_BaseCase(CMBaseCase):
         node: Any,
         command: str,
         user: str,
-        user_password: str = "BeiMing@123",
+        user_password: str,
         is_ubse: bool = False,
         borrow_app_path: str = "/tmp",
     ) -> str:
@@ -658,7 +656,7 @@ class MEM_Pooling_BaseCase(CMBaseCase):
             node: 节点对象
             command: 包含所需参数的内存借用归还命令
             user: 执行命令的用户名
-            user_password: 用户密码（默认BeiMing@123）
+            user_password: 用户密码
             is_ubse: 是否使用ubse用户执行（默认False）
             borrow_app_path: 借用工具路径（默认'/tmp'）
 
@@ -666,7 +664,7 @@ class MEM_Pooling_BaseCase(CMBaseCase):
             执行结果字符串
 
         Example:
-            result = self.mem_borrow_common_by_specify_user(node, 'fd_list', 'testuser')
+            result = self.mem_borrow_common_by_specify_user(node, 'fd_list', 'testuser', 'password')
             print(result)
         """
         test_file_path = getattr(self, "test_file_path", "/home/autotest")

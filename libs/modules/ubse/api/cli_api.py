@@ -673,7 +673,7 @@ def display_topo_cpu(node: Any) -> List[Dict[str, str]]:
         Empty list if query failed or no data.
 
     Example:
-        links = cli_api.display_topo(node)
+        links = cli_api.display_topo_cpu(node)
         for link in links:
             print(f"Link: {link.get('link-id')}, Node: {link.get('node')}")
     """
