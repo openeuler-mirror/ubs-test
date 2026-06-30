@@ -501,42 +501,6 @@ class MEM_Pooling_BaseCase(CMBaseCase):
         result = node.run({"command": [curl_cmd], "timeout": 30})
         return result.get("stdout", "")
 
-    def backup_rack_log(self, node: Any) -> bool:
-        """备份rackmanager日志目录.
-
-        Args:
-            node: 节点对象
-
-        Returns:
-            True表示备份成功，False表示失败
-
-        Example:
-            if self.backup_rack_log(node):
-                print("Log backed up successfully")
-        """
-        bak_logs_path = f"{self.c_path}/bak_logs"
-
-        res = node.run({"command": [f"ls {bak_logs_path}"]})
-        msg = str(res.get("stdout", "")) + str(res.get("stderr", ""))
-        if "No such file or directory" in msg:
-            node.run({"command": [f"mkdir {bak_logs_path}"]})
-
-        res = node.run({"command": [f"ls {self.rackmanager_log}"]}).get("stdout")
-        if not res:
-            return True
-
-        timestamp = datetime.now(tz=timezone(timedelta(hours=8))).strftime("%Y%m%d_%H%M%S.%f")[:-3]
-        backup_file = f"{bak_logs_path}/ubse_{timestamp}.log"
-
-        node.run({"command": [f"cp -r {self.rackmanager_log} {backup_file}"]})
-        res = node.run({"command": [f"ls {backup_file}"]}).get("stdout")
-
-        if not res:
-            logger.error("Failed to backup rack log to %s", backup_file)
-            return False
-
-        logger.info("Successfully backed up rack log to %s", backup_file)
-        return True
 
     def get_node_memory_status(self, node_id: str, expect_value: str = "ok") -> str:
         """获取指定节点的内存状态.
