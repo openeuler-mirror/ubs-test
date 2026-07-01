@@ -229,7 +229,7 @@ def check_memory(node: Any) -> List[Dict[str, Any]]:
         Empty list if query failed or 'ERROR' found
 
     Example:
-        status_list = cli_api.check_memmory(node)
+        status_list = cli_api.check_memory(node)
         for status in status_list:
             print(f"Node: {status['node']}, Status: {status['status']}")
     """
@@ -270,34 +270,6 @@ def check_memory(node: Any) -> List[Dict[str, Any]]:
     return status_list
 
 
-def check_mem_query(
-    node: Any,
-    query_item: str = "borrow_detail",
-    timeout: int = 0
-) -> str:
-    """通过ubsectl display memory命令查询内存借用信息原始输出。
-
-    Args:
-        node: Node object with run() method
-        query_item: Query item type (default: 'borrow_detail')
-        timeout: Sleep time in seconds before query (default: 0)
-
-    Returns:
-        Query result string (stdout + stderr combined)
-
-    Example:
-        result = cli_api.check_mem_query(node, query_item='borrow_account', timeout=2)
-        if 'information is empty' not in result:
-            print("Memory data found")
-    """
-    time.sleep(timeout)
-    res = node.run(
-        {'command': [f"ubsectl display memory -t {query_item}"]})
-    res = str(res.get("stdout", "")) + str(res.get("stderr", ""))
-    logger.info(res)
-    return res
-
-
 def get_node_memory_status_by_node_id(node: Any, node_id: str) -> str:
     """通过check_memory获取指定节点的内存状态。
 
@@ -315,12 +287,12 @@ def get_node_memory_status_by_node_id(node: Any, node_id: str) -> str:
             print("Node memory status is OK")
     """
     status_list = check_memory(node)
-    
+
     for status_info in status_list:
         node_str = status_info.get("node", "")
         if "(" + node_id + ")" in node_str:
             return status_info.get("status", "").lower()
-    
+
     return ""
 
 
@@ -388,7 +360,7 @@ def display_mem_borrow_detail(
     return mems
 
 
-def display_borrow(
+def display_memory(
     node: Any,
     options: str = 'borrow_detail',
     is_use_long_option: bool = False
@@ -405,7 +377,7 @@ def display_borrow(
         Empty list if query failed or 'information is empty'
 
     Example:
-        mems = cli_api.display_borrow(node, options='borrow_account')
+        mems = cli_api.display_memory(node, options='borrow_account')
         for mem in mems:
             print(f"Name: {mem.get('name')}, Size: {mem.get('lend_size')}")
     """
@@ -689,81 +661,38 @@ def detach_shm_memory(
 
 # ========== 拓扑链接 ==========
 
-def query_topo_info(node: Any) -> List[Dict[str, str]]:
+def display_topo_cpu(node: Any) -> List[Dict[str, str]]:
     """通过ubsectl display topo命令查询拓扑链接信息。
 
     Args:
         node: Node object with run() method
 
     Returns:
-        List of link info dictionaries containing:
-        - 'link-id': Link identifier
-        - 'node': Node ID
-        - 'socket': Socket ID
-        - 'port': Port ID
-        - 'interface-name': Interface name
-        - 'peer-node': Peer node ID
-        - 'peer-socket': Peer socket ID
-        - 'peer-port': Peer port ID
-        - 'peer-interface-name': Peer interface name
-        Empty list if query failed
+        List of link info dictionaries parsed from table output.
+        Filters out header lines containing ':' (e.g., 'cpu topo:', 'Total Links:').
+        Empty list if query failed or no data.
 
     Example:
-        links = cli_api.query_topo_info(node)
+        links = cli_api.display_topo_cpu(node)
         for link in links:
-            print(f"Link: {link['link-id']}, Node: {link['node']}")
+            print(f"Link: {link.get('link-id')}, Node: {link.get('node')}")
     """
-    res = node.run({
-        'command': [f"ubsectl display topo -t cpu"]
-    }).get("stdout", "").rstrip('\r\nroot@#>')
-    link_list = [item for item in res.replace('-', '').split('\r\n') if item]
-    if len(link_list) <= 1:
+    stdout = (node.run({'command': [f"ubsectl display topo -t cpu"]})
+              .get("stdout", "").rstrip('\r\nroot@#>'))
+
+    lines = [line for line in stdout.splitlines()
+             if ":" not in line.lower()]
+    if not lines:
         return []
-    link_info = []
-    keys = ['link-id', 'node', 'socket', 'port', 'interface-name', 'peer-node', 'peer-socket', 'peer-port',
-            'peer-interface-name']
-    for i, links in enumerate(link_list):
-        items = links.split()
-        if i <= 2:
-            continue
-        if len(items) > 4:
-            link_info_dict = dict(zip(keys, items))
-            if link_info_dict:
-                link_info.append(link_info_dict)
-    return link_info
-
-
-def query_link_info(node: Any) -> List[Dict[str, str]]:
-    """通过ubsectl display topo命令查询链路拓扑信息。
-
-    Args:
-        node: Node object with run() method
-
-    Returns:
-        List of link info dictionaries containing 'link-id'
-        Empty list if query failed or no links found
-
-    Example:
-        links = cli_api.query_link_info(node)
-        for link in links:
-            print(f"Link ID: {link['link-id']}")
-    """
-    result = node.run({"command": ["ubsectl display topo -t cpu"]})
-    stdout = result.get("stdout", "") + result.get("stderr", "")
+    table_content = "\n".join(lines)
     
-    if "root@#>" in stdout:
-        stdout = stdout.split("root@#>")[0]
-    
-    links = []
-    lines = stdout.strip().split("\n")
-    
-    for line in lines:
-        if line.strip() and "Link" in line:
-            parts = line.split(":")
-            if len(parts) >= 2:
-                links.append({"link-id": parts[1].strip()})
-    
-    return links
+    try:
+        parser = AweTableParser(table_content)
+        topo_info = parser.parse_text()
+    except ValueError:
+        logger.warning(f"Failed to parse topo info: {table_content[:200]}")
+        return []
+    return topo_info
 
 
 def display_cluster(node: Any) -> List[Dict[str, str]]:
@@ -911,10 +840,9 @@ __all__ = [
     'remove_cert',
     'import_crl',
     'check_memory',
-    'check_mem_query',
+    'display_memory',
     'get_node_memory_status_by_node_id',
     'display_mem_borrow_detail',
-    'display_borrow',
     'display_numa_status_info',
     'create_numa_memory',
     'create_fd_memory',
@@ -922,8 +850,7 @@ __all__ = [
     'delete_memory',
     'attach_shm_memory',
     'detach_shm_memory',
-    'query_topo_info',
-    'query_link_info',
+    'display_topo_cpu',
     'display_cluster',
     'display_election',
     'cli_h',
