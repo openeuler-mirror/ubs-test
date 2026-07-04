@@ -4,7 +4,7 @@
 import time
 from pathlib import Path
 from libs.core.base import TestCase
-from libs.modules.ubse.common.ubse_process_ops import create_directory_and_upload
+from libs.core.file_ops import create_directory_and_upload
 
 class MEM_Pooling_Hook(TestCase):
 
