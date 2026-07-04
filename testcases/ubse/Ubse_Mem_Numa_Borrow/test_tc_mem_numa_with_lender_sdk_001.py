@@ -26,7 +26,7 @@ class TestTcMemNumaWithLenderSdk001(MEM_Pooling_BaseCase):
         P1.ubse进程已启动
         P2.节点集群状态为ok
     TestStep:
-        S1.调用ubse_mem_numa_create_with_lender接口，参数正常
+        S1.调用ubse_mem_numa_create_with_lender接口，参数合法
         S2.查看内存账本信息：ubsectl display memory -t borrow_detail
         S3.调用ubse_mem_numa_delete接口删除指定numa远端内存
         S4.查看内存账本信息：ubsectl display memory -t borrow_detail
@@ -52,8 +52,9 @@ class TestTcMemNumaWithLenderSdk001(MEM_Pooling_BaseCase):
         self.clear_all_borrow_mem()
 
     def teardown_method(self):
-        
-        pass
+
+        self.logStep("清理内存")
+        self.clear_all_borrow_mem()
 
     def test_tc_mem_numa_with_lender_sdk_001(self):
 

@@ -21,12 +21,12 @@ class TestTcMemNumaCreateSdk001(MEM_Pooling_BaseCase):
     EnvType:
 
     CaseName:
-        验证sdk接口创建numa形态的远端内存创建成功
+        验证sdk接口创建numa形态的远端内存成功
     PreCondition:
         P1.ubse进程已启动
         P2.节点集群状态为ok
     TestStep:
-        S1.调用ubse_mem_numa_create接口创建numa形态的远端内存，参数正常
+        S1.调用ubse_mem_numa_create接口创建numa形态的远端内存，参数合法
         S2.查看内存账本信息：ubsectl display memory -t borrow_detail
         S3.调用ubse_mem_numa_delete接口删除指定numa远端内存
         S4.查看内存账本信息：ubsectl display memory -t borrow_detail
@@ -52,11 +52,12 @@ class TestTcMemNumaCreateSdk001(MEM_Pooling_BaseCase):
 
     def teardown_method(self):
 
-        pass
+        self.logStep("清理内存")
+        self.clear_all_borrow_mem()
 
     def test_tc_mem_numa_create_sdk_001(self):
 
-        self.logStep("S1.调用ubse_mem_numa_create接口创建numa形态的远端内存，参数正常")
+        self.logStep("S1.调用ubse_mem_numa_create接口创建numa形态的远端内存，参数合法")
         name = "mem_numa_create_sdk_001"
         res = self.mem_numa_borrow(self.nodes[0], name=name)
 

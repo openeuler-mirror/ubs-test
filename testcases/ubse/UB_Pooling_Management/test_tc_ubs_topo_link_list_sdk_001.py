@@ -37,7 +37,7 @@ class TestTcUbsTopoLinkListSdk001(MEM_Pooling_BaseCase, UB_Pooling_BaseCase):
     def setup_method(self):
 
         self.logStep("P1.ubse进程已启动")
-        self.master_node, self.standby_node = self.ubse_process_ops.return_nodes_by_role(self.nodes)
+        self.master_node, self.standby_node, _ = self.ubse_process_ops.return_nodes_by_all_role(self.nodes)
         self.logStep("P2.节点集群状态为ok")
         for node in self.nodes:
             node_status = self.get_node_memory_status(node.nodeId)
