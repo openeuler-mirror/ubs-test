@@ -53,7 +53,7 @@ def stop_process(node: Any, process_name: str) -> bool:
         if stop_process(node, "nginx"):
             print("Process stopped successfully")
     """
-    cmd = f"systemctl stop {process_name} || pkill -9 {process_name}"
+    cmd = f"systemctl stop {process_name}"
     res = node.run({"command": [cmd], "timeout": 60})
     return res.get("rc", 1) == 0
 

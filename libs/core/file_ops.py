@@ -63,7 +63,7 @@ def modify_conf_value(node: Any, key: str, value: Optional[str] = None) -> bool:
             print("Config removed")
     """
     conf_path = "/usr/local/softbus/ctrlbus/conf/ubse.conf"
-    if not value:
+    if value is None:
         cmd = f"sed -i '/{key}=/d' {conf_path}"
     else:
         cmd = f"sed -i 's/{key}=.*/{key}={value}/' {conf_path}"
@@ -100,7 +100,7 @@ def backup_file(
 
     node.run({"command": [f"cp -p {path1}/{filename} {path2}/{filename}"]})
     res = node.run({"command": [f"cat {path2}/{filename}"]})
-    return bool(res.get("stdout"))
+    return res.get("stdout") is not None
 
 
 def create_directory_and_upload(
@@ -178,10 +178,10 @@ def get_file_nums(
         return 0
 
     if not file_name:
-        logger.warning(f"File count check failed for: {file_path}")
-        return 0
+        res = node.run({"command": [f"ll {file_path} | grep -c '^-'"]})
+    else:
+        res = node.run({"command": [f"ll {file_path} | grep -c {file_name}"]})
 
-    res = node.run({"command": [f"ll {file_path} | grep -c {file_name}"]})
     stdout = res.get("stdout", "")
     if not stdout:
         return 0
@@ -252,21 +252,26 @@ def get_latest_journal_date(node: Any, keyword: str) -> str:
         if date != '0':
             print(f"Last error: {date}")
     """
-    res = node.run({
-        "command": [f"journalctl -u ubse.service | grep -v ubse_uds_client | grep '{keyword}' | awk 'END{{print $1, $2, $3}}'"]
-    })
+    def _get_date_with_retry(node: Any, keyword: str, retry_count: int = 0) -> str:
+        res = node.run({
+            "command": [f"journalctl -u ubse.service | grep -v ubse_uds_client | grep '{keyword}' | awk 'END{{print $1, $2, $3}}'"]
+        })
 
-    stdout = res.get("stdout", "")
-    if not stdout or not stdout.split("\r\n")[0].strip():
-        return "0"
-    try:
-        date_str = stdout.split("\r\n")[0]
-        if date_str.strip():
-            date_str = datetime.strptime(date_str, "%b %d %H:%M:%S").strftime("%m-%d %H:%M:%S")
-    except ValueError:
-        logger.error(f"Failed to parse journal date: {stdout[:200]}")
-        return get_latest_journal_date(node, keyword)
-    return date_str
+        stdout = res.get("stdout", "")
+        if not stdout or not stdout.split("\r\n")[0].strip():
+            return "0"
+        try:
+            date_str = stdout.split("\r\n")[0]
+            if date_str.strip():
+                date_str = datetime.strptime(date_str, "%b %d %H:%M:%S").strftime("%m-%d %H:%M:%S")
+        except ValueError:
+            logger.error(f"Failed to parse journal date: {stdout[:200]}")
+            if retry_count < 3:
+                return _get_date_with_retry(node, keyword, retry_count + 1)
+            return "0"
+        return date_str
+    
+    return _get_date_with_retry(node, keyword)
 
 
 def check_log_date_update(
