@@ -882,7 +882,7 @@ class MEM_Pooling_BaseCase(CMBaseCase):
 
         shm_borrow_name = [item.get("name") for item in shm_borrow_details]
         update_shm_borrow_name = list(set(shm_borrow_name))
-        master, _ = self.ubse_process_ops.return_nodes_by_role(self.nodes)
+        master, _, _ = self.ubse_process_ops.return_nodes_by_all_role(self.nodes)
         for name in update_shm_borrow_name:
             res = self.mem_shm_borrow(master, option="shm_delete", name=name)
             self.logInfo(f"清理结果: {res}")

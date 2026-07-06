@@ -2,10 +2,7 @@
 Migrated from legacy: tc_mem_numa_get_sdk_001
 """
 import pytest
-from typing import Any, Dict, List
-
 from libs.modules.ubse.basecase.mem_pooling_basecase import MEM_Pooling_BaseCase
-from libs.utils.logger_compat import Log
 
 
 @pytest.mark.hook("libs.modules.ubse.hook.mem_pooling_hook.MEM_Pooling_Hook")
@@ -24,7 +21,7 @@ class TestTcMemNumaGetSdk001(MEM_Pooling_BaseCase):
         P1.ubse进程已启动
         P2.节点集群状态为ok
     TestStep:
-        S1.调用ubse_mem_numa_create接口，参数正常
+        S1.调用ubse_mem_numa_create接口，参数合法
         S2.调用ubse_mem_numa_get，传入S1的name，查看返回信息是否正确
         S3.调用ubse_mem_numa_delete接口删除指定numa远端内存
         S4.调用ubse_mem_numa_get，传入S1的name，查看返回信息是否正确
@@ -33,13 +30,8 @@ class TestTcMemNumaGetSdk001(MEM_Pooling_BaseCase):
         E2.账本查看成功
         E3.内存删除成功
         E4.账本不包含S1的内存
-    Author:
-        fangxiuxiu 30068540
-    """
-    @pytest.fixture(autouse=True)
-    def setup_hook(self, mem_pooling_hook_fixture):
-        mem_pooling_hook_fixture.beforePreTestSet()
 
+    """
     def setup_method(self):
 
         self.logStep("P1.ubse进程已启动")
@@ -51,8 +43,9 @@ class TestTcMemNumaGetSdk001(MEM_Pooling_BaseCase):
         self.clear_all_borrow_mem()
 
     def teardown_method(self):
-        
-        pass
+
+        self.logStep("清理内存")
+        self.clear_all_borrow_mem()
 
     def test_tc_mem_numa_get_sdk_001(self):
 
@@ -69,7 +62,7 @@ class TestTcMemNumaGetSdk001(MEM_Pooling_BaseCase):
 
         self.logStep("E2.账本查看成功")
         self.assertIn("Successfully", borrow_result,"账本查看失败")
-
+        self.assertIn(name, borrow_result, "账本查看失败")
 
         self.logStep("S3.调用ubse_mem_numa_delete接口删除指定numa远端内存")
         res = self.mem_numa_borrow(node=self.nodes[0], masking=False, name=name)

@@ -2,10 +2,7 @@
 Migrated from legacy: tc_mem_numa_list_sdk_001
 """
 import pytest
-from typing import Any, Dict, List
-
 from libs.modules.ubse.basecase.mem_pooling_basecase import MEM_Pooling_BaseCase
-from libs.utils.logger_compat import Log
 
 
 @pytest.mark.hook("libs.modules.ubse.hook.mem_pooling_hook.MEM_Pooling_Hook")
@@ -24,9 +21,9 @@ class TestTcMemNumaListSdk001(MEM_Pooling_BaseCase):
         P1.ubse进程已启动
         P2.节点集群状态为ok
     TestStep:
-        S1.调用ubse_mem_numa_create接口创建numa内存，参数正常
+        S1.调用ubse_mem_numa_create接口创建numa内存，参数合法
         S2.调用ubse_mem_numa_list，查看返回信息是否正确
-        S3.调用ubse_mem_numa_create接口创建numa内存，参数正常
+        S3.调用ubse_mem_numa_create接口创建numa内存，参数合法
         S4.调用ubse_mem_numa_list，查看返回信息是否正确
         S5.调用ubse_mem_numa_delete接口删除指定numa远端内存,传入S1的name
         S6.调用ubse_mem_numa_list，查看返回信息是否正确
@@ -49,7 +46,7 @@ class TestTcMemNumaListSdk001(MEM_Pooling_BaseCase):
     def setup_method(self):
 
         self.logStep("P1.ubse进程已启动")
-        self.master_node, self.standby_node = self.ubse_process_ops.return_nodes_by_role(self.nodes)
+        self.master_node, self.standby_node, _ = self.ubse_process_ops.return_nodes_by_all_role(self.nodes)
         self.logStep("P2.节点集群状态为ok")
         for node in self.nodes:
             node_status = self.get_node_memory_status(node.nodeId)
@@ -57,12 +54,13 @@ class TestTcMemNumaListSdk001(MEM_Pooling_BaseCase):
         self.clear_all_borrow_mem()
 
     def teardown_method(self):
-        
-        pass
+
+        self.logStep("清理内存")
+        self.clear_all_borrow_mem()
 
     def test_tc_mem_numa_list_sdk_001(self):
 
-        self.logStep("S1.调用ubse_mem_numa_create接口创建numa内存，参数正常")
+        self.logStep("S1.调用ubse_mem_numa_create接口创建numa内存，参数合法")
         res = self.mem_numa_borrow(node=self.nodes[0], name="mem_numa_list_sdk_001_1")
 
         self.logStep("E1.内存创建成功")
@@ -76,7 +74,7 @@ class TestTcMemNumaListSdk001(MEM_Pooling_BaseCase):
         self.assertIn("Successfully", borrow_result)
         self.assertIn("Found 1 Numa-form memory resources", borrow_result)
 
-        self.logStep("S3.调用ubse_mem_numa_create接口创建numa内存，参数正常")
+        self.logStep("S3.调用ubse_mem_numa_create接口创建numa内存，参数合法")
         res = self.mem_numa_borrow(node=self.nodes[0], name="mem_numa_list_sdk_001_2")
 
         self.logStep("E3.内存创建成功")
