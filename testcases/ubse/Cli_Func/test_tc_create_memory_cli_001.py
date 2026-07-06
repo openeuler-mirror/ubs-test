@@ -47,11 +47,11 @@ class TestTcCreateMemoryCli001(MEM_Pooling_BaseCase):
 
         self.logStep("S1.使用cli分别创建fd、numa、共享内存")
         # 创建FD内存
-        res_fd = self.cli_api.create_fd_memory(self.nodes[0], size="128M", name="create_memory_cli_001_fd")
+        res_fd, mem_info = self.cli_api.create_fd_memory(self.nodes[0], size="128M", name="create_memory_cli_001_fd")
         # 创建NUMA内存
-        res_numa = self.cli_api.create_numa_memory(self.nodes[0], size="128M", name="create_memory_cli_001_numa")
+        res_numa, mem_info = self.cli_api.create_numa_memory(self.nodes[0], size="128M", name="create_memory_cli_001_numa")
         # 创建共享内存
-        res_shm = self.cli_api.create_shm_memory(self.nodes[0], size="128M",
+        res_shm, mem_info = self.cli_api.create_shm_memory(self.nodes[0], size="128M",
                                                  name="create_memory_cli_001_shm", region="1,2")
 
         self.logStep("E1.内存创建成功")

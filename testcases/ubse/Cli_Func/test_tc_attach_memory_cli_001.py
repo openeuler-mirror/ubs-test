@@ -56,7 +56,7 @@ class TestTcAttachMemorySdkCli001(MEM_Pooling_BaseCase):
 
         name = "attach_memory_cli_001"
         self.logStep("S1.调用ubsectl create memory创建共享内存")
-        res_shm = self.cli_api.create_shm_memory(self.nodes[0], size="128M", name=name,region="1,2")
+        res_shm, mem_info = self.cli_api.create_shm_memory(self.nodes[0], size="128M", name=name,region="1,2")
 
         self.logStep("E1.内存创建成功")
         self.assertTrue(res_shm, "创建共享内存失败")
@@ -70,7 +70,7 @@ class TestTcAttachMemorySdkCli001(MEM_Pooling_BaseCase):
         self.logStep("E2.账本正常")
 
         self.logStep("S3.调用ubsectl attach memory 映射共享内存，检查是否成功")
-        res_attach = self.cli_api.attach_shm_memory(self.nodes[0], name=name)
+        res_attach, mem_info = self.cli_api.attach_shm_memory(self.nodes[0], name=name)
         self.assertTrue(res_attach, "映射共享内存失败")
         self.logStep("E3.映射成功")
 
@@ -83,7 +83,7 @@ class TestTcAttachMemorySdkCli001(MEM_Pooling_BaseCase):
         self.assertTrue(target_account.get("borrow_node"), f"name为{name}的账本borrow_node为空")
 
         self.logStep("S5.调用ubsectl detach memory 解除映射，检查是否成功")
-        res_detach = self.cli_api.detach_shm_memory(self.nodes[0], name=name)
+        res_detach, mem_info = self.cli_api.detach_shm_memory(self.nodes[0], name=name)
 
         self.logStep("E5.解除映射成功")
         self.assertTrue(res_detach, "解除映射失败")

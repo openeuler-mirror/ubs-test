@@ -46,8 +46,8 @@ class TestTcUbseMemNumaStatGetSdk001(MEM_Pooling_BaseCase):
     def test_tc_ubse_mem_numastat_get_sdk_001(self):
 
         self.logStep("S1.调用ubs_mem_numastat_get接口查询，传入node_id 1.")
-        sdk_res = {}
         for node in self.nodes:
+            sdk_res = {}
             info = self.mem_borrow_common_result(node, f"numa_info {node.nodeId}")
             if "Successfully get numa info" in info:
                 sdk_res = self.parse_sdk_numa_info(info.split("Successfully get numa info")[1])
@@ -58,6 +58,6 @@ class TestTcUbseMemNumaStatGetSdk001(MEM_Pooling_BaseCase):
         self.logStep("E1.返回成功")
 
         self.logStep("S2.调用ubs_mem_numastat_get接口查询，传入node_id 1000.")
-        res = self.mem_borrow_common_result(self.node, f"numa_info 1000")
+        res = self.mem_borrow_common_result(self.master_node, f"numa_info 1000")
         self.logStep("E2.返回成功,uma信息为空")
         self.assertNotIn("ubse_numa_mem_info", res)
