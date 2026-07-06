@@ -83,7 +83,7 @@ class TestTcAttachMemorySdkCli001(MEM_Pooling_BaseCase):
         self.assertTrue(target_account.get("borrow_node"), f"name为{name}的账本borrow_node为空")
 
         self.logStep("S5.调用ubsectl detach memory 解除映射，检查是否成功")
-        res_detach, mem_info = self.cli_api.detach_shm_memory(self.nodes[0], name=name)
+        res_detach = self.cli_api.detach_shm_memory(self.nodes[0], name=name)
 
         self.logStep("E5.解除映射成功")
         self.assertTrue(res_detach, "解除映射失败")

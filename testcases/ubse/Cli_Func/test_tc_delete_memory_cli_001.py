@@ -59,18 +59,18 @@ class TestTcDeleteMemoryCli001(MEM_Pooling_BaseCase):
     def test_tc_delete_memory_cli_001(self):
 
         self.logStep("S1.调用ubsectl delete memory -n 命令，检查是否删除成功")
-        res, mem_info = self.cli_api.delete_memory(self.master_node, name="delete_memory_cli_001_fd", mem_type="fd")
+        res = self.cli_api.delete_memory(self.master_node, name="delete_memory_cli_001_fd", mem_type="fd")
 
         self.logStep("E1.删除成功")
         self.assertEqual(res, True)
 
         self.logStep("S2.调用ubsectl delete memory --name 命令，检查是否删除成功")
-        res, mem_info = self.cli_api.delete_memory(self.master_node, name="delete_memory_cli_001_numa",
+        res = self.cli_api.delete_memory(self.master_node, name="delete_memory_cli_001_numa",
                                          is_use_long_option=True)
 
         self.logStep("E2.删除成功")
         self.assertEqual(res, True)
-        res, mem_info = self.cli_api.delete_memory(self.master_node, name="delete_memory_cli_001_shm", mem_type="share")
+        res = self.cli_api.delete_memory(self.master_node, name="delete_memory_cli_001_shm", mem_type="share")
         self.assertEqual(res, True)
 
         self.logStep("S3.查询是否不存在内存借用账本")
