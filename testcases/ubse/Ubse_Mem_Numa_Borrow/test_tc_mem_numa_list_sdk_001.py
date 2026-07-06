@@ -39,9 +39,6 @@ class TestTcMemNumaListSdk001(MEM_Pooling_BaseCase):
         E7.内存删除成功
         E8.账本查看成功，没有借用信息
     """
-    @pytest.fixture(autouse=True)
-    def setup_hook(self, mem_pooling_hook_fixture):
-        mem_pooling_hook_fixture.beforePreTestSet()
 
     def setup_method(self):
 
