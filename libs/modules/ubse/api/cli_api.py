@@ -768,6 +768,54 @@ def display_election(node: Any, role: str) -> Optional[str]:
     return None
 
 
+def display_node(
+    node: Any,
+    node_id: Optional[str] = None,
+    is_use_long_option: bool = False
+) -> List[Dict[str, str]]:
+    """通过ubsectl display node命令查询集群中节点的详细信息。
+
+    Args:
+        node: Node object with run() method
+        node_id: 指定要查询的节点ID（optional，取值 1-255，不传则查当前节点）
+        is_use_long_option: Use long option format (--node)
+
+    Returns:
+        List of node info dictionaries. Fields:
+        - 'node': 节点信息，格式 hostname(slot_id)，如 'computer01(1)'；节点不可达时为 '-(2)'
+        - 'role': 节点角色（'master'/'standby'/'agent'）；不可达时为 '-'
+        - 'bonding-eid': 节点 bonding 配置的 eid
+        - 'guid': 节点全局唯一标识符；不可达时为 '-'
+        节点不存在时返回空列表；节点不可达时返回最近已知的部分信息。
+
+    Example:
+        info = cli_api.display_node(node, node_id="2")
+        if info:
+            print(f"Node: {info[0]['node']}, Role: {info[0]['role']}")
+    """
+    if is_use_long_option:
+        command = "ubsectl display node"
+        if node_id:
+            command += f" --node {node_id}"
+    else:
+        command = "ubsectl display node"
+        if node_id:
+            command += f" -n {node_id}"
+
+    res = node.run({'command': [command]}).get("stdout", "").rstrip('\r\nroot@#>')
+
+    if not res or "ERROR" in res:
+        return []
+    try:
+        parser = AweTableParser(res)
+        node_list = parser.parse_text()
+    except ValueError:
+        logger.warning(f"Failed to parse node info: {res[:200]}")
+        return []
+
+    return [node_info for node_info in node_list if node_info]
+
+
 # ========== Help命令 ==========
 
 def cli_h(node: Any, expected_help_file: Optional[str] = None) -> bool:
@@ -853,6 +901,7 @@ __all__ = [
     'display_topo_cpu',
     'display_cluster',
     'display_election',
+    'display_node',
     'cli_h',
     'cli_help',
 ]
