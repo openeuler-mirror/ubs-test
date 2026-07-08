@@ -1,14 +1,8 @@
 """Distributed High Reliability BaseCase.
 
-Migrated from: legency/testcase/ubse/lib/basecase/ubse/Distributed_High_Reliability/Distributed_High_Reliability_BaseCase.py
 Provides high reliability and fault tolerance test methods.
 
 Legacy file is 305 lines - this is a simplified pytest-compatible version.
-
-CRITICAL CHANGE (2026-05-18):
-- 移除__init__方法，解决pytest无法收集带__init__测试类的硬限制
-- 使用@pytest.fixture(autouse=True)注入外部依赖参数(nodes, resource, custom_params)
-- 业务参数在fixture或setup_method中初始化
 """
 
 import logging

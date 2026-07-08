@@ -1,6 +1,5 @@
 """CLI command wrappers for RackControl tests.
 
-Migrated from: legency/testcase/ubse/lib/api/RackControl/cli_api.py
 Provides CLI command execution and output parsing functions.
 """
 

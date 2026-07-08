@@ -1,6 +1,5 @@
 """Topology management functions for RackControl tests.
 
-Migrated from: legency/testcase/ubse/lib/Common/RackControl/UB_Pooling_And_Topology_Management/UB_Topology_Management_Common.py
 Provides topology information query and device management.
 """
 

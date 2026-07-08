@@ -1,15 +1,9 @@
 """CMBaseCase - Root base class for ubse test cases.
 
-Migrated from: legency/testcase/ubse/lib/basecase/CMBaseCase.py
 Provides common initialization logic for all ubse tests.
 
 Legacy inheritance: CMBaseCase(Case) 
 Pytest adaptation: CMBaseCase(TestCase) - 使用fixture注入依赖
-
-CRITICAL CHANGE (2026-05-12):
-- 移除__init__方法，解决pytest无法收集带__init__测试类的硬限制
-- 使用@pytest.fixture(autouse=True)注入外部依赖参数(nodes, resource, custom_params)
-- 业务参数在fixture或setup_method中初始化
 """
 
 import logging
