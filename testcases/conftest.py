@@ -24,6 +24,9 @@ from libs.core.basecase.ubturbo.env_topo import inject_env_topo_dependencies
 from libs.core.basecase.ubturbo.mempooling_basecase import (
     inject_mempooling_basecase_dependencies,
 )
+from libs.core.basecase.ubsio.dfc_basecase import (
+    inject_dfc_basecase_dependencies,
+)
 
 # Import pytest_configure with alias to avoid recursion
 from libs.core.fixtures import (
@@ -99,6 +102,7 @@ __all__ = [
     "inject_env_topo_dependencies",
     "inject_mempooling_basecase_dependencies",
     "inject_container_overcommit_basecase_dependencies",
+    "inject_dfc_basecase_dependencies",
     "get_pytest_config",
     "pytest_addoption",
 ]
