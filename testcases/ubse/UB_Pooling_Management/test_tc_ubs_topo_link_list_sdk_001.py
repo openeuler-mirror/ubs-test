@@ -1,6 +1,3 @@
-"""
-Migrated from legacy: tc_ubs_topo_link_list_sdk_001
-"""
 import pytest
 from typing import Any, Dict, List
 

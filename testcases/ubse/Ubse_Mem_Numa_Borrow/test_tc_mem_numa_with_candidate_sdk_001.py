@@ -1,6 +1,3 @@
-"""
-Migrated from legacy: tc_mem_numa_with_candidate_sdk_name_001
-"""
 import pytest
 from typing import Any, Dict, List
 

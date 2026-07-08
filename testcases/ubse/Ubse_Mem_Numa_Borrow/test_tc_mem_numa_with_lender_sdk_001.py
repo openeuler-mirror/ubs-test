@@ -1,6 +1,3 @@
-"""
-Migrated from legacy: tc_mem_numa_with_lender_sdk_name_001
-"""
 import pytest
 import random
 import string

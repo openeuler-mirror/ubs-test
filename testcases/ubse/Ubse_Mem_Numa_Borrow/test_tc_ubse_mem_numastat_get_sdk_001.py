@@ -1,7 +1,3 @@
-"""
-Migrated from legacy: tc_ubse_node_numa_mem_get_sdk_001
-"""
-
 import pytest
 from libs.modules.ubse.basecase.mem_pooling_basecase import MEM_Pooling_BaseCase
 

@@ -1,7 +1,3 @@
-"""
-Migrated from legacy: tc_delete_memory_cli_001
-"""
-
 import pytest
 from libs.modules.ubse.basecase.mem_pooling_basecase import MEM_Pooling_BaseCase
 

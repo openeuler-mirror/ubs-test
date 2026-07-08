@@ -1,7 +1,3 @@
-"""
-Migrated from legacy: tc_memory_sdk_cli_002
-"""
-
 import pytest
 from libs.modules.ubse.basecase.mem_pooling_basecase import MEM_Pooling_BaseCase
 
