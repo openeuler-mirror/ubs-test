@@ -1,6 +1,3 @@
-"""
-Migrated from legacy: tc_scbus_ha_007
-"""
 import pytest
 import time
 from typing import Any, Dict, List

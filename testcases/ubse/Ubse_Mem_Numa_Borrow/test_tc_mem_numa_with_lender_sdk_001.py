@@ -1,6 +1,3 @@
-"""
-Migrated from legacy: tc_mem_numa_with_lender_sdk_name_001
-"""
 import pytest
 import random
 import string
@@ -37,9 +34,6 @@ class TestTcMemNumaWithLenderSdk001(MEM_Pooling_BaseCase):
         E4.账本不包含S1的内存
 
     """
-    @pytest.fixture(autouse=True)
-    def setup_hook(self, mem_pooling_hook_fixture):
-        mem_pooling_hook_fixture.beforePreTestSet()
 
     def setup_method(self):
 

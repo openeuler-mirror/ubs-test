@@ -1,6 +1,3 @@
-"""
-Migrated from legacy: tc_scbus_ha_026
-"""
 import pytest
 from typing import Any, Dict, List
 

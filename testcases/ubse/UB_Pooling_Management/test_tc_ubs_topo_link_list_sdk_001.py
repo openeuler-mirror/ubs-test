@@ -1,6 +1,3 @@
-"""
-Migrated from legacy: tc_ubs_topo_link_list_sdk_001
-"""
 import pytest
 from typing import Any, Dict, List
 
@@ -30,10 +27,6 @@ class TestTcUbsTopoLinkListSdk001(MEM_Pooling_BaseCase, UB_Pooling_BaseCase):
     Author:
         zhangyufang 30058350
     """
-    @pytest.fixture(autouse=True)
-    def setup_hook(self, mem_pooling_hook_fixture):
-        mem_pooling_hook_fixture.beforePreTestSet()
-
     def setup_method(self):
 
         self.logStep("P1.ubse进程已启动")
