@@ -137,33 +137,41 @@ def import_cert(
             print("Import success")
     """
     if ca_crl_file:
+        passwd_file = "/tmp/.ubse_cert_passwd"
+        node.run({"command": [f"echo '{password}' > {passwd_file} && chmod 600 {passwd_file}"]})
+        
         if not is_use_long_option:
             result = node.run({
                 'command': [
-                    f"echo {password} | ubsectl import cert -s {server_cert_file} -k {server_key_file} "
-                    f"-c {ca_cert_file} -l {ca_crl_file}"
+                    f"ubsectl import cert -s {server_cert_file} -k {server_key_file} "
+                    f"-c {ca_cert_file} -l {ca_crl_file} < {passwd_file} && rm -f {passwd_file}"
                 ]
             })
         else:
             result = node.run({
                 'command': [
-                    f"echo {password} | ubsectl import cert --server-cert-file {server_cert_file} "
-                    f"--server-key-file {server_key_file} --ca-cert-file {ca_cert_file} --ca-crl-file {ca_crl_file}"
+                    f"ubsectl import cert --server-cert-file {server_cert_file} "
+                    f"--server-key-file {server_key_file} --ca-cert-file {ca_cert_file} "
+                    f"--ca-crl-file {ca_crl_file} < {passwd_file} && rm -f {passwd_file}"
                 ]
             })
     else:
+        passwd_file = "/tmp/.ubse_cert_passwd"
+        node.run({"command": [f"echo '{password}' > {passwd_file} && chmod 600 {passwd_file}"]})
+        
         if not is_use_long_option:
             result = node.run({
                 'command': [
-                    f"echo {password} | ubsectl import cert -s {server_cert_file} -k {server_key_file} "
-                    f"-c {ca_cert_file}"
+                    f"ubsectl import cert -s {server_cert_file} -k {server_key_file} "
+                    f"-c {ca_cert_file} < {passwd_file} && rm -f {passwd_file}"
                 ]
             })
         else:
             result = node.run({
                 'command': [
-                    f"echo {password} | ubsectl import cert --server-cert-file {server_cert_file} "
-                    f"--server-key-file {server_key_file} --ca-cert-file {ca_cert_file}"
+                    f"ubsectl import cert --server-cert-file {server_cert_file} "
+                    f"--server-key-file {server_key_file} --ca-cert-file {ca_cert_file} "
+                    f"< {passwd_file} && rm -f {passwd_file}"
                 ]
             })
     
