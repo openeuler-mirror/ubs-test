@@ -1,7 +1,3 @@
-"""SDK接口删除FD内存测试.
-
-验证 ubse_mem_fd_delete 接口删除指定FD远端内存的成功场景，并验证重复删除失败。
-"""
 import pytest
 from libs.modules.ubse.basecase.mem_pooling_basecase import MEM_Pooling_BaseCase
 

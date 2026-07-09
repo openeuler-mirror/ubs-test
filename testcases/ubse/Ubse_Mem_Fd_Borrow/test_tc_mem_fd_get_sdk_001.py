@@ -1,7 +1,3 @@
-"""SDK接口查询FD内存测试.
-
-验证 ubse_mem_fd_get 接口查询本节点FD形态远端内存信息的成功场景，并验证删除后查询失败。
-"""
 import pytest
 from libs.modules.ubse.basecase.mem_pooling_basecase import MEM_Pooling_BaseCase
 

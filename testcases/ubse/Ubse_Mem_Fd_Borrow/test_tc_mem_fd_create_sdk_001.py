@@ -1,8 +1,3 @@
-"""SDK接口创建FD内存测试.
-
-验证 ubse_mem_fd_create 接口创建FD形态远端内存的成功场景，并验证删除后账本清空。
-"""
-
 import pytest
 from libs.modules.ubse.basecase.mem_pooling_basecase import MEM_Pooling_BaseCase
 

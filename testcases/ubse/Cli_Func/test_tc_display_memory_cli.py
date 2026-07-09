@@ -1,15 +1,3 @@
-"""CLI display memory 功能测试.
-
-验证 ubsectl display memory 命令的各种查询选项，包括:
-- node_borrow: 节点借出信息
-- borrow_detail: 借用详情
-- node_lend: 节点借入信息
-- config: 配置信息
-- numa_status: NUMA 状态
-
-Migrated from legacy: tc_display_memory_cli_004
-"""
-
 import pytest
 from libs.modules.ubse.basecase.mem_pooling_basecase import MEM_Pooling_BaseCase
 

@@ -1,7 +1,3 @@
-"""SDK接口批量查询FD内存测试.
-
-验证 ubse_mem_fd_list 接口批量查询本节点FD形态远端内存，验证创建/删除后账本数量变化。
-"""
 import pytest
 from libs.modules.ubse.basecase.mem_pooling_basecase import MEM_Pooling_BaseCase
 
