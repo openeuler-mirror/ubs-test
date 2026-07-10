@@ -144,7 +144,7 @@ def import_cert(
             result = node.run({
                 'command': [
                     f"ubsectl import cert -s {server_cert_file} -k {server_key_file} "
-                    f"-c {ca_cert_file} -l {ca_crl_file} < {passwd_file} && rm -f {passwd_file}"
+                    f"-c {ca_cert_file} -l {ca_crl_file} < {passwd_file} ; rm -f {passwd_file}"
                 ]
             })
         else:
@@ -152,7 +152,7 @@ def import_cert(
                 'command': [
                     f"ubsectl import cert --server-cert-file {server_cert_file} "
                     f"--server-key-file {server_key_file} --ca-cert-file {ca_cert_file} "
-                    f"--ca-crl-file {ca_crl_file} < {passwd_file} && rm -f {passwd_file}"
+                    f"--ca-crl-file {ca_crl_file} < {passwd_file} ; rm -f {passwd_file}"
                 ]
             })
     else:
@@ -163,7 +163,7 @@ def import_cert(
             result = node.run({
                 'command': [
                     f"ubsectl import cert -s {server_cert_file} -k {server_key_file} "
-                    f"-c {ca_cert_file} < {passwd_file} && rm -f {passwd_file}"
+                    f"-c {ca_cert_file} < {passwd_file} ; rm -f {passwd_file}"
                 ]
             })
         else:
@@ -171,7 +171,7 @@ def import_cert(
                 'command': [
                     f"ubsectl import cert --server-cert-file {server_cert_file} "
                     f"--server-key-file {server_key_file} --ca-cert-file {ca_cert_file} "
-                    f"< {passwd_file} && rm -f {passwd_file}"
+                    f"< {passwd_file} ; rm -f {passwd_file}"
                 ]
             })
     
