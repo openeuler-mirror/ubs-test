@@ -20,7 +20,7 @@ class TestTcMemFdCreateWithCandidateSdk001(MEM_Pooling_BaseCase):
     TestStep:
         S1.调用ubse_mem_fd_create_with_candidate接口，参数合法
         S2.查看内存账本信息：ubsectl display memory -t borrow_detail
-S3.调用ubse_mem_fd_delete接口删除指定fd远端内存
+        S3.调用ubse_mem_fd_delete接口删除指定fd远端内存
         S4.查看内存账本信息：ubsectl display memory -t borrow_detail
     ExpectedResult:
         E1.内存创建成功
@@ -61,7 +61,7 @@ S3.调用ubse_mem_fd_delete接口删除指定fd远端内存
         self.logStep("E2.查到创建的内存信息")
         self.assertTrue(any(d.get("name") == name for d in mem_borrow_details), f"不存在name为{name}的内存信息")
 
-        self.logStep("S3.调用ubse_mem_fd_delete接口删除指定numa远端内存")
+        self.logStep("S3.调用ubse_mem_fd_delete接口删除指定fd远端内存")
         res = self.mem_fd_borrow(node=self.nodes[0], name=name, masking=False)
 
         self.logStep("E3.内存删除成功")

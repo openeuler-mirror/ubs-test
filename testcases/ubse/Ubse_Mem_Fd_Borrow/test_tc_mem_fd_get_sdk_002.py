@@ -76,7 +76,7 @@ class TestTcMemFdGetSdk002(MEM_Pooling_BaseCase):
         self.logStep("E4.内存删除成功")
         self.assertTrue(res, "内存删除失败")
 
-        self.logStep("S5.在节点2调用ubse_mem_fd_get查询S1中创建的内存，检查是否查询成功")
+        self.logStep("S5.在节点1调用ubse_mem_fd_get查询S1中创建的内存，检查是否查询成功")
         command = f"fd_get {name}"
         borrow_result = self.mem_borrow_common_result(node=self.nodes[0], command=command)
 

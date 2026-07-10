@@ -45,7 +45,7 @@ class TestTcMemFdDeleteSdk001(MEM_Pooling_BaseCase):
 
     def test_tc_fd_delete_test_name_001(self):
         
-        self.logStep("S1.调用ubse_mem_fd_create接口创建numa内存，参数合法")
+        self.logStep("S1.调用ubse_mem_fd_create接口创建fd内存，参数合法")
         name = "mem_fd_delete_sdk_001"
         res = self.mem_fd_borrow(node=self.nodes[0], name=name)
 
