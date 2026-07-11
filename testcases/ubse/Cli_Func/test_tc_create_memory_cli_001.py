@@ -2,6 +2,7 @@ import pytest
 from libs.modules.ubse.basecase.mem_pooling_basecase import MEM_Pooling_BaseCase
 
 
+@pytest.mark.hook("libs.modules.ubse.hook.mem_pooling_hook.MEM_Pooling_Hook")
 @pytest.mark.smoke
 class TestTcCreateMemoryCli001(MEM_Pooling_BaseCase):
     """
@@ -25,7 +26,6 @@ class TestTcCreateMemoryCli001(MEM_Pooling_BaseCase):
     """
 
     def setup_method(self):
-
         self.logStep("P1.ubse进程已启动")
         self.master_node, self.standby_node, _ = self.ubse_process_ops.return_nodes_by_all_role(self.nodes)
         self.logStep("P2.节点集群状态为ok")
@@ -35,7 +35,6 @@ class TestTcCreateMemoryCli001(MEM_Pooling_BaseCase):
         self.clear_all_borrow_mem()
 
     def teardown_method(self):
-
         self.logStep("清理内存")
         self.clear_all_borrow_mem()
 

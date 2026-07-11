@@ -49,12 +49,12 @@ def create_user(
     if group:
         safe_group = shlex.quote(group)
         # 检查用户组是否存在，不存在则创建
-        res = node.run({"command": [f"getent group {safe_group}"]}, returnCode=True)
-        if res.get("returnCode", 1) != 0:
+        res = node.run({"command": [f"getent group {safe_group}"], "returnCode": True})
+        if res.get("rc", 1) != 0:
             node.run({"command": [f"groupadd {safe_group}"]})
         # 将用户加入用户组
-        res = node.run({"command": [f"usermod -aG {safe_group} {safe_name}"]}, returnCode=True)
-        if res.get("returnCode", 1) != 0:
+        res = node.run({"command": [f"usermod -aG {safe_group} {safe_name}"], "returnCode": True})
+        if res.get("rc", 1) != 0:
             logger.error(f"Failed to add user {name} to group {group}")
             return False
 
@@ -130,14 +130,14 @@ def delete_user(node: Any, name: str = "test_user", group: Optional[str] = None)
         safe_group = shlex.quote(group)
         node.run({"command": [f"groupdel {safe_group}"]})
 
-    res = node.run({"command": [f"id {safe_name}"]}, returnCode=True)
+    res = node.run({"command": [f"id {safe_name}"], "returnCode": True})
     stdout = res.get("stdout", "")
 
     # 判断用户是否存在：
-    # returnCode=0 表示用户存在
-    # returnCode=1 表示用户不存在（删除成功）
+    # rc=0 表示用户存在
+    # rc=1 表示用户不存在（删除成功）
     # stdout 包含 "no such user" 也表示用户不存在
-    if res.get("returnCode", 1) == 0 or (stdout and "no such user" not in stdout):
+    if res.get("rc", 1) == 0 or (stdout and "no such user" not in stdout):
         logger.warning(f"User still exists after deletion: {name}")
         return False
 
