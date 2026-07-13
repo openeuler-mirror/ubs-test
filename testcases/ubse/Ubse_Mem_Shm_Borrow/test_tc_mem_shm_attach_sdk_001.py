@@ -10,6 +10,8 @@ class TestTcMemShmAttachSdk001(MEM_Pooling_BaseCase):
         test_tc_mem_shm_attach_sdk_001
     RunLevel:
         Level 0
+    EnvType:
+
     CaseName:
         验证sdk接口映射共享内存name合法映射成功
     PreCondition:

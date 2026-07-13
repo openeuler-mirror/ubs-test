@@ -58,7 +58,7 @@ class TestTcMemShmCreateSdk001(MEM_Pooling_BaseCase):
         mem_borrow_details = self.cli_api.display_mem_borrow_detail(self.nodes[0])
 
         self.logStep("E2.查到创建的内存信息")
-        self.assertTrue(any(d.get("name") == name for d in mem_borrow_details), f"不存在name为{name}的内存信息")
+        self.assertTrue(any(d.get("name", "") == name for d in mem_borrow_details), f"不存在name为{name}的内存信息")
 
 
         self.logStep("S3.调用ubse_mem_shm_delete接口删除共享内存")
@@ -71,4 +71,4 @@ class TestTcMemShmCreateSdk001(MEM_Pooling_BaseCase):
         mem_borrow_details = self.cli_api.display_mem_borrow_detail(self.nodes[0])
 
         self.logStep("E4.账本不包含S1的内存")
-        self.assertFalse(any(d.get("name") == name for d in mem_borrow_details), f"仍存在name为{name}的内存信息")
+        self.assertFalse(any(d.get("name", "") == name for d in mem_borrow_details), f"仍存在name为{name}的内存信息")
