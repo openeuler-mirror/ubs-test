@@ -320,8 +320,6 @@ class OpenStackBaseCase(UBSVirtBaseCase):
         res = self.check_nova_compute_status(self.node_list)
         self.assertTrue(res, "等待nova-compute服务重启状态没全部拉起")
 
-        self._load_flavor()
-
         vm_create_list = []
         self.volume_use_list = []
         for vm in resource_topo.vms:
