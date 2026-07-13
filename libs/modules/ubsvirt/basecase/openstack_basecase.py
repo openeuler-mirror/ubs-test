@@ -475,35 +475,33 @@ class OpenStackBaseCase(UBSVirtBaseCase):
 
     def create_server(self, vm: VMResource, expect_status='ACTIVE'):
         lock.acquire()
-        try:
-            volume = self._create_volume(vm.image)
-            flavor = self._get_flavor(vm)
-            if vm.enable_remote_memory == '' and vm.enable_remote_create == '':
-                client.create_server_with_volume(self.controller, vm.name, flavor.name, volume.name,
-                                                 host=self.node_dict[vm.node].host)
-            else:
-                client.create_server_with_volume(self.controller, vm.name, flavor.name, volume.name)
+        volume = self._create_volume(vm.image)
+        lock.release()
+        flavor = self._get_flavor(vm)
+        if vm.enable_remote_memory == '' and vm.enable_remote_create == '':
+            client.create_server_with_volume(self.controller, vm.name, flavor.name, volume.name,
+                                             host=self.node_dict[vm.node].host)
+        else:
+            client.create_server_with_volume(self.controller, vm.name, flavor.name, volume.name)
 
-            while True:
-                detail = client.get_server_detail(self.controller, vm.name)
-                if detail['status'] not in ['creating', 'BUILD']:
-                    break
-                time.sleep(20)
-            if expect_status == 'ACTIVE':
-                if detail['status'] != 'ACTIVE':
-                    raise RuntimeError("create server fail")
-            else:
-                if detail['status'] == expect_status:
-                    return detail['status']
+        while True:
+            detail = client.get_server_detail(self.controller, vm.name)
+            if detail['status'] not in ['creating', 'BUILD']:
+                break
+            time.sleep(20)
+        if expect_status == 'ACTIVE':
+            if detail['status'] != 'ACTIVE':
+                raise RuntimeError("create server fail")
+        else:
+            if detail['status'] == expect_status:
+                return detail['status']
 
-            volume.status = 'in-use'
-            if detail['OS-EXT-SRV-ATTR:host'] != self.node_dict[vm.node].host:
-                client.migrate_server(self.controller, vm.name, self.node_dict[vm.node].host)
-                detail = self.wait_server_target_status(vm.name, {'status': 'ACTIVE'})
-            vm.instance = detail['OS-EXT-SRV-ATTR:instance_name']
-            vm.ip = detail['addresses']['vm_net'][0]
-        finally:
-            lock.release()
+        volume.status = 'in-use'
+        if detail['OS-EXT-SRV-ATTR:host'] != self.node_dict[vm.node].host:
+            client.migrate_server(self.controller, vm.name, self.node_dict[vm.node].host)
+            detail = self.wait_server_target_status(vm.name, {'status': 'ACTIVE'})
+        vm.instance = detail['OS-EXT-SRV-ATTR:instance_name']
+        vm.ip = detail['addresses']['vm_net'][0]
 
     def _create_volume(self, image):
         if not self.resource_dict.get('volume'):
