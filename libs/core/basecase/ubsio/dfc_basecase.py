@@ -377,6 +377,9 @@ class DFCBaseCase(TestCase):
                 disk = disk_dict.get(node.localIP)
                 if not disk:
                     pass
+                elif "loop" in disk:
+                    disk_cmd = f"dd bs=8k count=1024 if=/dev/zero of=/dev/{disk}"
+                    node.run_input(disk_cmd)
                 elif ":" in disk:
                     disk_list = disk.split(":")
                     for i in disk_list:
@@ -385,13 +388,10 @@ class DFCBaseCase(TestCase):
                             self.check_disk(node, i_disk)
                         disk_cmd = f"dd bs=8k count=1024 if=/dev/zero of=/dev/{i_disk}"
                         node.run_input(disk_cmd)
-                elif "loop" in disk:
-                    disk_cmd = f"dd bs=8k count=1024 if=/dev/zero of=/dev/{i_disk}"
-                    node.run_input(disk_cmd)
                 else:
-                    self.check_disk(node, disk)
                     disk_cmd = f"dd bs=8k count=1024 if=/dev/zero of=/dev/{disk}"
                     node.run_input(disk_cmd)
+
 
 
 

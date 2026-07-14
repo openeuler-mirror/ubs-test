@@ -14,7 +14,20 @@ DOCKER_NAME = "falcon_new2"
 DFC_NAME = "dfc_server"
 # KV部署形式
 KV_DEPLOY = "converged"
-disk_dict = {"192.168.41.123":"nvme2n1"}
+
+# 根据env.json配置获取节点对应的盘信息
+disk_dict = {}
+from libs.utils import env_config
+from pathlib import Path
+project_root = Path(__file__).parent.parent.parent
+env_config_ret = env_config.load_resource_config(project_root / "conf" / "env.json")
+host_dict = env_config_ret.get("hosts")
+for config_ret in host_dict.items():
+    single_params = config_ret[1].get("params")
+    config_localip = config_ret[1].get("localIP")
+
+    disk_dict[config_localip] = disk_dict.get(config_localip, '') + ''.join(f"{v}:" for k, v in single_params.items() if k.startswith('disk'))
+    disk_dict[config_localip] = disk_dict[config_localip].rstrip(":")
 
 # 容器外映射路径
 DOCKER_OUTSIDE_MAP_PATH = '/home/ubsio_dfc/'
