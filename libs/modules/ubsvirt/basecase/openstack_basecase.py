@@ -8,6 +8,7 @@ import logging
 import re
 import threading
 import time
+import ast
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from typing import Any, Dict, List, Optional
@@ -57,6 +58,9 @@ def inject_openstack_basecase_dependencies(
     instance.agent = None
     instance.node_list = instance._load_nodes() if nodes else []
     instance.numa_num = instance.get_numa_num(instance.master) if instance.master else 0
+    instance.obmm_default_num = 1024 // instance.numa_num if instance.numa_num != 0 else 512
+    instance.default_page_num = instance.obmm_default_num // 2
+    instance.ubse_node_list = [instance.master] + instance.agent_list
     instance.node_dict = {}
     instance.resource_dict = {}
     instance.volume_use_list = []
@@ -300,7 +304,7 @@ class OpenStackBaseCase(UBSVirtBaseCase):
 
         self._match_node(resource_topo.nodes)
         self.clear_server()
-        self.reset_hugepage(self.node_list, self.node_dict, numa_total=self.numa_num)
+        self.reset_hugepage(self.node_list, self.node_dict)
 
         for node in resource_topo.nodes:
             huge_page = node.hugePage
@@ -320,6 +324,8 @@ class OpenStackBaseCase(UBSVirtBaseCase):
         self.volume_use_list = []
         for vm in resource_topo.vms:
             vm_create_list.append([self.create_server, vm])
+        if not vm_create_list:
+            return vm_create_list
         pool = ThreadPoolExecutor(max_workers=len(vm_create_list))
         all_task = [pool.submit(i[0], i[1]) for i in vm_create_list]
         result = [i.result() for i in all_task]
@@ -353,7 +359,6 @@ class OpenStackBaseCase(UBSVirtBaseCase):
             return
         for server in servers:
             client.delete_server(self.controller, server['ID'])
-        time.sleep(10)
 
     def add_stress_to_vm(self, vm: VMResource, percent: int) -> None:
         """Add memory stress to VM."""
@@ -453,7 +458,7 @@ class OpenStackBaseCase(UBSVirtBaseCase):
                 res = res + float(numa['HugePages_Total']) - float(numa['HugePages_Free'])
         return round(res, 2)
 
-    def wait_server_target_status(self, vm, expect_dict, timeout=600):
+    def wait_server_target_status(self, vm, expect_dict, timeout=600, sleep_time=10):
         start_time = time.time()
         while (time.time() - start_time) < timeout:
             found = True
@@ -464,7 +469,7 @@ class OpenStackBaseCase(UBSVirtBaseCase):
                     break
             if found:
                 return detail
-            time.sleep(10)
+            time.sleep(sleep_time)
 
     def create_server(self, vm: VMResource, expect_status='ACTIVE'):
         lock.acquire()
@@ -623,7 +628,7 @@ class OpenStackBaseCase(UBSVirtBaseCase):
             client.remove_aggregate_host(self.controller, aggregate_name, match_hosts)
             client.add_aggregate_host(self.controller, aggregate_name, [self.node_dict[node_name].host])
 
-    def reset_hugepage(self, node_list, node_dict, numa_total=2):
+    def reset_hugepage(self, node_list, node_dict):
         keys = node_dict.keys()
         for node in node_list:
             for key in keys:
@@ -635,7 +640,217 @@ class OpenStackBaseCase(UBSVirtBaseCase):
                     continue
         for node in node_list:
             if "expect_node" not in node.tags:
-                numa_info_dict = {0: 384}
-                result = client.refresh_hugePage(node.ssh_connect, numa_info_dict, numa_total=numa_total)
+                numa_info_dict = {0: self.default_page_num}
+                result = client.refresh_hugePage(node.ssh_connect, numa_info_dict, numa_total=self.numa_num)
                 if not result:
                     raise RuntimeError("set hugePage fail")
+
+    def create_server_only(self, vm):
+        lock = threading.Lock()
+        lock.acquire()
+        volume = self._create_volume(vm.image)
+        lock.release()
+        flavor = self._get_flavor(vm)
+        client.create_server_with_volume(self.controller, vm.name, flavor.name, volume.name)
+
+    def clear_huge_pages(self, node):
+        for i in range(0, self.numa_num):
+            numa_clr_cmd = "echo 0 > /sys/devices/system/node/node{}/hugepages/hugepages-2048kB/nr_hugepages".format(i)
+            node.run({'command': numa_clr_cmd})
+        node.run({'command': ['echo 3 > /proc/sys/vm/drop_caches']})
+        node.run({'command': ['numastat -cvm']})
+
+    def get_overcommitment(self, node):
+        command = "python /usr/lib/python3.11/site-packages/ubse/ubs_virt_case_conf.py"
+        res = node.run({'command': [command]}).get('stdout')
+        parts = res.split("#####")
+        if len(parts) < 2:
+            self.logError(f"get_overcommitment: unexpected output format: {res}")
+            return None
+        case_conf_dict = ast.literal_eval(parts[1])
+        overcommitment = [case_conf_dict['migrate_water_line'], case_conf_dict['over_commitment']]
+        return overcommitment
+
+    def wait_ubse_status(self, node, timeout, wait_interval):
+        start_time = time.time()
+        while time.time() - start_time < timeout:
+            flag = True
+            status_dict = self.get_ubse_status(node)
+            for ssh_node in self.nodes:
+                host_name = ssh_node.getHostname()
+                if host_name == 'controller' and self.is_Simulation:
+                    continue
+                if status_dict.get(host_name) != 'ok':
+                    flag = False
+                    break
+            if flag:
+                time.sleep(30) # ubse进程恢复后再等待30s，提高用例稳定性
+                return
+            time.sleep(wait_interval)
+        self.assertTrue(False, "进程重启后节点状态未就绪")
+
+    def get_ubse_status(self, node):
+        status_dict = {}
+        res = node.run({'command': [f'sudo -u ubse ubsectl check memory']}).get('stdout')
+        if res:
+            lines = res.splitlines()
+            for line in lines:
+                line = line.strip()
+                if line and not line.startswith(('-', 'root')) and 'node' not in line:
+                    parts = line.split()
+                    node_str = parts[0]
+                    status = parts[4].rstrip(';')
+                    base_node = node_str.split('(')[0] if '(' in node_str else node_str
+                    status_dict[base_node] = status
+        return status_dict
+
+    def get_ubse_node_id(self, node):
+        res = node.run({'command': [
+            "ubsectl display cluster | grep ` cat /etc/hostname | grep -v '#'` | awk 'BEGIN{ FS=\"(\" ; RS=\")\" } NF>1 { print $NF }'"
+        ]}).get("stdout")
+        if not res:
+            return False
+        else:
+            return str(res[0])
+
+    def wait_stress(self, node_name, numa_name, expect_numa_size, timeout=900):
+        if self.is_Simulation is False:
+            self.logInfo("环境为非仿真环境，跳过加压等待时间")
+            return True
+        wait_time = 0
+        flag = True
+        numa_used_size = None
+        while wait_time < timeout:
+            numa_used_size = self.get_node_numa_used(node_name, numa_name)
+            if numa_used_size > expect_numa_size:
+                flag = True
+                break
+            else:
+                wait_time = wait_time + 5
+                time.sleep(5)
+        self.assertTrue(flag, f"numa{numa_name} numa_used_size is {numa_used_size}, not {expect_numa_size}")
+
+    def get_migrate_actionType(self, exec_node, timestamp, timeout=1800):
+        start_time = time.time()
+        while (time.time() - start_time) < timeout:
+            decision = client.get_migrate_actionType(exec_node, timestamp)
+            if decision is not None:
+                return int(decision)
+            time.sleep(10)
+        return None
+
+    def check_stress_in_vm(self, vm, first_enter=True):
+        vm_ssh_node = self._get_vm_ssh(vm, first_enter)
+        return client.check_vm_stress(vm_ssh_node)
+
+    def stop_ubs_scheduler_agent(self, node):
+        command = f"systemctl stop ubs-scheduler-agent.service"
+        query_cmd = f"ps -ef |grep ubs_scheduler_agent.py | grep -v grep"
+        res = node.run({'command': [command]})
+        for _ in range(15):
+            res = node.run({'command': [query_cmd]})
+            if res.get("stdout") is None:
+                break
+            time.sleep(3)
+        return True if res.get("stdout") is None else False
+
+    def start_ubs_scheduler_agent(self, node):
+        command = f"systemctl start ubs-scheduler-agent.service"
+        query_cmd = f"ps -ef |grep ubs_scheduler_agent.py | grep -v grep"
+        res = node.run({'command': [command]})
+        for _ in range(15):
+            res = node.run({'command': [query_cmd]})
+            if res.get("stdout") is not None:
+                break
+            time.sleep(3)
+        return True if res.get("stdout") is not None else False
+
+    def stop_scbus(self, node):
+        command = f"systemctl stop ubse"
+        query_cmd = f"ps -ef |grep /usr/bin/ubse | grep -v grep"
+        res = node.run({'command': [command]})
+        for _ in range(5):
+            res = node.run({'command': [query_cmd]})
+            if res.get("stdout") is None:
+                break
+            time.sleep(1)
+        return True if res.get("stdout") is None else False
+
+    def start_scbus(self, node):
+        command = f"systemctl start ubse"
+        query_cmd = f"ps -ef |grep /usr/bin/ubse | grep -v grep"
+        res = node.run({'command': [command]})
+        for _ in range(5):
+            res = node.run({'command': [query_cmd]})
+            if res.get("stdout") is not None:
+                break
+            time.sleep(1)
+        return True if res.get("stdout") is not None else False
+
+    def stop_all_scbus(self):
+        for node in self.ubse_node_list:
+            res = self.stop_scbus(node)
+            self.assertTrue(res, '停止ubse进程失败')
+
+    def start_all_scbus(self):
+        for node in self.ubse_node_list:
+            res = self.start_scbus(node)
+            self.assertTrue(res, '启动ubse进程失败')
+
+    def change_overcommitment(self, nova_conf_path, set_value=1.25):
+        change_overcommitment_res = True
+
+        for node in self.ubse_node_list:
+            overcommitment = self.get_overcommitment(node)
+            if set_value == overcommitment[1]:
+                change_overcommitment_res = True
+            else:
+                change_overcommitment_res = False
+                break
+
+        if change_overcommitment_res is True:
+            self.logStep("超分比例不需要修改")
+            return change_overcommitment_res
+
+        self.stop_all_scbus()
+        self.controller.stopService("openstack-nova-scheduler")
+        for node in self.ubse_node_list:
+            node.stopService("openstack-nova-compute")
+
+        set_value_str = str(set_value)
+        for node in self.nodes:
+            client.set_conf_file(node, nova_conf_path, 'ram_allocation_ratio', set_value_str)
+
+        self.master.run({'command': ['rm -rf /var/lib/ubse/data']})
+        for agent in self.agent_list:
+            agent.run({'command': ['rm -rf /var/lib/ubse/data']})
+
+        self.start_all_scbus()
+        self.wait_ubse_status(self.master, 900, 10)
+
+        self.controller.startService("openstack-nova-scheduler")
+        for node in self.ubse_node_list:
+            node.startService("openstack-nova-compute")
+
+        self.waitServiceStatus(self.controller, "openstack-nova-scheduler", 900)
+        for node in self.ubse_node_list:
+            self.waitServiceStatus(node, "openstack-nova-compute", 900)
+
+        for node in self.ubse_node_list:
+            overcommitment = self.get_overcommitment(node)
+            self.assertEqual(overcommitment[1], set_value, "overcommitment is not set value")
+
+        self.controller.stopService("ubs-scheduler-controller")
+        for node in self.ubse_node_list:
+            node.stopService("ubs-scheduler-agent")
+
+        self.controller.startService("ubs-scheduler-controller")
+        for node in self.ubse_node_list:
+            node.startService("ubs-scheduler-agent")
+
+        self.waitServiceStatus(self.controller, "ubs-scheduler-controller", 900)
+        for node in self.ubse_node_list:
+            self.waitServiceStatus(node, "ubs-scheduler-agent", 900)
+
+        change_overcommitment_res = True
+        return change_overcommitment_res
