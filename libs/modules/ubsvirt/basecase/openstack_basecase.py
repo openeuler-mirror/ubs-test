@@ -320,16 +320,9 @@ class OpenStackBaseCase(UBSVirtBaseCase):
         res = self.check_nova_compute_status(self.node_list)
         self.assertTrue(res, "等待nova-compute服务重启状态没全部拉起")
 
-        vm_create_list = []
         self.volume_use_list = []
         for vm in resource_topo.vms:
-            vm_create_list.append([self.create_server, vm])
-        if not vm_create_list:
-            return vm_create_list
-        pool = ThreadPoolExecutor(max_workers=len(vm_create_list))
-        all_task = [pool.submit(i[0], i[1]) for i in vm_create_list]
-        result = [i.result() for i in all_task]
-        pool.shutdown()
+            self.create_server(vm)
 
         return resource_topo.vms
 
