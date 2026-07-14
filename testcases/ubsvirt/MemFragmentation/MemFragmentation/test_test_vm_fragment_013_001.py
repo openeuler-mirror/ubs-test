@@ -75,6 +75,7 @@ class TestVmFragment013001(OpenStackBaseCase):
             '远端创建内存量为0（"remote_mem": 0）'
         )
         mem_fragment_algorithm_decision = self.get_mem_fragment_algorithm_decision(self.controller)
+        self.assertIsNotNone(mem_fragment_algorithm_decision, "Algorithm decision log is None")
         self.assertEqual(
             mem_fragment_algorithm_decision.get("should_borrow_mem"), False, "VM is borrow mem"
         )
@@ -92,7 +93,7 @@ class TestVmFragment013001(OpenStackBaseCase):
             5120,
             "node1",
             False,
-            3,
+            2,
             False,
             True,
             25,
@@ -114,6 +115,7 @@ class TestVmFragment013001(OpenStackBaseCase):
         self.logStep(
             'E3、ubs-scheduler-controller.log日志中存在INFO决策信息打印，决策为匀一匀创建（"should_borrow_mem": True）'
         )
+        self.assertIsNotNone(mem_fragment_algorithm_decision, "Algorithm decision log is None")
         self.assertEqual(
             mem_fragment_algorithm_decision.get("should_borrow_mem"), True, "VM is not borrow mem"
         )
