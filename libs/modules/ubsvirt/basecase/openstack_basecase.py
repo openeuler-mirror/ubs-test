@@ -9,8 +9,6 @@ import re
 import threading
 import time
 import ast
-from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 import pytest
