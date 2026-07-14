@@ -173,8 +173,7 @@ class DFCKVCLIHelper:
         Returns:
             Tuple of (status, output)
         """
-        from libs.ubsio import PYDFC_EXPORT
-        cmd = f"cd {scripts_path};{PYDFC_EXPORT};python3 {script_name} {args}"
+        cmd = f"cd {scripts_path};python3 {script_name} {args}"
         docker_cmd = f"docker exec {docker_name} bash -c '{cmd}'"
         result = self.node.run({"command": [docker_cmd], "timeout": timeout})
         
