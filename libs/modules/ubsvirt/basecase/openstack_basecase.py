@@ -663,8 +663,11 @@ class OpenStackBaseCase(UBSVirtBaseCase):
     def get_overcommitment(self, node):
         command = "python /usr/lib/python3.11/site-packages/ubse/ubs_virt_case_conf.py"
         res = node.run({'command': [command]}).get('stdout')
-        res = res.split("#####")[1]
-        case_conf_dict = ast.literal_eval(res)
+        parts = res.split("#####")
+        if len(parts) < 2:
+            self.logError(f"get_overcommitment: unexpected output format: {res}")
+            return None
+        case_conf_dict = ast.literal_eval(parts[1])
         overcommitment = [case_conf_dict['migrate_water_line'], case_conf_dict['over_commitment']]
         return overcommitment
 
@@ -710,7 +713,7 @@ class OpenStackBaseCase(UBSVirtBaseCase):
         else:
             return str(res[0])
 
-    def wait_stress(self, node, numa, expect_numa_size, timeout=900):
+    def wait_stress(self, node_name, numa_name, expect_numa_size, timeout=900):
         if self.is_Simulation is False:
             self.logInfo("环境为非仿真环境，跳过加压等待时间")
             return True
@@ -718,14 +721,14 @@ class OpenStackBaseCase(UBSVirtBaseCase):
         flag = True
         numa_used_size = None
         while wait_time < timeout:
-            numa_used_size = self.get_node_numa_used(node, numa)
+            numa_used_size = self.get_node_numa_used(node_name, numa_name)
             if numa_used_size > expect_numa_size:
                 flag = True
                 break
             else:
                 wait_time = wait_time + 5
                 time.sleep(5)
-        self.assertTrue(flag, f"numa{numa} numa_used_size is {numa_used_size}, not {expect_numa_size}")
+        self.assertTrue(flag, f"numa{numa_name} numa_used_size is {numa_used_size}, not {expect_numa_size}")
 
     def get_migrate_actionType(self, exec_node, timestamp, timeout=1800):
         start_time = time.time()
@@ -757,7 +760,7 @@ class OpenStackBaseCase(UBSVirtBaseCase):
         res = node.run({'command': [command]})
         for _ in range(15):
             res = node.run({'command': [query_cmd]})
-            if res.get("stdout") is None:
+            if res.get("stdout") is not None:
                 break
             time.sleep(3)
         return True if res.get("stdout") is not None else False
@@ -779,7 +782,7 @@ class OpenStackBaseCase(UBSVirtBaseCase):
         res = node.run({'command': [command]})
         for _ in range(5):
             res = node.run({'command': [query_cmd]})
-            if res.get("stdout") is None:
+            if res.get("stdout") is not None:
                 break
             time.sleep(1)
         return True if res.get("stdout") is not None else False
