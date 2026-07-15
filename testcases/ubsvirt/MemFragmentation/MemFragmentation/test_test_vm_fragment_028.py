@@ -10,7 +10,6 @@ import pytest
 from libs.modules.ubsvirt.basecase.openstack_basecase import OpenStackBaseCase
 
 
-@pytest.mark.smoke
 class TestVmFragment028(OpenStackBaseCase):
     """
     CaseNumber:
