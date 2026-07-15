@@ -16,7 +16,12 @@ def refresh_hugePage(node, numa_info={}, restart_service=False, numa_total=2):
     numa_infos = get_numaInfo(node)
     if numa_info == {}:
         return
-    for i in range(numa_total):
+    # default_obmm_num为obmm占用
+    default_obmm_num = 1024 // numa_total
+    default_page_num = default_obmm_num // 2
+    # 当前大页numa设置最大支持4，避免对预上线等情况下得额外numa进行设置
+    loop_num = min(numa_total, 4)
+    for i in range(loop_num):
         numa_node = next((numa for numa in numa_infos if numa['name'] == 'Node ' + str(i)), None)
         if not numa_node:
             return False
@@ -37,10 +42,10 @@ def refresh_hugePage(node, numa_info={}, restart_service=False, numa_total=2):
         else:
             if int(numa_node['HugePages_Total']) == 0:
                 continue
-            if int(numa_node['HugePages_Free']) == 256:
+            if int(numa_node['HugePages_Total']) == default_obmm_num:
                 continue
 
-            ret = echo_hugePage(node, i, 128 + 256)
+            ret = echo_hugePage(node, i, default_page_num)
             if ret.get('rc') != 0:
                 return False
             restart_service = True

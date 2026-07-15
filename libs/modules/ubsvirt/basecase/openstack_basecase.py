@@ -792,10 +792,12 @@ class OpenStackBaseCase(UBSVirtBaseCase):
         change_overcommitment_res = True
 
         for node in self.ubse_node_list:
-            overcommitment = self.get_overcommitment(node)
-            if set_value == overcommitment[1]:
-                change_overcommitment_res = True
-            else:
+            try:
+                overcommitment = self.get_overcommitment(node)
+            except Exception:
+                change_overcommitment_res = False
+                break
+            if set_value != overcommitment[1]:
                 change_overcommitment_res = False
                 break
 

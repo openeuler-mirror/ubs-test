@@ -24,7 +24,7 @@ class TestUbsVirt008(OpenStackBaseCase):
     def setup_method(self):
         self.logStep("P1.环境中ubse、Ubs-Scheduler状态正常")
         self.path = '/usr/lib/python3.11/site-packages/ubse/ubs_virt_008.py'
-        self.overcommitment = str(self.get_overcommitment(self.master)[1])
+        self.overcommitment = self.get_overcommitment(self.master)[1]
         self.casetype = "memFragmentation" if self.overcommitment == 1.0 else "overCommitment"
 
     def teardown_method(self):

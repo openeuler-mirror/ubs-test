@@ -38,7 +38,7 @@ class TestUbsVirt012(OpenStackBaseCase):
     def test_ubs_virt_012(self, get_topo_path):
         self.logInfo("创建虚机")
         self.vm_list = self.prepare_topo(str(get_topo_path("test_ubs_virt_012")))
-        self.hostname = self.master.getHostName()
+        self.hostname = self.master.getHostname()
 
         self.logStep("S1.调用update_page_flow_and_status相关接口查看虚机信息，查看响应结果是否满足预期")
         services = client.list_servers(self.controller)
