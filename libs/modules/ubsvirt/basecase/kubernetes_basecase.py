@@ -1,6 +1,5 @@
 ﻿#!/usr/local/python
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2012-2025. All rights reserved.
 """KubernetesBaseCase - Kubernetes容器共享内存测试用例基类。
 Pytest适配: KubernetesBaseCase(UBSVirtBaseCase) - 使用fixture注入
 """
