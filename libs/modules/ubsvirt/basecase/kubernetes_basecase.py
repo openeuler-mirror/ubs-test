@@ -1459,7 +1459,6 @@ class KubernetesBaseCase(UBSVirtBaseCase):
 
         参数说明：
             node_name: 节点名称
-            start_time: 开始时间戳
             timeout: 超时时间（秒）
 
         返回值说明：
