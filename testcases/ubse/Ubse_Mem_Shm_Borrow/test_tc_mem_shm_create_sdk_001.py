@@ -4,23 +4,23 @@ from libs.modules.ubse.basecase.mem_pooling_basecase import MEM_Pooling_BaseCase
 
 @pytest.mark.hook("libs.modules.ubse.hook.mem_pooling_hook.MEM_Pooling_Hook")
 @pytest.mark.smoke
-class TestTcMemNumaCreateSdk001(MEM_Pooling_BaseCase):
+class TestTcMemShmCreateSdk001(MEM_Pooling_BaseCase):
     """
     CaseNumber:
-        test_tc_mem_numa_create_sdk_001
+        test_tc_mem_shm_create_sdk_001
     RunLevel:
-        Level 0
+        Level T
     EnvType:
 
     CaseName:
-        验证sdk接口创建numa形态的远端内存成功
+        验证sdk接口创建共享内存成功
     PreCondition:
         P1.ubse进程已启动
         P2.节点集群状态为ok
     TestStep:
-        S1.调用ubse_mem_numa_create接口创建numa形态的远端内存，参数合法
+        S1.调用ubse_mem_shm_create接口创建共享内存，参数合法
         S2.查看内存账本信息：ubsectl display memory -t borrow_detail
-        S3.调用ubse_mem_numa_delete接口删除指定numa远端内存
+        S3.调用ubse_mem_shm_delete接口删除共享内存
         S4.查看内存账本信息：ubsectl display memory -t borrow_detail
     ExpectedResult:
         E1.内存创建成功
@@ -44,11 +44,12 @@ class TestTcMemNumaCreateSdk001(MEM_Pooling_BaseCase):
         self.logStep("清理内存")
         self.clear_all_borrow_mem()
 
-    def test_tc_mem_numa_create_sdk_001(self):
-
-        self.logStep("S1.调用ubse_mem_numa_create接口创建numa形态的远端内存，参数合法")
-        name = "mem_numa_create_sdk_001"
-        res = self.mem_numa_borrow(self.nodes[0], name=name)
+    def test_tc_mem_shm_create_sdk_001(self):
+        
+        self.logStep("S1.调用ubse_mem_shm_create接口创建共享内存，参数合法")
+        region = ",".join([node.nodeId for node in self.nodes])
+        name = "mem_shm_create_sdk_001"
+        res = self.mem_shm_borrow(node=self.nodes[0], option="shm_create", name=name, slot_ids=region)
 
         self.logStep("E1.内存创建成功")
         self.assertTrue(res, "内存创建失败")
@@ -59,8 +60,9 @@ class TestTcMemNumaCreateSdk001(MEM_Pooling_BaseCase):
         self.logStep("E2.查到创建的内存信息")
         self.assertTrue(any(d.get("name", "") == name for d in mem_borrow_details), f"不存在name为{name}的内存信息")
 
-        self.logStep("S3.调用ubse_mem_numa_delete接口删除指定numa远端内存")
-        res = self.mem_numa_borrow(self.nodes[0], masking=False, name=name)
+
+        self.logStep("S3.调用ubse_mem_shm_delete接口删除共享内存")
+        res = self.mem_shm_borrow(node=self.nodes[0], option="shm_delete", name=name)
 
         self.logStep("E3.内存删除成功")
         self.assertTrue(res, "内存删除失败")

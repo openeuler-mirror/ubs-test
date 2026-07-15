@@ -1,16 +1,13 @@
 import pytest
-from typing import Any, Dict, List
-
 from libs.modules.ubse.basecase.mem_pooling_basecase import MEM_Pooling_BaseCase
-from libs.utils.logger_compat import Log
 
 
 @pytest.mark.hook("libs.modules.ubse.hook.mem_pooling_hook.MEM_Pooling_Hook")
 @pytest.mark.smoke
-class TestTcMemNumaWithCandidateSdk001(MEM_Pooling_BaseCase):
+class TestTcMemNumaCreateWithCandidateSdk001(MEM_Pooling_BaseCase):
     """
     CaseNumber:
-        tc_mem_numa_with_candidate_sdk_001
+        test_tc_mem_numa_create_with_candidate_sdk_001
     RunLevel:
         Level T
     EnvType:
@@ -50,7 +47,7 @@ class TestTcMemNumaWithCandidateSdk001(MEM_Pooling_BaseCase):
     def test_tc_mem_numa_with_candidate_sdk_001(self):
 
         self.logStep("S1.调用ubse_mem_numa_create_with_candidate接口，参数正常")
-        name = "mem_numa_with_candidate_sdk_001"
+        name = "mem_numa_create_with_candidate_sdk_001"
         res = self.mem_numa_borrow(node=self.nodes[0], option="create_with_candidate",
                                    name=name, slot_ids="1,2")
         self.logStep("E1.内存创建成功")
@@ -60,7 +57,7 @@ class TestTcMemNumaWithCandidateSdk001(MEM_Pooling_BaseCase):
         mem_borrow_details = self.cli_api.display_mem_borrow_detail(self.nodes[0])
 
         self.logStep("E2.查到创建的内存信息")
-        self.assertTrue(any(d.get("name") == name for d in mem_borrow_details), f"不存在name为{name}的内存信息")
+        self.assertTrue(any(d.get("name", "") == name for d in mem_borrow_details), f"不存在name为{name}的内存信息")
 
         self.logStep("S3.调用ubse_mem_numa_delete接口删除指定numa远端内存")
         res = self.mem_numa_borrow(node=self.nodes[0], name=name, masking=False)
@@ -72,4 +69,4 @@ class TestTcMemNumaWithCandidateSdk001(MEM_Pooling_BaseCase):
         mem_borrow_details = self.cli_api.display_mem_borrow_detail(self.nodes[0])
 
         self.logStep("E4.账本不包含S1的内存")
-        self.assertFalse(any(d.get("name") == name for d in mem_borrow_details), f"仍存在name为{name}的内存信息")
+        self.assertFalse(any(d.get("name", "") == name for d in mem_borrow_details), f"仍存在name为{name}的内存信息")
