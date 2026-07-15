@@ -1,0 +1,13 @@
+{
+  "nodes":[{
+    "name": "node1",
+    "role": "master",
+    "hugePage": 2688
+  },
+  {
+    "name": "node2",
+    "role": "agent",
+    "hugePage": 10240
+  }],
+  "vms":[]
+}
