@@ -794,10 +794,10 @@ class OpenStackBaseCase(UBSVirtBaseCase):
         for node in self.ubse_node_list:
             try:
                 overcommitment = self.get_overcommitment(node)
+                if set_value != overcommitment[1]:
+                    change_overcommitment_res = False
+                    break
             except Exception:
-                change_overcommitment_res = False
-                break
-            if set_value != overcommitment[1]:
                 change_overcommitment_res = False
                 break
 
@@ -847,3 +847,8 @@ class OpenStackBaseCase(UBSVirtBaseCase):
 
         change_overcommitment_res = True
         return change_overcommitment_res
+
+    def get_keystone_token(self):
+        self.ensure_admin_openrc_on_controller()
+        res = (self.controller.run({"command": ["openstack token issue -f value -c id"]}).get("stdout") or "")
+        return res.replace("\r", "").replace("\n", "").replace("root@#>", "")

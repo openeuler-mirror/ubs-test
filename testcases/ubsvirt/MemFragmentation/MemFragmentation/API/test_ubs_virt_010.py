@@ -39,5 +39,6 @@ class TestUbsVirt010(OpenStackBaseCase):
 
         self.logInfo("E1.接口调用成功，相应结果符合预期")
         hostname = self.master.getHostname()
+        self.assertIsNotNone(node_info, "接口调用失败，返回信息为None")
         self.assertIn(hostname, node_info, "调用接口返回的信息不包含主机名或主机名不正确")
         self.assertIn('huge_page_total=' + str(node_dict[0]), node_info, "调用接口返回的信息不包含大页值或大页值不正确")

@@ -37,12 +37,15 @@ class TestUbsVirt011(OpenStackBaseCase):
         self.logInfo("创建虚机")
         self.vm_list = self.prepare_topo(str(get_topo_path("test_ubs_virt_011")))
         server_detail = client.get_server_detail(self.controller, 'vm_01')
+        if not server_detail:
+            self.assertTrue(False, 'vm_01信息查询失败')
 
         self.logStep("S1.调用ubs_vm_info_list相关接口查看虚机信息，查看响应结果是否满足预期")
         vm_info = test_api.apitest_ubs_virt_vm_info_list(self.master, self.vm_py_path)
         self.logInfo("node_info=" + vm_info)
 
         self.logInfo("E1.接口调用成功，相应结果符合预期")
+        self.assertIsNotNone(vm_info, "接口调用失败，返回信息为None")
         self.assertIn(server_detail["OS-EXT-SRV-ATTR:instance_name"], vm_info, "虚拟机查询失败")
         hostname = self.node_dict["node1"].host
         self.assertIn(hostname, vm_info, "调用接口返回的信息不包含主机名或主机名不正确")

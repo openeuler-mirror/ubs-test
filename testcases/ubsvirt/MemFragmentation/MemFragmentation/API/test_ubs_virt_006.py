@@ -27,9 +27,7 @@ class TestUbsVirt006(OpenStackBaseCase):
         self.logStep("P1.环境中UBS Scheduler状态正常")
 
         self.logStep("P2.获取环境中keystone的token信息")
-        self.ensure_admin_openrc_on_controller()
-        res = self.controller.run({"command": ["openstack token issue -f value -c id"]}).get("stdout")
-        self.token = res.replace("\r", "").replace("\n", "").replace("root@#>", "")
+        self.token = self.get_keystone_token()
 
     def teardown_method(self):
         self.clear_server()
@@ -49,6 +47,7 @@ class TestUbsVirt006(OpenStackBaseCase):
         del_res = test_api.apitest_ubs_virt_delete_vm(self.controller, vm_id, self.token)
 
         self.logInfo("E1.接口调用成功，状态码返回200，相应结果符合预期")
+        self.assertIsNotNone(del_res, "接口调用失败，返回信息为None")
         self.assertIn("200", del_res, "return code is not 200")
         msg = f'Execute deletion task of vm: {vm_id}, create monitor and update task'
         self.assertIn(msg, del_res, "接口返回无msg信息")

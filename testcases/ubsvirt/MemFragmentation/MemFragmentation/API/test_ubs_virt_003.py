@@ -28,9 +28,7 @@ class TestUbsVirt003(OpenStackBaseCase):
         self.logStep("P1.环境中UBS Scheduler状态正常")
 
         self.logStep("P2.获取环境中keystone的token信息")
-        self.ensure_admin_openrc_on_controller()
-        res = self.controller.run({"command": ["openstack token issue -f value -c id"]}).get("stdout")
-        self.token = res.replace("\r", "").replace("\n", "").replace("root@#>", "")
+        self.token = self.get_keystone_token()
 
         self.logStep("P3.环境为碎片场景")
 
@@ -55,6 +53,7 @@ class TestUbsVirt003(OpenStackBaseCase):
         query_res = test_api.wait_apitest_creation_numa_info(self.controller, vm_id, self.token, check_msg, sleep_time=1)
 
         self.logInfo("E1.接口调用成功，状态码返回200，相应结果符合预期")
+        self.assertIsNotNone(query_res, "接口调用失败，返回信息为None")
         self.assertIn("200", query_res, "return code is not 200")
         hostname = self.node_dict['node1'].host
         self.assertIn(hostname, query_res, f"调用接口返回的信息不包含主机名或主机名不正确")

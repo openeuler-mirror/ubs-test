@@ -27,8 +27,9 @@ class TestUbsVirt012(OpenStackBaseCase):
         self.vm_py_path = '/usr/lib/python3.11/site-packages/ubse/ubs_virt_012.py'
 
     def teardown_method(self):
-        test_api.apitest_update_page_flow_and_status(self.master, self.vm_py_path, 'true', self.uuid,
-                                                     self.hostname, 0)
+        if hasattr(self, "uuid"):
+            test_api.apitest_update_page_flow_and_status(self.master, self.vm_py_path, 'true', self.uuid,
+                                                         self.hostname, 0)
         self.master.run({'command': [f'rm -f {self.vm_py_path}']})
         self.clear_server()
         for node_name in self.node_dict:

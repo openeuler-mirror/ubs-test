@@ -27,9 +27,7 @@ class TestUbsVirt005(OpenStackBaseCase):
         self.logStep("P1.环境中UBS Scheduler状态正常")
 
         self.logStep("P2.获取环境中keystone的token信息")
-        self.ensure_admin_openrc_on_controller()
-        res = self.controller.run({"command": ["openstack token issue -f value -c id"]}).get("stdout")
-        self.token = res.replace("\r", "").replace("\n", "").replace("root@#>", "")
+        self.token = self.get_keystone_token()
 
         self.logStep("P3.环境为碎片场景")
 
@@ -47,10 +45,13 @@ class TestUbsVirt005(OpenStackBaseCase):
         hostname = self.node_dict['node2'].host
         client.migrate_server(self.controller, self.vm_list[0].name, hostname)
         server_detail = client.get_server_detail(self.controller, "vm_01")
+        if not server_detail:
+            self.assertTrue(False, 'vm_01信息查询失败')
         vm_id = server_detail['id']
         check_msg = "\"numa_id\":0"
         query_res = test_api.wait_apitest_migration_numa_info(self.controller, vm_id, self.token, check_msg, sleep_time=1)
 
         self.logInfo("E1.接口调用成功，状态码返回200，相应结果符合预期")
+        self.assertNotEqual(query_res, False, "接口调用失败，返回信息为False")
         self.assertIn("200", query_res, "return code is not 200")
         self.assertIn(check_msg, query_res, "接口查询的numa_id与预期：0不一致")

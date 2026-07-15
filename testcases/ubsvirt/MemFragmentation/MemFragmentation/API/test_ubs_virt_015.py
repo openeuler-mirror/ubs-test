@@ -33,9 +33,7 @@ class TestUbsVirt015(OpenStackBaseCase):
 
         self.logStep("P2.获取环境中keystone的token信息")
         self.logInfo("获取token信息")
-        self.ensure_admin_openrc_on_controller()
-        res = self.controller.run({"command": ["openstack token issue -f value -c id"]}).get("stdout")
-        self.token = res.replace("\r", "").replace("\n", "").replace("root@#>", "")
+        self.token = self.get_keystone_token()
 
         self.logStep("P3.碎片场景已创建一个虚机")
 
