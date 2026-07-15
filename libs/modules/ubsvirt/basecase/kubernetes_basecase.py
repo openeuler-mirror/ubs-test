@@ -102,6 +102,10 @@ class KubernetesBaseCase(UBSVirtBaseCase):
             elif host_name == "master":
                 wrapper_node.add_tag('master')
                 self.master = ssh_node
+
+        if self.master is None:
+            raise RuntimeError("No master node found in node list")
+
         return node_list
 
     def init_shm_test_tool(self) -> None:
@@ -279,7 +283,7 @@ class KubernetesBaseCase(UBSVirtBaseCase):
         stdout = res.get("stdout")
 
         if stdout is None:
-            return True
+            return False
 
         if "deleted" in stdout.split("root@#>")[0]:
             return True
@@ -911,7 +915,8 @@ class KubernetesBaseCase(UBSVirtBaseCase):
         参数说明：
             node: 节点SSH对象
         """
-        for i in range(0, 4):
+        numa_count = self.get_node_numa_num(node)
+        for i in range(0, numa_count):
             numa_clr_cmd = f"echo 0 > /sys/devices/system/node/node{i}/hugepages/hugepages-2048kB/nr_hugepages"
             node.run({'command': [numa_clr_cmd]})
         node.run({'command': ['echo 3 > /proc/sys/vm/drop_caches']})
