@@ -921,3 +921,801 @@ class KubernetesBaseCase(UBSVirtBaseCase):
         node.run({'command': ['echo 3 > /proc/sys/vm/drop_caches']})
         node.run({'command': ['numastat -cvm']})
 
+    def change_hugepage(self, node_name: str, numa_name: str, extra_huge_size: int) -> None:
+        """修改节点NUMA的大页数量
+
+        参数说明：
+            node_name: 节点名称
+            numa_name: NUMA名称（如node0）
+            extra_huge_size: 大页数量
+        """
+        node = self.node_dict[node_name]
+        cmd = f"echo {extra_huge_size} > /sys/devices/system/node/{numa_name}/hugepages/hugepages-2048kB/nr_hugepages"
+        node.run({'command': [cmd]})
+
+    def clear_drop_cache(self, node_name: str) -> None:
+        """清理节点缓存
+
+        参数说明：
+            node_name: 节点名称
+        """
+        node = self.node_dict[node_name]
+        cmd = "echo 3 > /proc/sys/vm/drop_caches"
+        node.run({'command': [cmd]})
+
+    def set_label_numa(self) -> None:
+        """设置NUMA策略标签"""
+        cmd = "kubectl label nodes --all watermark-escape-strategy=numa --overwrite"
+        self.master.run({'command': [cmd]})
+
+    def set_label_node(self) -> None:
+        """设置Node策略标签"""
+        cmd = "kubectl label nodes --all watermark-escape-strategy=node --overwrite"
+        self.master.run({'command': [cmd]})
+
+    def get_node_number(self) -> int:
+        """获取集群节点数量
+
+        返回值说明：
+            int: 节点数量
+        """
+        cmd = "kubectl get nodes -o jsonpath='{.items[*].metadata.name}'"
+        res = self.master.run({'command': [cmd]})
+        node_names = res.get("stdout", "").split("root@#>")[0]
+        all_node = node_names.split()
+        return len(all_node)
+
+    def watch_pod_for_status(self, name_space: str = "kube-system", pod_name: str = "",
+                             status: str = "Running", timeout: int = 60) -> bool:
+        """等待Pod达到指定状态
+
+        参数说明：
+            name_space: 命名空间
+            pod_name: Pod名称
+            status: 目标状态
+            timeout: 超时时间（秒）
+
+        返回值说明：
+            bool: 是否达到目标状态
+        """
+        search_cmd = f"kubectl get pod -n {name_space} | grep {pod_name} | awk '{{print $3}}'"
+        wait_time = 0
+        flag = False
+        while wait_time < timeout:
+            res = self.master.run({'command': [search_cmd], 'waitstr': '#'}).get('stdout')
+            if status in res:
+                flag = True
+                break
+            wait_time = wait_time + 5
+            time.sleep(5)
+        return flag
+
+    def get_node_numa_free(self, node_name: str, numa_name: str) -> float:
+        """获取节点NUMA的空闲内存
+
+        参数说明：
+            node_name: 节点名称
+            numa_name: NUMA名称（如Node 0）
+
+        返回值说明：
+            float: 空闲内存大小（MB）
+        """
+        from libs.modules.ubsvirt.api.client import get_numaInfo
+        numa_infos = get_numaInfo(self.node_dict[node_name])
+        for numa in numa_infos:
+            if numa['name'] == numa_name:
+                return float(numa['MemFree'])
+        return 0.0
+
+    def get_node_numa_total(self, node_name: str, numa_name: str) -> float:
+        """获取节点NUMA的总内存
+
+        参数说明：
+            node_name: 节点名称
+            numa_name: NUMA名称（如Node 0）
+
+        返回值说明：
+            float: 总内存大小（MB）
+        """
+        from libs.modules.ubsvirt.api.client import get_numaInfo
+        node = self.node_dict.get(node_name)
+        if node is not None:
+            numa_infos = get_numaInfo(node)
+            for numa in numa_infos:
+                if numa['name'] == numa_name:
+                    return float(numa['MemTotal'])
+        return 0.0
+
+    def get_node_numa_used(self, node_name: str, numa_name: str) -> float:
+        """获取节点NUMA的使用内存（通过大页计算）
+
+        参数说明：
+            node_name: 节点名称
+            numa_name: NUMA名称（如Node 0）
+
+        返回值说明：
+            float: 使用内存大小（MB）
+        """
+        from libs.modules.ubsvirt.api.client import get_numaInfo
+        numa_infos = get_numaInfo(self.node_dict[node_name])
+        res = 0.0
+        for numa in numa_infos:
+            if numa['name'] == numa_name:
+                res = res + float(numa['HugePages_Total']) - float(numa['HugePages_Free'])
+        return round(res, 2)
+
+    def get_node_container_numa_affinity_by_name(self, node_name: str, pod_name: str = "pod-for-mem",
+                                                  container_name: str = "numa") -> int:
+        """通过名称获取Pod容器的NUMA亲和性
+
+        参数说明：
+            node_name: 节点名称
+            pod_name: Pod名称
+            container_name: 容器名称
+
+        返回值说明：
+            int: NUMA亲和性编号（失败返回-1）
+        """
+        name_space = "kube-system"
+        uid_cmd = f"kubectl get pod -n {name_space} {pod_name} -o go-template='{{{{.metadata.uid}}}}'"
+        test_node_uid = self.master.run({'command': [uid_cmd], 'waitstr': '#'}).get('stdout').replace("root@#>", "")
+
+        node = self.node_dict[node_name]
+        res = node.run({'command': ['cat /root/kubernetes/var/lib/kubelet/memory_manager_state']}).get(
+            "stdout").replace("root@#>", "")
+        if container_name not in res:
+            logger.info("can not find container in mem manager state")
+            return -1
+
+        data = json.loads(res)
+        numa_affinity = data['entries'][test_node_uid][container_name][0]['numaAffinity'][0]
+        logger.info(f"pod numa affinity is {numa_affinity}")
+        return numa_affinity
+
+    def set_node_reserved_size(self, node_list: List[str], reserved_size_all: float) -> None:
+        """设置节点预留内存大小
+
+        参数说明：
+            node_list: 节点列表
+            reserved_size_all: 预留大小（MB）
+        """
+        for node_name in node_list:
+            node = self.node_dict[node_name]
+            node_numa_num = self.get_node_numa_num(node)
+            reserved_size = reserved_size_all / int(node_numa_num)
+            for numa_num in range(0, node_numa_num):
+                numa_name = f"node{numa_num}"
+                numa_name_for_search = f"Node {numa_num}"
+                self.change_hugepage(node_name, numa_name, 0)
+                time.sleep(2)
+                mem_free = self.get_node_numa_free(node_name, numa_name_for_search)
+                mem_reserved = reserved_size
+                mem_hugepage = mem_free - mem_reserved
+                if mem_hugepage > 0:
+                    hugepage_count = int(mem_hugepage / 2)
+                    self.change_hugepage(node_name, numa_name, hugepage_count)
+                    time.sleep(2)
+                else:
+                    raise ValueError(f"set_node_reserved_size, mem_hugepage value error for {node_name} numa{numa_num}")
+
+    def set_numa_reserved_size(self, numa_affinity_num: int, reserved_size_all: float, run_node_name: str) -> None:
+        """设置NUMA预留内存大小
+
+        参数说明：
+            numa_affinity_num: NUMA亲和性编号
+            reserved_size_all: 预留大小（MB）
+            run_node_name: 运行节点名称
+        """
+        if numa_affinity_num not in [0, 1, 2, 3]:
+            raise ValueError(f"numa affinity is invalid, num is {numa_affinity_num}")
+        numa_name = f"Node {numa_affinity_num}"
+        numa_node_for_huagepage = f"node{numa_affinity_num}"
+        self.change_hugepage(run_node_name, numa_node_for_huagepage, 0)
+        mem_free = self.get_node_numa_free(run_node_name, numa_name)
+        mem_hugepage = mem_free - reserved_size_all
+        if mem_hugepage > 0:
+            hugepage_count = int(mem_hugepage / 2)
+            self.change_hugepage(run_node_name, numa_node_for_huagepage, hugepage_count)
+            time.sleep(10)
+        else:
+            logger.info("Remaining memory is less than the set_numa_reserved_size")
+
+    def clear_all_huge_size(self, node_list: List[str]) -> None:
+        """清理所有节点的大页
+
+        参数说明：
+            node_list: 节点列表
+        """
+        for node_name in node_list:
+            node = self.node_dict[node_name]
+            for numa_name in [f'node{i}' for i in range(0, 4)]:
+                self.change_hugepage(node_name, numa_name, 0)
+                time.sleep(2)
+
+    def start_redis_server(self, node_name: str, pod_name: str = "pod-for-mem") -> None:
+        """启动Redis服务器
+
+        参数说明：
+            node_name: 节点名称
+            pod_name: Pod名称
+        """
+        node = self.node_dict[node_name]
+        server_cmd = f"kubectl exec -n kube-system {pod_name} -- /redis/redis-server /redis/redis.conf &"
+        ssh_node = get_new_sshconnect(self.master)
+        ssh_node.run({'command': [server_cmd], 'waitstr': '#', 'timeout': 30, 'shnormal': True})
+        wait_time = 0
+        flag = False
+        cmd = "ps axf | grep redis-server | grep -v grep | awk '{print $1}'"
+        while wait_time < 60:
+            server_pid = node.run({'command': [cmd], 'waitstr': '#'}).get("stdout").split("\r\n")[0]
+            if server_pid:
+                flag = True
+                break
+            wait_time = wait_time + 5
+            time.sleep(5)
+        if not flag:
+            raise RuntimeError("redis server create failed")
+
+    def stress_redis(self, stress_type: str = "numa", pod_name: str = "pod-for-mem") -> None:
+        """使用Redis进行压力测试
+
+        参数说明：
+            stress_type: 压力类型（numa/node）
+            pod_name: Pod名称
+        """
+        stress_map = {
+            "numa": 2850000,
+            "node": 6500000
+        }
+        stress_val = stress_map.get(stress_type, 2850000)
+        server_cmd = [
+            f"nohup kubectl exec -n kube-system {pod_name} -- /redis/redis-benchmark -t set,get -n 20000000 -c 128 -r {stress_val} -h 127.0.0.1 -p 6379 -d 2048 --threads 64 > /dev/null 2>&1 &"]
+        ssh_node = get_new_sshconnect(self.master)
+        ssh_node.run({'command': server_cmd, 'waitstr': 'avg_msec'})
+
+    def stress_redis_by_value(self, stress_num_value: int, pod_name: str = "pod-for-mem") -> None:
+        """使用Redis按指定值进行压力测试
+
+        参数说明：
+            stress_num_value: 压力数值
+            pod_name: Pod名称
+        """
+        server_cmd = [
+            f"nohup kubectl exec -n kube-system {pod_name} -- /redis/redis-benchmark -t set,get -n 20000000 -c 128 -r {stress_num_value} -h 127.0.0.1 -p 6379 -d 2048 --threads 64 > /dev/null 2>&1 &"]
+        ssh_node = get_new_sshconnect(self.master)
+        ssh_node.run({'command': server_cmd, 'waitstr': 'avg_msec'})
+
+    def clear_redis_stress(self, pod_name: str) -> None:
+        """清理Redis压力测试进程
+
+        参数说明：
+            pod_name: Pod名称
+        """
+        ssh_pod = get_new_sshconnect(self.master)
+        client_kill_cmd = f"kubectl exec -n kube-system {pod_name} -- pkill -9 redis-benchmark"
+        ssh_pod.run({'command': [client_kill_cmd], "timeout": 30})
+
+        server_kill_cmd = f"kubectl exec -n kube-system {pod_name} -- pkill -9 redis-server"
+        ssh_pod.run({'command': [server_kill_cmd], "timeout": 30})
+
+    def add_huge_page_stress(self, node: Any, numa_id: int, percent: float) -> None:
+        """添加大页压力
+
+        参数说明：
+            node: 节点SSH对象
+            numa_id: NUMA编号
+            percent: 压力百分比
+        """
+        node.run({'command': ['echo 3 > /proc/sys/vm/drop_caches']})
+        from libs.modules.ubsvirt.api.client import get_numaInfo
+        node_numa = get_numaInfo(node)
+        numa_node = next((numa for numa in node_numa if numa['name'] == f'Node {numa_id}'), None)
+        if not numa_node:
+            raise ValueError(f"Node {numa_id} not found")
+
+        request_huge_mem = int(numa_node["MemTotal"]) - (
+                (int(numa_node["MemTotal"]) - int(numa_node["MemFree"]) + 7200) * 100 / percent)
+        extra_huge_size = request_huge_mem / 2
+        extra_stress_cmd = f"echo {int(extra_huge_size)} > /sys/devices/system/node/node{numa_id}/hugepages/hugepages-2048kB/nr_hugepages"
+        res = node.run({'command': [extra_stress_cmd], 'waitstr': 'root@#>'}).get('stdout')
+        if "error" in res:
+            raise RuntimeError("tuning huge pages failed")
+
+    def add_stress(self, pod: PodResource, percent: float, node_name: str, bind_numa: bool = True) -> None:
+        """添加压力测试
+
+        参数说明：
+            pod: PodResource对象
+            percent: 压力百分比
+            node_name: 节点名称
+            bind_numa: 是否绑定NUMA
+        """
+        self.start_redis_server(node_name, pod.pod_name)
+        if bind_numa:
+            self.add_huge_page_stress(pod.node, pod.numa_affinity, percent)
+        self.stress_redis("numa", pod.pod_name)
+
+    def get_node_matrix_log_path(self, node_name: str) -> str:
+        """获取节点matrix-agent日志路径
+
+        参数说明：
+            node_name: 节点名称
+
+        返回值说明：
+            str: 日志路径
+        """
+        get_name_cmd = f"kubectl get pod -n kube-system -owide | grep kube-matrix-agent | grep {node_name} | awk '{{print $1}}'"
+        matrix_node_name = self.master.run({'command': [get_name_cmd], 'waitstr': '#'}).get('stdout')
+        matrix_node_name = matrix_node_name.replace("root@#>", "").replace("\r\n", "").strip()
+
+        get_uid_cmd = f"kubectl get pod -n kube-system {matrix_node_name} -o go-template='{{{{.metadata.uid}}}}'"
+        matrix_node_uid = self.master.run({'command': [get_uid_cmd], 'waitstr': '#'}).get('stdout')
+        matrix_node_uid = matrix_node_uid.replace("root@#>", "").replace("\r\n", "").strip()
+
+        log_path = f"/var/log/pods/kube-system_{matrix_node_name}_{matrix_node_uid}/kube-matrix-agent/"
+
+        path_Exist = self.node_dict[node_name].doesPathExist(log_path)
+        if not path_Exist:
+            raise RuntimeError("can not get node matrix log path")
+        return log_path
+
+    def get_latest_log_name_list(self, node: Any, log_path: str) -> List[str]:
+        """获取最新的日志文件列表
+
+        参数说明：
+            node: 节点SSH对象
+            log_path: 日志路径
+
+        返回值说明：
+            List[str]: 日志文件名列表
+        """
+        cmd = f"ls -t {log_path}| head -n 2"
+        res = node.run({'command': [cmd]})
+        if res.get("stderr"):
+            logger.error(res.get("stderr"))
+            return []
+        file_list = res.get("stdout", "").split("\r\n")
+        return [f for f in file_list if ".log" in f]
+
+    def get_decision_from_log(self, node: Any, log_path: str, current_time: int,
+                              expect_des: str, log_name: str) -> str:
+        """从日志中获取决策信息
+
+        参数说明：
+            node: 节点SSH对象
+            log_path: 日志路径
+            current_time: 当前时间戳
+            expect_des: 期望的描述关键字
+            log_name: 日志文件名
+
+        返回值说明：
+            str: 决策日志行（未找到返回None）
+        """
+        from datetime import datetime
+        pattern = r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}'
+        cmd_str = f"zgrep -a '{expect_des}' {log_path}{log_name} | tail -n 20"
+        res = node.run({'command': [cmd_str], 'waitstr': '#'})
+        if res['stdout'] is None:
+            return None
+        server = res.get("stdout").replace("root@#>", "")
+        lines = server.split('\n')
+        decisions = []
+        for index in range(0, len(lines) - 1, 1):
+            line = lines[index]
+            match = re.search(pattern, line)
+            if not match:
+                continue
+            log_time = match.group()
+            timestamp = datetime.strptime(log_time, "%Y-%m-%dT%H:%M:%S").timestamp()
+            if timestamp <= current_time or (index + 1) >= len(lines):
+                continue
+            decisions.append(lines[index])
+        formatted_time = datetime.fromtimestamp(current_time).strftime("%Y-%m-%d %H:%M:%S")
+        logger.info(f"{formatted_time}时间点后的日志信息有{decisions}")
+        if not decisions:
+            return None
+        else:
+            return decisions[0]
+
+    def get_matrix_agent_decision(self, timestamp: int, node_name: str, expect_des: str,
+                                  timeout: int = 120) -> bool:
+        """获取matrix-agent决策日志
+
+        参数说明：
+            timestamp: 时间戳
+            node_name: 节点名称
+            expect_des: 期望的描述关键字
+            timeout: 超时时间（秒）
+
+        返回值说明：
+            bool: 是否找到决策日志
+        """
+        start_time = time.time()
+        exec_node = self.node_dict[node_name]
+        matrix_log = self.get_node_matrix_log_path(exec_node.getHostname())
+        while (time.time() - start_time) < timeout:
+            matrix_log_name_list = self.get_latest_log_name_list(exec_node, matrix_log)
+            for matrix_log_name in matrix_log_name_list:
+                decisions = self.get_decision_from_log(exec_node, matrix_log, timestamp, expect_des, matrix_log_name)
+                if decisions:
+                    return True
+            time.sleep(10)
+        return False
+
+    def get_node_borrowing_numa(self, node_name: str) -> float:
+        """获取节点借用的NUMA内存总量
+
+        参数说明：
+            node_name: 节点名称
+
+        返回值说明：
+            float: 借用内存总量（MB）
+        """
+        from libs.modules.ubsvirt.api.client import get_numaInfo
+        numa_infos = get_numaInfo(self.node_dict[node_name])
+        borrowing_mem = 0.0
+        for numa in numa_infos:
+            if numa['name'] in {f'Node {i}' for i in range(self.node_numa_num, self.node_numa_num + 18)}:
+                borrowing_mem = borrowing_mem + float(numa['MemTotal'])
+        return round(borrowing_mem, 2)
+
+    def get_node_borrowing_mem_used(self, node_name: str) -> float:
+        """获取节点已借用内存的使用量
+
+        参数说明：
+            node_name: 节点名称
+
+        返回值说明：
+            float: 已借用内存使用量（MB）
+        """
+        from libs.modules.ubsvirt.api.client import get_numaInfo
+        numa_infos = get_numaInfo(self.node_dict[node_name])
+        used_mem = 0.0
+        for numa in numa_infos:
+            if numa['name'] in {f'Node {i}' for i in range(4, 10)}:
+                used_mem = used_mem + (float(numa['MemTotal']) - float(numa['HugePages_Free']))
+        return round(used_mem, 2)
+
+    def get_node_borrowing_mem_free(self, node_name: str) -> float:
+        """获取节点已借用内存的空闲量
+
+        参数说明：
+            node_name: 节点名称
+
+        返回值说明：
+            float: 已借用内存空闲量（MB）
+        """
+        from libs.modules.ubsvirt.api.client import get_numaInfo
+        numa_infos = get_numaInfo(self.node_dict[node_name])
+        used_mem = 0.0
+        for numa in numa_infos:
+            if numa['name'] in {f'Node {i}' for i in range(4, 10)}:
+                used_mem = used_mem + float(numa['HugePages_Free'])
+        return round(used_mem, 2)
+
+    def get_node_mem_free_total(self, node_name: str) -> float:
+        """获取节点所有本地NUMA的空闲内存总量
+
+        参数说明：
+            node_name: 节点名称
+
+        返回值说明：
+            float: 空闲内存总量（MB）
+        """
+        from libs.modules.ubsvirt.api.client import get_numaInfo
+        numa_infos = get_numaInfo(self.node_dict[node_name])
+        free_mem = 0.0
+        for numa in numa_infos:
+            if numa['name'] in {f'Node {i}' for i in range(0, 4)}:
+                free_mem = free_mem + float(numa['MemFree'])
+        return free_mem
+
+    def check_numa_borrow_size(self, node_name: str, size: float, timeout: int = 120) -> bool:
+        """检查NUMA借用内存大小
+
+        参数说明：
+            node_name: 节点名称
+            size: 期望的借用大小（MB）
+            timeout: 超时时间（秒）
+
+        返回值说明：
+            bool: 是否达到期望的借用大小
+        """
+        wait_time = 0
+        flag = False
+        while wait_time < timeout:
+            borrow_num = self.get_node_borrowing_numa(node_name)
+            if borrow_num >= size:
+                flag = True
+                break
+            wait_time = wait_time + 5
+            time.sleep(5)
+        return flag
+
+    def check_numa_accurate_borrow_size(self, node_name: str, size: float, timeout: int = 120) -> bool:
+        """检查NUMA借用内存准确值
+
+        参数说明：
+            node_name: 节点名称
+            size: 期望的借用大小（MB）
+            timeout: 超时时间（秒）
+
+        返回值说明：
+            bool: 是否达到期望的借用大小
+        """
+        wait_time = 0
+        flag = False
+        while wait_time < timeout:
+            borrow_num = self.get_node_borrowing_numa(node_name)
+            if borrow_num == size:
+                flag = True
+                break
+            wait_time = wait_time + 5
+            time.sleep(5)
+        return flag
+
+    def check_numa_mem_return(self, node_name: str, timeout: int = 120) -> bool:
+        """检查NUMA内存归还
+
+        参数说明：
+            node_name: 节点名称
+            start_time: 开始时间戳
+            timeout: 超时时间（秒）
+
+        返回值说明：
+            bool: 是否归还成功
+        """
+        wait_time = 0
+        while wait_time < timeout:
+            flag1 = self.check_numa_accurate_borrow_size(node_name, 0, timeout=10)
+            if flag1 is True:
+                return True
+            wait_time = wait_time + 5
+            time.sleep(5)
+        return False
+
+    def get_latest_borrow_event(self, node_name: str) -> str:
+        """获取最新的借用事件时间
+
+        参数说明：
+            node_name: 节点名称
+
+        返回值说明：
+            str: 事件时间字符串
+        """
+        borrow_event = f"kubectl get events -A --field-selector involvedObject.name={node_name},reason=EscapeAlarm --sort-by='.metadata.creationTimestamp' | grep 'mem borrow success' |tail -n 1"
+        res = self.master.run({'command': [borrow_event], 'waitstr': '#'})
+        if res.get("stdout"):
+            result = res.get("stdout").split("root@#>")[0]
+            if node_name in result:
+                parts = result.split()
+                time_field = parts[1]
+                logger.info(f"time field is {time_field}")
+                return time_field
+        return ""
+
+    def get_latest_return_event(self, node_name: str) -> str:
+        """获取最新的归还事件时间
+
+        参数说明：
+            node_name: 节点名称
+
+        返回值说明：
+            str: 事件时间字符串
+        """
+        borrow_event = f"kubectl get events -A --field-selector involvedObject.name={node_name},reason=MemReturnAlarm --sort-by='.metadata.creationTimestamp' | grep 'mem return success' |tail -n 1"
+        res = self.master.run({'command': [borrow_event], 'waitstr': '#'})
+        if res.get("stdout"):
+            result = res.get("stdout").split("root@#>")[0]
+            if node_name in result:
+                parts = result.split()
+                time_field = parts[1]
+                logger.info(f"time field is {time_field}")
+                return time_field
+        return ""
+
+    def to_seconds(self, time_str: str) -> int:
+        """将Kubernetes事件时间转换为秒
+
+        参数说明：
+            time_str: 时间字符串（如2m30s）
+
+        返回值说明：
+            int: 秒数
+        """
+        if 'm' in time_str:
+            parts = re.split('m', time_str)
+            minutes = int(parts[0])
+            seconds = int(parts[1].rstrip('s')) if 's' in parts[1] else 0
+            logger.info(f"time to second is {minutes * 60 + seconds}")
+            return minutes * 60 + seconds
+        else:
+            return int(time_str.rstrip('s'))
+
+    def set_watermark(self, return_line: int, first_line: int, second_line: int) -> bool:
+        """设置内存借用水线阈值
+
+        参数说明：
+            return_line: 归还水线（百分比）
+            first_line: 第一水线（百分比）
+            second_line: 第二水线（百分比）
+
+        返回值说明：
+            bool: 是否设置成功
+
+        示例：
+            set_watermark(70, 85, 90) 表示：
+            - 归还水线：70%
+            - 第一借用水线：85%
+            - 第二借用水线：90%
+        """
+        cmd = (
+            f"kubectl patch cm -n kube-system watermark-config "
+            f"--type merge "
+            f"-p '{{\"data\":{{\"firstLine\":\"{first_line}\","
+            f"\"returnLine\":\"{return_line}\","
+            f"\"secondLine\":\"{second_line}\"}}}}'"
+        )
+        res = self.master.run({'command': [cmd], 'waitstr': '#'})
+        if res.get("stdout"):
+            result = res.get("stdout").split("root@#>")[0]
+            if "configmap/watermark-config patched" in result:
+                logger.info(f"水线设置成功: return_line={return_line}, first_line={first_line}, second_line={second_line}")
+                return True
+        logger.error("水线设置失败")
+        return False
+
+    def config_hugepage_with_mem_hugepage(self, node_name: str, numa_num: int, mem_reserved: float) -> None:
+        """配置大页与预留内存
+
+        参数说明：
+            node_name: 节点名称
+            numa_num: NUMA编号
+            mem_reserved: 需要预留的内存大小（MB）
+        """
+        numa_name = f"Node {numa_num}"
+        numa_node_for_huagepage = f"node{numa_num}"
+        self.change_hugepage(node_name, numa_node_for_huagepage, 0)
+        mem_free = self.get_node_numa_free(node_name, numa_name)
+        mem_hugepage = mem_free - mem_reserved
+        hugepage_count = int(mem_hugepage / 2)
+        self.change_hugepage(node_name, numa_node_for_huagepage, hugepage_count)
+
+    def set_node_label(self, bind_numa: bool = True) -> None:
+        """设置节点标签
+
+        参数说明：
+            bind_numa: 是否绑定NUMA策略（True为numa，False为node）
+        """
+        self.master.run({'command': [f"kubectl label nodes --all remote-mem-allocation-ratio=25"]})
+        if bind_numa:
+            self.master.run({'command': [f"kubectl label nodes --all watermark-escape-strategy=numa --overwrite"]})
+        else:
+            self.master.run({'command': [f"kubectl label nodes --all watermark-escape-strategy=node --overwrite"]})
+
+    def create_pod(self, pod_yaml: str) -> PodResource:
+        """创建Pod并返回PodResource对象
+
+        参数说明：
+            pod_yaml: Pod yaml文件路径
+
+        返回值说明：
+            PodResource: Pod资源对象
+        """
+        tmp_pod_file = "/tmp/pod.yaml"
+        with open(pod_yaml, encoding='utf-8') as fd:
+            data = fd.read()
+
+        self.upload_file("master", {"source_file": pod_yaml, "destination_file": tmp_pod_file})
+
+        lines = data.split('\n')
+        pod_name = ""
+        name_space = "kube-system"
+        node_name = ""
+        container_name = ""
+
+        for line in lines:
+            line = line.strip()
+            if line.startswith("name:"):
+                if pod_name == "":
+                    pod_name = line.split(":")[1].strip()
+            elif line.startswith("namespace:"):
+                name_space = line.split(":")[1].strip()
+            elif line.startswith("nodeName:"):
+                node_name = line.split(":")[1].strip()
+
+        if container_name == "":
+            container_name = pod_name
+
+        pod_resource = PodResource(
+            pod_name=pod_name,
+            name_space=name_space,
+            node=self.node_dict.get(node_name),
+            container=container_name
+        )
+
+        create_cmd = f"kubectl apply -f {tmp_pod_file}"
+        self.master.run({'command': [create_cmd], 'waitstr': '#'})
+
+        self.master.run({'command': [f"rm -f {tmp_pod_file}"], 'waitstr': '#'})
+
+        search_cmd = f"kubectl get pod -n {name_space} | grep {pod_name} | awk '{{print $3}}'"
+        wait_time = 0
+        flag = False
+        while wait_time < 60:
+            res = self.master.run({'command': [search_cmd], 'waitstr': '#'}).get('stdout')
+            if "Running" in res:
+                flag = True
+                break
+            wait_time = wait_time + 5
+            time.sleep(5)
+        self.assertTrue(flag, "pod create failed")
+
+        self.get_node_container_numa_affinity(pod_resource)
+        self.pod_list.append(pod_resource)
+
+        return pod_resource
+
+    def delete_pod(self, pod: PodResource) -> None:
+        """删除Pod
+
+        参数说明：
+            pod: PodResource对象
+        """
+        search_cmd = f"kubectl get pod -n {pod.name_space} {pod.pod_name} -owide"
+        res = self.master.run({'command': [search_cmd], 'waitstr': '#'}).get("stdout")
+        self.assertNotIn("not found", res, "can not find pod in kube")
+
+        del_cmd = f"kubectl delete pod -n {pod.name_space} {pod.pod_name}"
+        self.master.run({'command': [del_cmd], 'waitstr': '#'})
+
+    def clear_test_pod(self) -> None:
+        """清理所有测试Pod"""
+        for pod in self.pod_list[:]:
+            self.delete_pod(pod)
+            search_cmd = f"kubectl get pod -n {pod.name_space} {pod.pod_name} -owide"
+            self.master.run({'command': [search_cmd], 'waitstr': '#'})
+            self.pod_list.remove(pod)
+
+    def get_node_container_numa_affinity(self, pod: PodResource) -> None:
+        """获取Pod容器的NUMA亲和性
+
+        参数说明：
+            pod: PodResource对象
+        """
+        uid_cmd = f"kubectl get pod -n {pod.name_space} {pod.pod_name} -o go-template='{{{{.metadata.uid}}}}'"
+        test_node_uid = self.master.run({'command': [uid_cmd], 'waitstr': '#'}).get('stdout').replace("root@#>", "")
+
+        res = pod.node.run({'command': ['cat /root/kubernetes/var/lib/kubelet/memory_manager_state']}).get(
+            "stdout").replace("root@#>", "")
+        if pod.container_name not in res:
+            logger.info("can not find container in mem manager state")
+            pod.numa_affinity = 0
+            return
+
+        data = json.loads(res)
+        numa_affinity = data['entries'][test_node_uid][pod.container_name][0]['numaAffinity'][0]
+        logger.info(f"pod numa affinity is {numa_affinity}")
+        pod.numa_affinity = numa_affinity
+
+    def get_latest_borrow_failed_event(self, node_name: str) -> str:
+        """获取最新的借用失败事件
+
+        参数说明：
+            node_name: 节点名称
+
+        返回值说明：
+            str: 时间字段
+        """
+        borrow_event = (
+            f"kubectl get events -A  --field-selector involvedObject.name={node_name},reason=EscapeAlarm  --sort-by='.metadata.creationTimestamp'  | grep 'mem borrow failed' | tail -n 1")
+        res = self.master.run({'command': [borrow_event], 'waitstr': '#'})
+        if res.get("stdout"):
+            result = res.get("stdout").split("root@#>")[0]
+            if node_name in result:
+                parts = result.split()
+                time_field = parts[1]
+                logger.info(f"time field is {time_field}")
+                return time_field
+        return ""
+
