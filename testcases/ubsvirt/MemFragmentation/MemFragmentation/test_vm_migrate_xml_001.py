@@ -52,7 +52,7 @@ class TestVmMigrateXml001(VMxmlBaseCase):
         self.logStep("P4、节点1和节点2的numa0分别配置5G大页内存")
         self.distribute_huge_page(self.master, 2560, 0)
         self.distribute_huge_page(self.agent, 2560, 0)
-        self.dst_ip = getattr(self.agent, 'localIP', '') or getattr(self.agent, 'ip', '')
+        self.dst_ip = getattr(self.agent, 'ip', '')
         
         self.logStep("S1、使用xml在节点1创建虚机")
         vm_created = self.create_vm_from_xml(
