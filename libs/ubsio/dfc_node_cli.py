@@ -126,7 +126,7 @@ class DFCNodeCLI:
             docker_name: Docker container name (optional)
         """
         if not docker_name:
-            cmd= "ps -ef | grep python3 | grep -v -E 'pytest|firewalld|tuned|grep' | awk '{print $2}' | xargs -i -t kill -9 {}"
+            cmd= f"ps -ef | grep {process_name} | grep -v -E 'pytest|firewalld|tuned|grep'" " | awk '{print $2}' | xargs -i -t kill -9 {}"
         else:
             pkill_cmd = f"pkill -9 -f {process_name}"
             cmd = f"docker exec {docker_name} bash -c '{pkill_cmd}'"
