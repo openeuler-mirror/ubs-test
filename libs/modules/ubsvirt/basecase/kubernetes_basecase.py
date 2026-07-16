@@ -1,4 +1,4 @@
-﻿#!/usr/local/python
+#!/usr/local/python
 # -*- coding: utf-8 -*-
 """KubernetesBaseCase - Kubernetes容器共享内存测试用例基类。
 Pytest适配: KubernetesBaseCase(UBSVirtBaseCase) - 使用fixture注入
@@ -1219,7 +1219,7 @@ class KubernetesBaseCase(UBSVirtBaseCase):
                 (int(numa_node["MemTotal"]) - int(numa_node["MemFree"]) + 7200) * 100 / percent)
         extra_huge_size = request_huge_mem / 2
         extra_stress_cmd = f"echo {int(extra_huge_size)} > /sys/devices/system/node/node{numa_id}/hugepages/hugepages-2048kB/nr_hugepages"
-        res = node.run({'command': [extra_stress_cmd], 'waitstr': 'root@#>'}).get('stdout')
+        res = node.run({'command': [extra_stress_cmd], 'waitstr': 'root@#>'}).get('stdout') or ""
         if "error" in res:
             raise RuntimeError("tuning huge pages failed")
 
