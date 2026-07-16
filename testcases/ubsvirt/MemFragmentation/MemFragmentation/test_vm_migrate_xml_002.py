@@ -1,8 +1,3 @@
-"""Migrated from legacy: test_vm_migrate_xml_002
-
-使用xml创建8G虚拟机multicopy热迁移
-"""
-
 import time
 import pytest
 
@@ -52,7 +47,7 @@ class TestVmMigrateXml002(VMxmlBaseCase):
         self.logStep("P4、节点1和节点2的numa0分别配置10G大页内存")
         self.distribute_huge_page(self.master, 5120, 0)
         self.distribute_huge_page(self.agent, 5120, 0)
-        self.dst_ip = getattr(self.agent, 'localIP', '') or getattr(self.agent, 'ip', '')
+        self.dst_ip = getattr(self.agent, 'ip', '')
         
         self.logStep("S1、使用xml在节点1创建虚机")
         vm_created = self.create_vm_from_xml(

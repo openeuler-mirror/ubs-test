@@ -1,0 +1,15 @@
+{
+  "nodes":[{
+    "name": "node1",
+    "role": "master",
+    "hugePage": 10496
+  }],
+  "vms":[{
+    "name": "vm_01",
+    "image": "openEuler-22.03-everything",
+    "ram": 20480,
+    "node": "node1",
+    "removable": false,
+    "cpu": 4
+  }]
+}
