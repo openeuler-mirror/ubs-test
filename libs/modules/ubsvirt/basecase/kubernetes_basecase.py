@@ -1221,7 +1221,8 @@ class KubernetesBaseCase(UBSVirtBaseCase):
         extra_stress_cmd = f"echo {int(extra_huge_size)} > /sys/devices/system/node/node{numa_id}/hugepages/hugepages-2048kB/nr_hugepages"
         res = node.run({'command': [extra_stress_cmd], 'waitstr': 'root@#>'}).get('stdout')
         if "error" in res:
-            raise RuntimeError("tuning huge pages failed")
+        res = node.run({'command': [extra_stress_cmd], 'waitstr': 'root@#>'}).get('stdout') or ""
+        if "error" in res:
 
     def add_stress(self, pod: PodResource, percent: float, node_name: str, bind_numa: bool = True) -> None:
         """添加压力测试
