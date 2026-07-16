@@ -50,7 +50,7 @@ spec:
         type: File
     - name: ko
       hostPath:
-        path: /tmp/memborrow/shm_tool
+        path: /tmp/memborrow/shm_demo
         type: File
     - name: shared-memory
       csi:
@@ -85,7 +85,7 @@ spec:
         - name: mxm-agent-ipc-server
           mountPath: /run/matrix/memory/
         - name: ko
-          mountPath: /ko/shm_tool
+          mountPath: /ko/shm_demo
         - name: shared-memory
           mountPath: /dev
           mountPropagation: "HostToContainer"
