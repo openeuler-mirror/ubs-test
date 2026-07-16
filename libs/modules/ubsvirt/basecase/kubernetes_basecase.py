@@ -982,7 +982,7 @@ class KubernetesBaseCase(UBSVirtBaseCase):
         wait_time = 0
         flag = False
         while wait_time < timeout:
-            res = self.master.run({'command': [search_cmd], 'waitstr': '#'}).get('stdout')
+            res = self.master.run({'command': [search_cmd], 'waitstr': '#'}).get('stdout') or ""
             if status in res:
                 flag = True
                 break
@@ -1128,7 +1128,7 @@ class KubernetesBaseCase(UBSVirtBaseCase):
         """
         for node_name in node_list:
             node = self.node_dict[node_name]
-            for numa_name in [f'node{i}' for i in range(0, 4)]:
+            for numa_name in [f'node{i}' for i in range(0, self.get_node_numa_num(node))]:
                 self.change_hugepage(node_name, numa_name, 0)
                 time.sleep(2)
 
@@ -1199,7 +1199,7 @@ class KubernetesBaseCase(UBSVirtBaseCase):
         ssh_pod.run({'command': [server_kill_cmd], "timeout": 30})
 
     def add_huge_page_stress(self, node: Any, numa_id: int, percent: float) -> None:
-        """添加大页压力
+        """添加大页内存
 
         参数说明：
             node: 节点SSH对象
@@ -1213,6 +1213,8 @@ class KubernetesBaseCase(UBSVirtBaseCase):
         if not numa_node:
             raise ValueError(f"Node {numa_id} not found")
 
+        if percent <= 0:
+            raise ValueError("percent must be greater than 0")
         request_huge_mem = int(numa_node["MemTotal"]) - (
                 (int(numa_node["MemTotal"]) - int(numa_node["MemFree"]) + 7200) * 100 / percent)
         extra_huge_size = request_huge_mem / 2
@@ -1295,7 +1297,7 @@ class KubernetesBaseCase(UBSVirtBaseCase):
         pattern = r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}'
         cmd_str = f"zgrep -a '{expect_des}' {log_path}{log_name} | tail -n 20"
         res = node.run({'command': [cmd_str], 'waitstr': '#'})
-        if res['stdout'] is None:
+        if res.get("stdout") is None:
             return None
         server = res.get("stdout").replace("root@#>", "")
         lines = server.split('\n')
@@ -1372,7 +1374,7 @@ class KubernetesBaseCase(UBSVirtBaseCase):
         numa_infos = get_numaInfo(self.node_dict[node_name])
         used_mem = 0.0
         for numa in numa_infos:
-            if numa['name'] in {f'Node {i}' for i in range(4, 10)}:
+            if numa['name'] in {f'Node {i}' for i in range(self.node_numa_num, self.node_numa_num + 18)}:
                 used_mem = used_mem + (float(numa['MemTotal']) - float(numa['HugePages_Free']))
         return round(used_mem, 2)
 
@@ -1577,6 +1579,9 @@ class KubernetesBaseCase(UBSVirtBaseCase):
         self.change_hugepage(node_name, numa_node_for_huagepage, 0)
         mem_free = self.get_node_numa_free(node_name, numa_name)
         mem_hugepage = mem_free - mem_reserved
+        if mem_hugepage <= 0:
+            logger.warning(f"mem_hugepage <= 0 for {node_name} numa{numa_num}, skip hugepage config")
+            return
         hugepage_count = int(mem_hugepage / 2)
         self.change_hugepage(node_name, numa_node_for_huagepage, hugepage_count)
 
