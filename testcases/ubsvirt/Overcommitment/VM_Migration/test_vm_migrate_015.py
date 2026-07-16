@@ -1,12 +1,12 @@
 import time
-import pytest
 
 from libs.modules.ubsvirt.api import client
 from libs.modules.ubsvirt.basecase.openstack_basecase import OpenStackBaseCase
 from libs.modules.ubsvirt.model.model import VMResource
+import libs.modules.ubsvirt.common.file_common as file_aw
+import libs.modules.ubsvirt.common.service_common as service_aw
 
 
-@pytest.mark.hook("libs.modules.ubsvirt.hook.migrate_hook.MigrateHook")
 class TestVmMigrate015(OpenStackBaseCase):
     """
     CaseId:
@@ -29,7 +29,25 @@ class TestVmMigrate015(OpenStackBaseCase):
         E1.环境中VM1、VM2存在串行迁移操作
     """
 
+    plugin_vm_file_path = f'/etc/ubse/plugins/plugin_virt_agent.conf'
+    plugin_vm_file_path_bak = f'{plugin_vm_file_path}.bak'
+
     def setup_method(self):
+        self.logStep("P3.修改high.watermark为70，low.watermark为60")
+        self.logger.info("备份配置文件")
+        for node in self.ubse_node_list:
+            file_aw.copy_file(node, self.plugin_vm_file_path, self.plugin_vm_file_path_bak)
+        self.logger.info("修改high.watermark,low.watermark配置")
+        change_res1 = file_aw.change_file(self.ubse_node_list, 'high.watermark', '70', self.plugin_vm_file_path)
+        self.assertTrue(change_res1, '修改high.watermark失败')
+
+        change_res2 = file_aw.change_file(self.ubse_node_list, 'low.watermark', '60', self.plugin_vm_file_path)
+        self.assertTrue(change_res2, '修改low.watermark失败')
+
+        for node in self.ubse_node_list:
+            service_aw.exec_service(node, 'restart', 'ubse')
+        self.wait_ubse_status(self.master, 900, 10)
+
         self.ubs_restart_flag = False
 
     def teardown_method(self):
@@ -41,6 +59,14 @@ class TestVmMigrate015(OpenStackBaseCase):
         for node_name in self.node_dict:
             node = self.node_dict[node_name]
             self.clear_huge_pages(node.ssh_node)
+
+        self.logger.info("还原配置文件")
+        for node in self.ubse_node_list:
+            file_aw.mv_file(node, self.plugin_vm_file_path_bak, self.plugin_vm_file_path)
+
+        for node in self.ubse_node_list:
+            service_aw.exec_service(node, 'restart', 'ubse')
+        self.wait_ubse_status(self.master, 900, 10)
 
     def test_vm_migrate_015(self, get_topo_path):
         self.logInfo("创建虚机")
