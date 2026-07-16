@@ -1,6 +1,3 @@
-import time
-from datetime import datetime
-
 from libs.modules.ubsvirt.api import client
 from libs.modules.ubsvirt.basecase.openstack_basecase import OpenStackBaseCase
 
