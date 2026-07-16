@@ -30,12 +30,6 @@ class TestVmMigrate015(OpenStackBaseCase):
     """
 
     def setup_method(self):
-        self.logStep("P1.环境中存在2个及以上节点")
-        self.logStep("P2.OpenStack/ubse功能正常无异常")
-        self.logStep("P3.修改high.watermark为70，low.watermark为60")
-        self.logInfo("hook里已执行")
-        self.logStep("P4.Node1上numa0配置8G可用大页内存,numa1配置4G可用大页")
-        self.logStep("P5.已完成内存规格4G虚拟机VM1、8G虚拟机VM2的创建")
         self.ubs_restart_flag = False
 
     def teardown_method(self):

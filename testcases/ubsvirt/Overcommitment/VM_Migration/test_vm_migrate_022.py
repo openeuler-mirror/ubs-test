@@ -24,10 +24,7 @@ class TestVmMigrate022(OpenStackBaseCase):
     """
 
     def setup_method(self):
-        self.logStep("P1.环境中存在2个及以上节点")
-        self.logStep("P2.OpenStack/ubse功能正常无异常")
-        self.logStep("P3.Node1上配置4G，Node2配置6G可用大页内存")
-        self.logStep("P4.已完成内存规格4G虚拟机VM1的创建")
+        pass
 
     def teardown_method(self):
         self.clear_server()
