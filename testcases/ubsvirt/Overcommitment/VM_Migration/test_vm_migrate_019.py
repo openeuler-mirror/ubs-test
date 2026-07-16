@@ -36,6 +36,7 @@ class TestVmMigrate019(OpenStackBaseCase):
         self.logStep("P3.Node1上配置8G可用大页内存，Node2的numa0配置可用4G内存")
         self.logStep("P4.已完成内存规格8G虚拟机VM1的创建")
         self.agent = self.agent_list[0]
+        self.ubs_restart_flag = False
 
     def teardown_method(self):
         if self.ubs_restart_flag:
@@ -78,7 +79,7 @@ class TestVmMigrate019(OpenStackBaseCase):
         self.logInfo("启动加压节点ubs scheduler agent")
         start_res = self.start_ubs_scheduler_agent(self.master)
         self.assertTrue(start_res, '启动ubs scheduler agent进程失败')
-        self.ubs_restart_flag = True
+        self.ubs_restart_flag = False
 
         escape_decision = self.get_decision(timestamp=start_time, ubs_scheduler_decision=True)
         self.assertEqual(escape_decision, "True", "MS action type is not migrate")

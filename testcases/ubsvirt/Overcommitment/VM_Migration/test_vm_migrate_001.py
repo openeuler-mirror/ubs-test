@@ -74,6 +74,8 @@ class TestVmMigrate001(OpenStackBaseCase):
                           {"status": "ACTIVE", "OS-EXT-SRV-ATTR:host": hostname})
 
         self.logInfo("E3.触发虚机迁移，虚机被迁移至Node2，此时虚机状态正常（状态为running，可以正常登录该虚机，虚机内部压力依然存在）")
+        if not server_detail:
+            self.assertTrue(False, "获取test_vm_migrate_001信息失败")
         self.assertEqual(server_detail["OS-EXT-SRV-ATTR:host"], hostname)
         timestamp2 = client.get_date_timestamp(self.controller)
         log_time2 = datetime.fromtimestamp(timestamp2).strftime("%Y-%m-%d %H:%M:%S")

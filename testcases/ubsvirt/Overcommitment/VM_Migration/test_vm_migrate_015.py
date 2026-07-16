@@ -36,6 +36,7 @@ class TestVmMigrate015(OpenStackBaseCase):
         self.logInfo("hook里已执行")
         self.logStep("P4.Node1上numa0配置8G可用大页内存,numa1配置4G可用大页")
         self.logStep("P5.已完成内存规格4G虚拟机VM1、8G虚拟机VM2的创建")
+        self.ubs_restart_flag = False
 
     def teardown_method(self):
         if self.ubs_restart_flag:
