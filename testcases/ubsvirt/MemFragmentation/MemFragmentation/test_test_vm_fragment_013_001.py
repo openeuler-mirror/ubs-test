@@ -1,4 +1,5 @@
 import pytest
+
 from libs.modules.ubsvirt.basecase.openstack_basecase import OpenStackBaseCase
 from libs.modules.ubsvirt.model.model import VMResource
 
