@@ -1,9 +1,3 @@
-"""
-Migrated from legacy: test_vm_fragment_031
-
-验证不同numa上本地资源不足匀一匀创建虚机
-"""
-
 import pytest
 
 from libs.modules.ubsvirt.basecase.openstack_basecase import OpenStackBaseCase

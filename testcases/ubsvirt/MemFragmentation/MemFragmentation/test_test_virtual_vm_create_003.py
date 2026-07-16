@@ -1,7 +1,3 @@
-"""
-Migrated from legacy: test_virtual_vm_create_003
-"""
-
 from libs.modules.ubsvirt.model.model import VMResource
 from libs.modules.ubsvirt.basecase.openstack_basecase import OpenStackBaseCase
 

@@ -1,7 +1,3 @@
-"""
-Migrated from legacy: test_vm_fragment_025
-"""
-
 import time
 import pytest
 

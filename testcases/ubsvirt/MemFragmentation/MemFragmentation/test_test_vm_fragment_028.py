@@ -1,9 +1,3 @@
-"""
-Migrated from legacy: test_vm_fragment_028
-
-验证UBS Scheduler服务启停和进程拉起功能
-"""
-
 import time
 import pytest
 

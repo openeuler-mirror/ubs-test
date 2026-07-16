@@ -1,8 +1,3 @@
-"""Migrated from legacy: test_vm_migrate_xml_002
-
-使用xml创建8G虚拟机multicopy热迁移
-"""
-
 import time
 import pytest
 

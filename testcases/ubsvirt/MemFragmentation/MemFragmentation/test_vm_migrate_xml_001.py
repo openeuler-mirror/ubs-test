@@ -1,8 +1,3 @@
-"""Migrated from legacy: test_vm_migrate_xml_001
-
-使用xml创建4G虚拟机onecopy热迁移
-"""
-
 import time
 import pytest
 
