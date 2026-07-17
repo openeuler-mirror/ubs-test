@@ -128,6 +128,7 @@ class TestContainerMemBorrow042(KubernetesBaseCase):
 
         self.logStep("S4.在master节点使用kubectl get event查询借用事件，使用numastat -vm查询借用内存")
         res = self.master.run({'command': ['kubectl get event -A | grep "mem borrow success"'], 'waitstr': '#'}).get("stdout")
+        self.assertTrue(len(res) > 0, "res is None")
         res = res.replace("root@#>", "")
 
         self.logStep("E4.查询到一次借用事件成功")
