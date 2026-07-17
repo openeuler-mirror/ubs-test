@@ -146,7 +146,7 @@ class TestCase:
         if not condition:
             self.logError(f"Assertion failed: {message}")
             raise AssertionError(message)
-        self.logInfo(f"Assertion passed: {message}")
+        self.logInfo(f"Assertion passed")
         
     def assertFalse(self, condition: bool, message: str = "") -> None:
         """Assert condition is False.
