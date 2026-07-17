@@ -18,7 +18,7 @@ class TestVmMigrate016(OpenStackBaseCase):
         P3.Node1上配置8G可用大页内存，Node2的numa0配置可用4G内存
         P4.已完成内存规格8G虚拟机VM1的创建
     TestStep:
-        S1.登录VM1,对VM1加压使得内存超过第二水na位线92%，查看水位线告警、逃生策略
+        S1.登录VM1,对VM1加压使得内存超过第二水位线92%，查看水位线告警、逃生策略
         S2.配置node3的numa0可用大页内存为10G
         S3.继续加压，对VM1加压使得内存超过第一水位线85%，查看水位线告警、逃生策略
     ExpectedResult:
@@ -87,4 +87,4 @@ class TestVmMigrate016(OpenStackBaseCase):
         self.logStep("E3.存在水位线告警，预期虚拟机迁移成功")
         vm_migrate_result = self.check_vm_migrate_to_dest_node(self.controller, self.vm_list[0].name,
                                                                self.agent_list[1].getHostname(), 8000)
-        self.assertEqual(vm_migrate_result, True, "VM test_vm_migrate_019_01 migrate failed")
+        self.assertEqual(vm_migrate_result, True, "VM test_vm_migrate_016_01 migrate failed")

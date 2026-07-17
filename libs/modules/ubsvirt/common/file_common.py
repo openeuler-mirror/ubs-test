@@ -1,6 +1,19 @@
+import re
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+def escape_sed_pattern(s: str) -> str:
+    """转义 sed 正则模式内所有特殊元字符 . \ / [ ] ( ) * + ? ^ $"""
+    return re.sub(r'([\.\\/\[\]()*+?^$])', r'\\\1', s)
+
+
+def escape_sed_repl(s: str) -> str:
+    """转义 sed 替换段特殊字符 & 和分隔符 #"""
+    s = s.replace("&", r"\&")
+    s = s.replace("#", r"\#")
+    return s
 
 
 def change_file(nodes, key, value, file_path):
@@ -13,14 +26,26 @@ def change_file(nodes, key, value, file_path):
         file_path：文件路径
     返回值：True/False
     """
-    for node in nodes:
-        node.run({'command': [f"sed -i 's/{key}[[:space:]]*=[[:space:]]*[^ ]*/{key}={value}/g' {file_path}"]})
+    # 转义正则特殊字符
+    esc_key = escape_sed_pattern(key)
+    esc_val = escape_sed_repl(str(value))
 
-        res = node.run({'command': [f"grep -E '^{key}=' {file_path}"]}).get('stdout')
-        if res is None:
+    for node in nodes:
+        # 使用 # 作为 sed 分隔符，避免路径/值中 / 冲突
+        sed_cmd = (
+            f"sed -i 's#{esc_key}[[:space:]]*=[[:space:]]*[^ ]*#{esc_key}={esc_val}#g' {file_path}"
+        )
+        node.run({'command': [sed_cmd]})
+
+        # grep 同样转义 key，防止正则误匹配
+        grep_cmd = f"grep -E '^{esc_key}=' {file_path}"
+        res = node.run({'command': [grep_cmd]}).get('stdout')
+        if res is None or len(res.strip()) == 0:
             return False
+
+        # 提取实际值对比
         res = res.split('=')[1].split()[0].replace('"', "'")
-        if res != value:
+        if res != str(value):
             return False
     return True
 

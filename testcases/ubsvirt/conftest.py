@@ -7,10 +7,8 @@ pytest fixture discovery mechanism:
   pytest searches conftest.py files from test directory upward to root.
   This top-level conftest.py makes libs/core/fixtures.py fixtures available globally.
 """
-import importlib
 import logging
 from pathlib import Path
-from typing import Any, Dict, Set
 
 import pytest
 
@@ -19,9 +17,6 @@ from libs.modules.ubsvirt.basecase.vmxml_basecase import inject_vmxml_basecase_d
 
 
 logger = logging.getLogger(__name__)
-
-_hooks_collected: Set[str] = set()
-_hooks_executed: Dict[str, Any] = {}
 
 TOPO_BASE_PATH = Path(__file__).parent.parent.parent / "resource" / "ubsvirt" / "topo"
 XML_BASE_PATH = Path(__file__).parent.parent.parent / "resource" / "ubsvirt" / "xml"
