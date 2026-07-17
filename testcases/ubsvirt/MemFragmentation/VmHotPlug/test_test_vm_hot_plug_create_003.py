@@ -1,16 +1,10 @@
-"""
-Migrated from legacy: test_vm_hot_plug_create_003
-"""
-
-import os
 import time
-from typing import Any, Dict, List
 
 from pathlib import Path
 
 from libs.modules.ubsvirt.basecase.vmhotplug_basecase import VMHotPlugBaseCase
 from libs.modules.ubsvirt.api import client
-from libs.utils.logger_compat import Log
+
 
 XML_BASE_PATH = Path(__file__).parent.parent.parent.parent.parent / "resource" / "ubsvirt" / "xml"
 
@@ -20,7 +14,7 @@ class TestVmHotPlugCreate003(VMHotPlugBaseCase):
     CaseNumber:
         test_vm_hot_plug_create_003
     RunLevel:
-        Level T
+        Level 0
     EnvType:
 
     CaseName:
