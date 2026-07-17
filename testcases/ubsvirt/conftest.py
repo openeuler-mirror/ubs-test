@@ -16,6 +16,7 @@ import pytest
 
 from libs.modules.ubsvirt.basecase.openstack_basecase import inject_openstack_basecase_dependencies as inject_virtualization_openstack_basecase_dependencies
 from libs.modules.ubsvirt.basecase.vmxml_basecase import inject_vmxml_basecase_dependencies
+from libs.modules.ubsvirt.basecase.vmhotplug_basecase import inject_vmhotplug_basecase_dependencies
 
 
 logger = logging.getLogger(__name__)
