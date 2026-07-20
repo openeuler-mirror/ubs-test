@@ -129,7 +129,7 @@ def create_directory_and_upload(
             print("Files uploaded")
     """
     if not source_base:
-        source_base = str(Path(__file__).parent.parent.parent.parent.parent).replace("\\", "/")
+        source_base = str(Path(__file__).parent.parent.parent).replace("\\", "/")
 
     success = True
     for node in nodes:
