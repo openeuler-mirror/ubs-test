@@ -266,18 +266,6 @@ class VMHotPlugBaseCase(UBSVirtBaseCase):
                 if not result:
                     raise RuntimeError("set hugePage fail")
 
-    def get_node_numa(self) -> Dict[str, Any]:
-        """获取所有节点的NUMA信息.
-
-        Returns:
-            节点NUMA信息字典
-        """
-        result = {}
-        for node in self.node_dict:
-            numa_info = client.get_numaInfo(node.ssh_node)
-            result[node.name] = numa_info
-        return result
-
     def get_node_borrowing_numa(self, node: Any) -> float:
         """获取节点的借用NUMA内存.
 
@@ -366,38 +354,6 @@ class VMHotPlugBaseCase(UBSVirtBaseCase):
                 return
             time.sleep(wait_interval)
         self.assertTrue(False, "进程重启后节点状态未就绪")
-
-    def wait_vm_mem_match_expect(
-        self,
-        vm_ssh: Any,
-        operate: str,
-        value: int,
-        timeout: int = 1800,
-        wait_time: int = 30,
-    ) -> bool:
-        """等待VM内存匹配预期值.
-
-        Args:
-            vm_ssh: VM SSH节点
-            operate: 操作类型（"greater" 或 "less"）
-            value: 预期值
-            timeout: 超时时间（秒）
-            wait_time: 等待间隔（秒）
-
-        Returns:
-            匹配成功返回True，超时返回False
-        """
-        start_time = time.time()
-        while (time.time() - start_time) < timeout:
-            vm_mem = client.get_memory(vm_ssh).get("used")
-            if not vm_mem:
-                continue
-            elif operate == "greater" and int(vm_mem) > value:
-                return True
-            elif operate == "less" and int(vm_mem) < value:
-                return True
-            time.sleep(wait_time)
-        return False
 
     def wait_vm_used_mem_match_expect(
         self,

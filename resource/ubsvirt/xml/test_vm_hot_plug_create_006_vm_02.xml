@@ -1,0 +1,68 @@
+<domain type="kvm">
+  <name>vm_02</name>
+  <memory unit="GiB">4</memory>
+  <currentMemory unit='GiB'>4</currentMemory>
+  <maxMemory slots='16' unit='GiB'>100</maxMemory>
+    <memtune>
+      <hard_limit unit='GiB'>100</hard_limit>
+  </memtune>
+  <memoryBacking>
+    <hugepages>
+      <page size='2' unit='MiB' nodeset='0'/>
+    </hugepages>
+  </memoryBacking>
+  <numatune>
+    <memory mode='strict' nodeset='0'/>
+    <memnode cellid='0' mode='strict' nodeset='0'/>
+  </numatune>
+
+  <vcpu placement="static">2</vcpu>
+  <cputune>
+    <vcpupin vcpu="0" cpuset="2" />
+    <vcpupin vcpu="1" cpuset="3" />
+    <emulatorpin cpuset="0-3"/>
+  </cputune>
+  <os>
+    <type arch="aarch64" machine="virt">hvm</type>
+    <loader readonly="yes" type="pflash">/usr/share/edk2/aarch64/QEMU_EFI-pflash.raw</loader>
+    <boot dev="hd" />
+  </os>
+  <features>
+    <acpi />
+    <gic version="3" />
+  </features>
+  <cpu mode="host-passthrough" check="none">
+    <topology sockets="1" cores="2" threads="1"/>
+    <numa>
+      <cell id='0' cpus='0-1' memory='4' unit='GiB' memAccess='shared'/>
+    </numa>
+  </cpu>
+  <clock offset="utc">
+  </clock>
+  <on_poweroff>destroy</on_poweroff>
+  <on_reboot>restart</on_reboot>
+  <on_crash>restart</on_crash>
+  <devices>
+  <controller type='scsi' index='0' model='virtio-scsi'>
+      <alias name='scsi0'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x04' function='0x0'/>
+  </controller>
+    <emulator>/usr/bin/qemu-kvm</emulator>
+     <disk type="file" device="disk">
+      <driver name="qemu" type="qcow2"  cache='none' io='native'/>
+      <source file="/opt/install/tmp/openstack/images/openEuler-22.03-SP2-aarch64-everything-redis-Performance1.qcow2" />
+      <target dev="sda" bus="scsi" />
+      <address type="drive" controller="0" bus="0" target="0" unit="0" />
+    </disk>
+    <console type="pty" />
+    <channel type="unix">
+      <source mode="bind" />
+      <target type="virtio" name="org.qemu.guest_agent.0" />
+    </channel>
+    <memballoon model='none' freePageReporting='off'>
+      <stats period='10'/>
+      <alias name='balloon0'/>
+      <address type='pci' domain='0x0000' bus='0x04' slot='0x00' function='0x0'/>
+    </memballoon>
+  </devices>
+</domain>
