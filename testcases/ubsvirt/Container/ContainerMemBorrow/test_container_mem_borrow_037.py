@@ -134,6 +134,7 @@ class TestContainerMemBorrow037(KubernetesBaseCase):
             wait_event_time += 1
             time.sleep(3)
 
+        self.assertTrue(time_str, "未获取到借用事件")
         time_int = self.to_seconds(time_str)
         self.assertLess(time_int, 300, "no borrow event")
 

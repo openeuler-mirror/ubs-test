@@ -166,6 +166,8 @@ class TestContainerShareMem005(KubernetesBaseCase):
         self.assertTrue(self.get_key_from_result(cmd_result4, "ptr"), "映射共享内存失败，未获取到映射地址")
 
         self.logStep("S6.再次创建一个pod2，登录后创建1024MB共享内存")
+        create_result3 = self.create_pod_by_name(f"{self.pod_name3}.yaml")
+        self.assertTrue(create_result3, "创建测试pod失败")
         cmd_result5 = self.allocate_shm(self.pod_name3, self.shm_name3, self.shm_size)
         self.logInfo(f"allocate_shm cmd_result {cmd_result5}")
         self.assertFalse(cmd_result5, "预期报错资源不足")
