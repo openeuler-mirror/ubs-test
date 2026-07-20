@@ -1,0 +1,7 @@
+apiVersion: resource.ubsvirt.huawei.com/v1
+kind: ShareMemory
+metadata:
+  name: testshm
+  namespace: kube-system
+spec:
+  storage: 2048Mi  # 限额
