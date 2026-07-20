@@ -18,7 +18,7 @@ class TestVmMigrate004(OpenStackBaseCase):
         P2.OpenStack/ubse功能正常无异常
         P3.Node1上配置4G可用大页内存
         P4.已完成内存规格4G虚拟机VM1的创建
-        P5.配置目标节点的numa0可用5G大页，numa1可用6G大页
+        P5.配置目标节点的numa0可用5G大页，numa1可用8G大页
     TestStep:
         S1.登录VM1,对VM1加压到3.5G，使得内存超过第一水位线85%（3.4G），查看水位线告警、逃生策略
     ExpectedResult:
@@ -38,8 +38,8 @@ class TestVmMigrate004(OpenStackBaseCase):
         self.logInfo("创建虚机")
         self.vm_list = self.prepare_topo(str(get_topo_path("test_vm_migrate_004")))
 
-        self.logStep("P5.配置目标节点的numa0可用5G大页，numa1可用6G大页")
-        result = client.echo_hugePage(self.node_dict['node2'].ssh_node, 1, 3072)
+        self.logStep("P5.配置目标节点的numa0可用5G大页，numa1可用8G大页")
+        result = client.echo_hugePage(self.node_dict['node2'].ssh_node, 1, 4096)
         if not result:
             raise RuntimeError("set hugePage fail")
         self.restart_service(self.node_dict['node2'].ssh_node, "nova-compute")
