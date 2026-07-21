@@ -1,6 +1,4 @@
-"""
-Migrated from legacy: test_virtual_vm_create_002
-"""
+
 
 import pytest
 from libs.modules.ubsvirt.basecase.openstack_basecase import OpenStackBaseCase

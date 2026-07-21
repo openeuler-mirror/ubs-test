@@ -1,6 +1,4 @@
-"""
-Migrated from legacy: test_vm_mem_return_008
-"""
+
 
 import pytest
 from libs.modules.ubsvirt.api import client
@@ -61,16 +59,16 @@ class TestVmMemReturn008(OpenStackBaseCase):
         )
         node = self.node_dict["node2"].ssh_node
         res = client.echo_hugePage(node, 0, 512)
+        self.assertTrue(res.get('rc') == 0, "大页配置失败")
         self.restart_service(node, "nova-compute")
         self.waitServiceStatus(node, "openstack-nova-compute", 1200)
-        self.assertTrue(res, "大页配置失败")
         node = self.node_dict["node3"].ssh_node
         res = client.echo_hugePage(node, 0, 2048)
+        self.assertTrue(res.get('rc') == 0, "大页配置失败")
         self.restart_service(node, "nova-compute")
         self.waitServiceStatus(node, "openstack-nova-compute", 1200)
 
         self.logStep("E2.修改成功")
-        self.assertTrue(res, "大页配置失败")
 
         self.logStep(
             "S3.对VM1加压触发了内存借用操作后，停止VM1的加压进程，查看借用策略、借入借出点水位线告警变化情况"

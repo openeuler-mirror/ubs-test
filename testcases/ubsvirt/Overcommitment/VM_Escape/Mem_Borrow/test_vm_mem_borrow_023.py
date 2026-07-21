@@ -1,6 +1,4 @@
-"""
-Migrated from legacy: test_vm_mem_borrow_023
-"""
+
 
 import time
 
@@ -52,16 +50,18 @@ class TestVmMemBorrow023(OpenStackBaseCase):
 
         self.logStep("S1、登录虚拟机对虚拟机进行加压至95%，借用1G内存")
         res = client.echo_hugePage(self.node_dict["node2"].ssh_node, 0, 512)
-        assert res, "大页配置失败"
+        assert res.get('rc') == 0, "大页配置失败"
         start_time = client.get_date_timestamp(self.controller)
         self.add_stress_to_vm(self.vms[0], 100)
         node1_percent = self.wait_mem_match_expect("node1", "greater", 99, 900)
         assert node1_percent > 99, f"node1 waterline is {node1_percent}, not greater than 99"
         time.sleep(20)
         res = client.echo_hugePage(self.node_dict["node2"].ssh_node, 0, 10000)
-        assert res, "大页配置失败"
+        assert res.get('rc') == 0, "大页配置失败"
         time.sleep(30)
         self.logStep("E1、存在水位线告警，存在OOM事件，触发内存借用操作，借用1G，水位线降低，内存借出点水线会上涨")
         log = client.get_assign_log(self.master, VM_PLUGIN_LOG, start_time, '"oomEventFlag":1')
         assert "oom" in log, "没有OOM触发决策的日志"
-        assert self.check_borrowed_numa_size("node1", 1000, 2048 * 0.9), "the borrowed size is not 1024M"
+        assert self.check_borrowed_numa_size("node1", 1000, 1024 * 0.9), "the borrowed size is not 1024M"
+
+

@@ -1,6 +1,3 @@
-"""
-Migrated from legacy: test_vm_mem_borrow_001
-"""
 
 import time
 
