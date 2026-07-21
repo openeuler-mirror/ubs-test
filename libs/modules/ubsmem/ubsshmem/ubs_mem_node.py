@@ -29,7 +29,7 @@ class UbsMemNode(NodeExecutor):
         self.log_path = f"{self._install_path}/log"
         self.stress_ng_path = f"{self._install_path}/bin/stress-ng"
         self._app_path = f"{self._install_path}/bin/{self.app_name}"
-        self._app_dependency = "UBSM_SDK_TRACE_ENABLE=1 MXM_CHANNEL_TIMEOUT=610 LD_LIBRARY_PATH=/usr/local/ubs_mem/lib/:$LD_LIBRARY_PATH prlimit --nofile=4096:4096"
+        self._app_dependency = "UBSM_SDK_TRACE_ENABLE=1 MXM_CHANNEL_TIMEOUT=810 LD_LIBRARY_PATH=/usr/local/ubs_mem/lib/:$LD_LIBRARY_PATH prlimit --nofile=4096:4096"
         self.ubsm_service = "ubsmd.service"
         self.ubsm_service_proc_name = "/usr/local/ubs_mem/bin/ubsmd"
         self.ubsm_service_log = "/var/log/ubsm/ubsmd.log"
@@ -114,7 +114,7 @@ class UbsMemNode(NodeExecutor):
 
     def app_is_alive(self, count: int) -> bool:
         for app_id in self._app_ids[:count]:
-            pids = self.pgrep_process_id(f"\"{self.app_name} {app_id}\"")
+            pids = self.pgrep_process_id(f"\"{self.app_name} -p {app_id}\"")
             if len(pids) == 0:
                 self.logger.error(f"The process with ID:{app_id} does not exist. ")
                 return False
@@ -607,4 +607,4 @@ commonName              = supplied"""
             return False
 
     def clear_obmm(self):
-        self.run(f"{self._app_path} --clear_obmm")
+        self.run(f"{self._app_path} --clear-obmm")

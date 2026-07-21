@@ -28,7 +28,7 @@ class UbsMemHttpClient:
         payload = {"action": action, "params": params or {}}
         self.logger.info(f"[UbsMemHttpClient] send to {self._api_url}, action: {action}, params: {params}")
         try:
-            resp = requests.post(self._api_url, json=payload, timeout=630)
+            resp = requests.post(self._api_url, json=payload, timeout=830)
             result = resp.json()
         except requests.exceptions.RequestException as e:
             result = {"success": False, "message": str(e)}
