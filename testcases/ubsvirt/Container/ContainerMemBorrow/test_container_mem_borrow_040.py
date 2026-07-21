@@ -124,6 +124,7 @@ class TestContainerMemBorrow040(KubernetesBaseCase):
             wait_event_time += 1
             time.sleep(3)
         time_int = self.to_seconds(time_str)
+        self.assertTrue(time_str, "未获取到借用事件")
 
         self.logStep("S5.在master节点查询借用事件")
         self.assertTrue(time_int < 300, "no borrow failed event")

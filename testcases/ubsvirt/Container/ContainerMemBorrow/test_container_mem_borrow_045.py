@@ -104,7 +104,7 @@ class TestContainerMemBorrow045(KubernetesBaseCase):
         res = self.master.run({'command': ['kubectl get event -A | grep "mem borrow success"'], 'waitstr': '#'}).get("stdout").replace("root@#>", "")
 
         self.logStep("E4.查询到一次借用事件成功")
-        self.assertIsNotNone(res, "kubectl get borrow event failed")
+        self.assertTrue(res, "kubectl get borrow event failed")
 
         self.logStep("S5.删除pod")
         self.delete_pod(self.test_pod)
@@ -112,7 +112,7 @@ class TestContainerMemBorrow045(KubernetesBaseCase):
         self.clear_huge_pages(self.node_dict['worker1'])
 
         self.logStep("E5.删除成功，清理环境成功")
-        res = self.master.run({'command': [search_cmd], 'waitstr': '#'}).get('stderr')
+        res = self.master.run({'command': [search_cmd], 'waitstr': '#'}).get('stderr', '')
         self.assertIn("not found", res)
 
         self.logStep("S6.在日志中查看归还借用内存成功标志")
