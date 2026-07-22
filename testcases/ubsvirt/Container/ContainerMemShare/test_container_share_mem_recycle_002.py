@@ -198,8 +198,8 @@ class TestContainerShareMemRecycle002(KubernetesBaseCase):
         self.assertTrue(cmd_result1, "删除pod1共享内存失败")
 
         self.logStep("S11.在pod0、pod1分别查共享目录映射结果")
-        dev_num0 = self.get_tmp_dev_num(self.pod0_name)
-        dev_num1 = self.get_tmp_dev_num(self.pod1_name)
+        dev_num0 = self.get_tmp_dev_num(self.pod0_name, self.cr_name)
+        dev_num1 = self.get_tmp_dev_num(self.pod1_name, self.cr_name)
 
         self.logStep("E11.在容器/dev/目录下没有映射的文件")
         self.assertEqual(self.get_shm_dev_nums(dev_num0), 0, "pod0映射的文件数量不正确")

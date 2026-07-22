@@ -137,7 +137,8 @@ class TestContainerShmCsiDriver008(KubernetesBaseCase):
         self.logStep("E4.创建共享内存成功")
 
         self.logStep("S5.构造matrix-csi-driver进程退出故障，映射共享内存")
-        self.stop_shm_pod()
+        stop_result = self.stop_shm_pod()
+        self.assertTrue(stop_result, "停止shm-csi-driver失败，无法构造故障")
         cmd_result3 = self.unmap_shm(self.pod_name1, self.shm_size, "0", "1", self.shm_name1)
         self.assertFalse(cmd_result3, "预期报错")
 
