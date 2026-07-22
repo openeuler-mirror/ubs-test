@@ -105,6 +105,6 @@ def uncomment_config(node, config_path: str, key: str) -> bool:
         bool: sed命令执行成功返回True，失败返回False
     """
     ek = escape_sed_pattern(key)
-    cmd = f"sed -i's/^#\s*({ek}\s*=)/\1/' {config_path}"
+    cmd = f"sed -i 's/^#\\s*\\({ek}\\s*=\\)/\\1/' {config_path}"
     result = node.run({'command': [cmd]})
     return result.get('rc') == 0
