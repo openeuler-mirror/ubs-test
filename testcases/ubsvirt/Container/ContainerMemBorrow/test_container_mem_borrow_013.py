@@ -31,8 +31,8 @@ class TestContainerMemBorrow013(KubernetesBaseCase):
         S1.登录C1，C2加压，使得内存超过第二水位线92%，查看借用情况
         S2.创建C3，对C3加压，查看借用情况
     ExpectedResult:
-        E1.存在水位线告警，借用2G
-        E2.存在水位线告警，借用4G
+        E1.存在水位线告警，借用4G
+        E2.存在水位线告警，借用8G
     Author:
         luzeren 30077053
     """
@@ -83,7 +83,7 @@ class TestContainerMemBorrow013(KubernetesBaseCase):
         self.stress_redis("node", "test-pod-01")
         self.stress_redis("node", "test-pod-02")
 
-        self.logStep("E1.存在水位线告警，借用2G")
+        self.logStep("E1.存在水位线告警，借用4G")
         flag1 = self.check_numa_borrow_size("worker1", 4096, 600)
         self.assertTrue(flag1, "borrow mem failed")
 
@@ -95,7 +95,7 @@ class TestContainerMemBorrow013(KubernetesBaseCase):
         ssh_node = get_new_sshconnect(self.master)
         ssh_node.run({'command': server_cmd, 'waitstr': 'avg_msec'})
 
-        self.logStep("E2.存在水位线告警，借用4G")
+        self.logStep("E2.存在水位线告警，借用8G")
         flag2 = self.check_numa_borrow_size("worker1", 8192, 600)
         self.assertTrue(flag2, "Mem borrow failed")
 
