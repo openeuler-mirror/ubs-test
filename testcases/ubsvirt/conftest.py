@@ -49,7 +49,7 @@ def get_topo_path(topo_dir):
 
     Usage:
         topo_path = get_topo_path("test_vm_fragment_009")
-        self.vm_list = self.prepare_topo(str(get_topo_path("test_test_vm_fragment_009")))
+        self.vm_list = self.prepare_topo(str(get_topo_path("test_vm_fragment_009")))
 
     Returns:
         callable: Function that takes topo_name (str) and returns Path

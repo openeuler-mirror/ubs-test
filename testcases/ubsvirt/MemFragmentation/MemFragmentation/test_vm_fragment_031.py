@@ -54,7 +54,7 @@ class TestVmFragment031(OpenStackBaseCase):
 
     def test_vm_fragment_031(self, get_topo_path):
         self.logStep("S1、在可视化界面创建8G虚机A")
-        self.vm_list = self.prepare_topo(str(get_topo_path("test_test_vm_fragment_031")))
+        self.vm_list = self.prepare_topo(str(get_topo_path("test_vm_fragment_031")))
         server_detail = self.wait_server_target_status(
             "test_vm_fragment_031",
             {"status": "ACTIVE", "OS-EXT-SRV-ATTR:host": self.node_dict["node1"].host},
