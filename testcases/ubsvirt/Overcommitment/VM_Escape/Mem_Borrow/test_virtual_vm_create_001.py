@@ -20,7 +20,7 @@ class TestVirtualVmCreate001(OpenStackBaseCase):
         P2.配置numa节点2M可用大页为20G
         P3.环境已安装使能memlink
     TestStep:
-        S1.分别创建内存规格1U8G，1U2G的虚机各2个，创建内存规格2U4G，1U1G的虚机各1个
+        S1.分别创建内存规格1U8G，1U2G的虚机各1个，创建内存规格2U4G，1U1G的虚机各2个
     ExpectedResult:
         E1.创建成功，虚拟机状态为ACTIVE
     Author: 
