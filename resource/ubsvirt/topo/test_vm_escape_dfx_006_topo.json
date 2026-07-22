@@ -7,7 +7,7 @@
   {
     "name": "node2",
     "role": "agent",
-    "hugePage": 3000
+    "hugePage": 2048
   }],
   "vms":[{
     "name": "vm_01",

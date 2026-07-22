@@ -16,8 +16,8 @@ class TestVmEscapeDfx006(OpenStackBaseCase):
     PreCondition:
         P1.环境中存在2个及以上节点
         P2.OpenStack/UBSE功能正常无异常
-        P3.Node0上配置4G可用大页内存
-        P4.已完成内存规格4G虚拟机VM1的创建
+        P3.Node1，Node2上配置4G可用大页内存
+        P4.Node1已完成内存规格4G虚拟机VM1的创建
     TestStep:
         S1.登录VM1,在对VM1加压，使得内存超过第二水位线92%（3.68G），查看水位线告警、借用策略、借入借出点水位线告警变化情况
         S2.执行UBSE重启操作

@@ -53,7 +53,6 @@ class TestVirtualMsAgent010(OpenStackBaseCase):
         self.logStep("S1.构造UBSE服务异常")
         log_start_time = client.get_date_timestamp(self.agent)
         exec_service(self.agent, "stop", "ubse")
-        self.logInfo("停止systemd服务")
 
         self.logStep("E1.日志记录失败信息，Ubs Scheduler Agent组件状态正常")
         log = client.get_ms_log_info(self.agent, log_start_time, self.ubs_agent_error_log,
