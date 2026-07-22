@@ -52,7 +52,7 @@
   {
     "name": "vm_06",
     "image": "openEuler-22.03-everything",
-    "ram": 1024,
+    "ram": 8192,
     "node": "node1",
     "removable": false,
     "cpu": 1
