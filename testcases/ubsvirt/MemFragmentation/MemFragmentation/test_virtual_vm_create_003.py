@@ -26,13 +26,13 @@ class TestVirtualVmCreate003(OpenStackBaseCase):
         """Legacy: postTestCase"""
         self.clear_server()
 
-    def test_test_virtual_vm_create_003(self, get_topo_path):
+    def test_virtual_vm_create_003(self, get_topo_path):
         """
         Test for test_virtual_vm_create_003
         """
 
         self.logStep("S1、创建内存规格20G的虚机")
-        self.vms = self.prepare_topo(str(get_topo_path("test_test_virtual_vm_create_003")))
+        self.vms = self.prepare_topo(str(get_topo_path("test_virtual_vm_create_003")))
 
         self.logStep("E1、创建成功")
 

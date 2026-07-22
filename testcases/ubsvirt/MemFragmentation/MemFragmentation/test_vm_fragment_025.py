@@ -57,7 +57,7 @@ class TestVmFragment025(OpenStackBaseCase):
         
 
         self.logStep("S1、在可视化界面创建8G虚机A")
-        self.vm_list = self.prepare_topo(str(get_topo_path("test_test_vm_fragment_025")))
+        self.vm_list = self.prepare_topo(str(get_topo_path("test_vm_fragment_025")))
         vm_2g = VMResource(
             "vm_2g",
             "openEuler-22.03-everything",
