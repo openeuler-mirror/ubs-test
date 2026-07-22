@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-pod-03
+  namespace: kube-system
+  labels:
+spec:
+  nodeName: worker1
+  containers:
+  - name: test-pod-03
+    image: docker.io/library/numa-stress:v1.0
+    command: ["/bin/sh", "-c", "while true; do sleep 1000; done"]
+    env:
+      - name: LD_LIBRARY_PATH
+        value: "/usr/local/softbus/ctrlbus/lib:/lib:/lib64:/usr/lib64:/usr/hostlib"
+    volumeMounts:
+      - name: libpath
+        mountPath: /usr/hostlib
+    resources:
+      requests:
+        cpu: "2"
+        memory: "14Gi"
+      limits:
+        cpu: "2"
+        memory: "16Gi"
+    securityContext:
+      privileged: true
+      allowPrivilegeEscalation: true
+      capabilities:
+        add:
+          - SYS_ADMIN
+  volumes:
+  - name: libpath
+    hostPath:
+      path: /usr/lib64/
