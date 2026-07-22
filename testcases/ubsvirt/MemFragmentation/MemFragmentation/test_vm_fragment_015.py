@@ -4,22 +4,22 @@ from libs.modules.ubsvirt.basecase.openstack_basecase import OpenStackBaseCase
 from libs.modules.ubsvirt.model.model import VMResource
 
 
-class TestVmFragment032(OpenStackBaseCase):
+class TestVmFragment013002(OpenStackBaseCase):
     """
     CaseNumber:
-        test_vm_fragment_032
+        test_vm_fragment_013_002
     RunLevel:
         Level 1
     EnvType:
 
     CaseName:
-        验证不同socket上本地资源不足匀一匀创建虚机
+        验证从节点本地资源不足匀一匀从节点创建虚机
     PreCondition:
         P1、4P环境，openstack部署成功
         P2、Ubs Scheduler服务正常部署，正常使能
         P3、软总线已经正常运行，内存子系统模块成功加载
         P4、不超分场景（ram_allocation_ratio为默认配置1）
-        P5、4numa环境，numa0，1是socket0，numa2，3是socket1。控制节点numa2分配大页内存13G，从节点numa3上分配4G
+        P5、从节点1分配大页内存13G，从节点2分配4G+512M
         P6、已存在可用卷
         P7、创建实例类型A(4U8G)，元数据({'hw:mem_page_size': '2048', 'ubs:enable_remote_memory': 'true', 'ubs:max_remote_memory_ratio': '25'})
         P8、创建示例类型B(2U5G)，元数据({'hw:mem_page_size': '2048', 'ubs:enable_remote_memory': 'true', 'ubs:max_remote_memory_ratio': '25'})
@@ -40,7 +40,7 @@ class TestVmFragment032(OpenStackBaseCase):
         self.logStep("P2、Ubs Scheduler服务正常部署，正常使能")
         self.logStep("P3、软总线已经正常运行，内存子系统模块成功加载")
         self.logStep("P4、不超分场景（ram_allocation_ratio为默认配置1）")
-        self.logStep("P5、、4numa环境，numa0，1是socket0，numa2，3是socket1。控制节点numa2分配大页内存13G，从节点numa3上分配4G")
+        self.logStep("P5、从节点1分配大页内存13G，从节点2分配4G+512M")
         self.logStep("P6、已存在可用卷")
         self.logStep(
             "P7、创建实例类型A(4U8G)，元数据({'hw:mem_page_size': '2048', 'ubs:enable_remote_memory': 'true', 'ubs:max_remote_memory_ratio': '25'})。"
@@ -52,11 +52,11 @@ class TestVmFragment032(OpenStackBaseCase):
     def teardown_method(self):
         self.clear_server()
 
-    def test_vm_fragment_032(self, get_topo_path):
+    def test_vm_fragment_013_002(self, get_topo_path):
         self.logStep("S1、在可视化界面创建8G虚机A")
-        self.vm_list = self.prepare_topo(str(get_topo_path("test_test_vm_fragment_032")))
+        self.vm_list = self.prepare_topo(str(get_topo_path("test_vm_fragment_013_002")))
         server_detail = self.wait_server_target_status(
-            "test_vm_fragment_032",
+            "test_vm_fragment_013_01",
             {"status": "ACTIVE", "OS-EXT-SRV-ATTR:host": self.node_dict["node1"].host},
         )
         self.assertEqual(server_detail["OS-EXT-SRV-ATTR:host"], self.node_dict["node1"].host)
