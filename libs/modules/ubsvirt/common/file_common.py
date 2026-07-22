@@ -87,13 +87,11 @@ def comment_config(node, config_path: str, key: str) -> bool:
         key: 配置项名称
     返回：
         bool: sed命令执行成功返回True，失败返回False
-    说明：
-        仅注释未带#的有效配置行，已注释行不会重复处理
     """
     ek = escape_sed_pattern(key)
     cmd = f"sed -i 's/^{ek}\\s*=/# &/' {config_path}"
-    result = node.run(cmd)
-    return result.std_rc == 0
+    result = node.run({'command': [cmd]})
+    return result.get('rc') == 0
 
 
 def uncomment_config(node, config_path: str, key: str) -> bool:
@@ -105,10 +103,8 @@ def uncomment_config(node, config_path: str, key: str) -> bool:
         key: 配置项名称
     返回：
         bool: sed命令执行成功返回True，失败返回False
-    说明：
-        保留key与等号之间原有空格格式，避免格式化错乱
     """
     ek = escape_sed_pattern(key)
-    cmd = f"sed -i 's/^#\\s*({ek}\\s*=)/\\1/' {config_path}"
-    result = node.run(cmd)
-    return result.std_rc == 0
+    cmd = f"sed -i's/^#\s*({ek}\s*=)/\1/' {config_path}"
+    result = node.run({'command': [cmd]})
+    return result.get('rc') == 0
