@@ -10,3 +10,4 @@ Example suite JSON hook field::
 """
 
 from libs.core.hook_runner import package_hook_fixture
+from libs.modules.ubsmem.ubsshmem.ubs_mem_case import inject_ubs_mem_case_dependencies

@@ -17,9 +17,6 @@ class UbsMemHook(TestCase):
     install_path: str = "/home/ci/ubs_mem"
     log_path: str = ""
     nodes: list = []
-    # packages_list: list = ["ubs-comm-lib-*-*.*.aarch64.rpm", "ubs-comm-devel-*-*.*.aarch64.rpm",
-    #                        "ubs-engine-1.0.0-*.aarch64.rpm", "ubs-engine-client-libs-*.*.aarch64.rpm",
-    #                        "ubs-engine-client-devel-*.*.aarch64.rpm", "ubs-mem-memfabric-*.*.aarch64.rpm"]
     packages_list: list = [ "ubs-mem-shmem-*.*.aarch64.rpm"]
 
     def sleep(self, time_s: float) -> None:
@@ -59,8 +56,6 @@ class UbsMemHook(TestCase):
 
     def install_packages(self):
         for node in self.nodes:
-            for package in self.packages_list:
-                node.run(f"rpm -ivh /opt/install/package/{package} --force")
             node.remove_file(self.install_path)
             node.mkdir(self.install_path)
             node.mkdir(self.log_path)

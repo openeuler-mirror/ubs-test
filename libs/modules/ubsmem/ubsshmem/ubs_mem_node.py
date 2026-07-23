@@ -21,7 +21,8 @@ class UbsMemNode(NodeExecutor):
         self._install_path = install_path
         self.node_id = node_id
         self.default_app_num = 16
-        self._app_ids = range(5123, 5199)
+        app_base = 5123 + (self.node_id - 1) * self.default_app_num
+        self._app_ids = range(app_base, app_base + self.default_app_num)
         self.host_name = ""
         self.apps: List[UbsMemHttpClient] = [UbsMemHttpClient(ssh_host, self._install_path, app_id)
                                       for app_id in self._app_ids]
