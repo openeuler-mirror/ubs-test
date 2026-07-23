@@ -1,6 +1,4 @@
-"""
-Migrated from legacy: test_vm_mem_borrow_010
-"""
+
 
 import pytest
 from libs.modules.ubsvirt.basecase.openstack_basecase import OpenStackBaseCase
