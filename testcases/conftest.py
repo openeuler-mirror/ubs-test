@@ -28,6 +28,7 @@ from libs.core.basecase.ubsio.dfc_basecase import (
     inject_dfc_basecase_dependencies,
 )
 from libs.modules.ubsvirt.basecase.kubernetes_basecase import inject_kubernetes_basecase_dependencies
+from libs.modules.ubsvirt.basecase.VasBaseCase import inject_vas_basecase_dependencies
 
 
 # Import pytest_configure with alias to avoid recursion
@@ -107,6 +108,7 @@ __all__ = [
     "inject_mempooling_basecase_dependencies",
     "inject_container_overcommit_basecase_dependencies",
     "inject_kubernetes_basecase_dependencies",
+    "inject_vas_basecase_dependencies",
     "inject_dfc_basecase_dependencies",
     "get_pytest_config",
     "pytest_addoption",

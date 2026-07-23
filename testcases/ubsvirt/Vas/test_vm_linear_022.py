@@ -51,6 +51,7 @@ class TestVmLinear022(VasBaseCase):
         self.logStep("S1.执行vasctl opt reassign --scope VM1")
         for i in range(1, 3):
             res = self.execute_command_with_return(f"vasctl opt reassign --scope VM{i}")
+            self.assertIsNotNone(res.get("stdout"), f"vasctl opt reassign --scope VM{i} produced no output")
             self.assertIn("ReAssign success", res["stdout"], f"vasctl opt reassign --scope VM{i} failed")
 
         self.logStep("E1.执行成功，无异常报错")

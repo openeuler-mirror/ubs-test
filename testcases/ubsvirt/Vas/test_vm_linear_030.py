@@ -37,7 +37,7 @@ class TestVmLinear030(VasBaseCase):
         self.logStep("P1.环境中已部署libvirt和vas awared scheduler服务")
         self.destroy_all()
 
-        self.logStep("P2.修改"/usr/lib/systemd/system/vas-daemon.service"中--skip-cluster配置为'0-1'，跳过vcpu0 vcpu1,重新加载后重启服务")
+        self.logStep("P2.修改/usr/lib/systemd/system/vas-daemon.service中--skip-cluster配置为'0-1'，跳过vcpu0 vcpu1,重新加载后重启服务")
         self.command_check(f'\cp {self.config_file} {self.config_file}.bak', "cp config file failed")
         command = f'sed -i \'s/--skip-cpuset ""/--skip-cpuset "0-1"/g\' {self.config_file}'
         self.command_check(command, "change skip-cpuset failed")

@@ -56,7 +56,7 @@ class TestVmLinear001(VasBaseCase):
         self.start_vas()
 
         self.logStep("E3.启动成功，进程running状态，-smt参数为false")
-        command = "ps -ef | grep vas_daemon | grep -v grep | grep -e -smt -e false"
+        command = "ps -ef | grep vas_daemon | grep -v grep | grep \"\\-smt false\""
         self.command_check(command, "-smt param is not changed")
 
     def teardown_method(self):
