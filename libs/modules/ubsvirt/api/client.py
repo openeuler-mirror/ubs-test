@@ -279,7 +279,7 @@ def get_decision(node, current_time, positive=True, decision_node=None, ubs_sche
 
 def get_decisions(node, current_time):
     pattern = r"\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}[+\-]\d{2}:\d{2})\].*?FinalDecision actionType = (\d+)"
-    res = node.run({'command': [f'grep -a "actionType =" /var/log/ubse/vm_plugin.log | tail -n 20'], 'waitstr': '#'})
+    res = node.run({'command': [f'grep -a "actionType =" /var/log/ubse/virt_agent_plugin.log | tail -n 20'], 'waitstr': '#'})
     if res['stdout'] is None:
         return None
     server = res.get("stdout").replace("root@#>", "")

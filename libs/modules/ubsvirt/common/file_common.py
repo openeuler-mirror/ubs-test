@@ -76,3 +76,50 @@ def mv_file(node, file_name, file_new_name):
     command = f"\\cp -rp {file_name} {file_new_name}"
     node.run({'command': [command]})
     node.run({'command': [f'rm -rf {file_name}']})
+
+
+def comment_config(node, config_path: str, key: str) -> bool:
+    """
+    功能：注释配置文件中以key=开头的配置行
+    参数：
+        node: 远程执行节点对象
+        config_path: 配置文件完整路径
+        key: 配置项名称
+    返回：
+        bool: sed命令执行成功返回True，失败返回False
+    """
+    ek = escape_sed_pattern(key)
+    cmd = f"sed -i 's/^{ek}\\s*=/# &/' {config_path}"
+    node.run({'command': [cmd]})
+    # 校验：存在被注释的 key = 行
+    grep_check_cmd = f"grep '^#[[:space:]]*{ek}[[:space:]]*=' {config_path}"
+    grep_result = node.run({'command': [grep_check_cmd]}).get('stdout')
+    if not (grep_result and key in grep_result):
+        logger.warning(f"注释未生效：文件未找到目标配置行，路径 ={config_path}, key={key}")
+        return False
+    logger.info(f"注释配置成功，路径 ={config_path}, key={key}")
+    return True
+
+
+def uncomment_config(node, config_path: str, key: str) -> bool:
+    """
+    功能：取消配置文件中被注释的 key= 配置行注释
+    参数：
+        node: 远程执行节点对象
+        config_path: 配置文件完整路径
+        key: 配置项名称
+    返回：
+        bool: sed命令执行成功返回True，失败返回False
+    """
+    ek = escape_sed_pattern(key)
+    cmd = f"sed -i 's/^#\\s*\\({ek}\\s*=\\)/\\1/' {config_path}"
+    node.run({'command': [cmd]})
+    # 校验：存在未注释的原生 key = 行
+    grep_check_cmd = f"grep '^[[:space:]]*{ek}[[:space:]]*=' {config_path}"
+    # 第二步校验结果
+    grep_result = node.run({'command': [grep_check_cmd]}).get('stdout')
+    if not (grep_result and key in grep_result):
+        logger.warning(f"取消注释未生效：文件未找到目标配置行，路径 ={config_path}, key={key}")
+        return False
+    logger.info(f"取消注释配置成功，路径 ={config_path}, key={key}")
+    return True
