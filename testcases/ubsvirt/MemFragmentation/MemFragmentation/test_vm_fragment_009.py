@@ -1,8 +1,5 @@
-"""
-Migrated from legacy: test_vm_fragment_009
-"""
-
 import pytest
+
 from libs.modules.ubsvirt.basecase.openstack_basecase import OpenStackBaseCase
 
 
@@ -38,7 +35,7 @@ class TestVmFragment009(OpenStackBaseCase):
         """
 
         self.logStep("S3、创建2G虚机")
-        self.vm_list = self.prepare_topo(str(get_topo_path("test_test_vm_fragment_009")))
+        self.vm_list = self.prepare_topo(str(get_topo_path("test_vm_fragment_009")))
 
         self.logInfo("E3、在控制节点创建虚机成功，状态正常")
         server_detail = self.wait_server_target_status(

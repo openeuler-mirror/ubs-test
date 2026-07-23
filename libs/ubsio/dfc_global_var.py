@@ -25,9 +25,9 @@ host_dict = env_config_ret.get("hosts")
 for config_ret in host_dict.items():
     single_params = config_ret[1].get("params")
     config_localip = config_ret[1].get("localIP")
-
-    disk_dict[config_localip] = disk_dict.get(config_localip, '') + ''.join(f"{v}:" for k, v in single_params.items() if k.startswith('disk'))
-    disk_dict[config_localip] = disk_dict[config_localip].rstrip(":")
+    if single_params is not None:
+        disk_dict[config_localip] = disk_dict.get(config_localip, '') + ''.join(f"{v}:" for k, v in single_params.items() if k.startswith('disk'))
+        disk_dict[config_localip] = disk_dict[config_localip].rstrip(":")
 
 # 容器外映射路径
 DOCKER_OUTSIDE_MAP_PATH = '/home/ubsio_dfc/'

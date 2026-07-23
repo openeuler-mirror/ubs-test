@@ -1,0 +1,26 @@
+{
+  "nodes": [
+    {
+      "name": "node1",
+      "role": "master",
+      "hugePage": {
+        "0": 4096, "1": 2048
+      }
+    },
+    {
+      "name": "node2",
+      "role": "agent",
+      "hugePage": 0
+    }
+  ],
+  "vms": [
+    {
+      "name": "test_vm_migrate_015_01",
+      "image": "openEuler-22.03-everything",
+      "ram": 8192,
+      "node": "node1",
+      "removable": true,
+      "cpu": 4
+    }
+  ]
+}

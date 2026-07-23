@@ -1,7 +1,3 @@
-"""
-Migrated from legacy: test_vm_fragment_023
-"""
-
 import time
 import pytest
 
@@ -58,7 +54,7 @@ class TestVmFragment023(OpenStackBaseCase):
         
 
         self.logStep("S1. 使用flavor_remote_memory_25创建8G虚机A")
-        self.vm_list = self.prepare_topo(str(get_topo_path("test_test_vm_fragment_023")))
+        self.vm_list = self.prepare_topo(str(get_topo_path("test_vm_fragment_023")))
         self.logStep("E1、8G虚机创建成功")
         server_detail = self.wait_server_target_status(
             "Delete_VM_002_01",

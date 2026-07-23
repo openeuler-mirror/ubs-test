@@ -1,0 +1,60 @@
+{
+  "nodes":[{
+    "name": "node1",
+    "role": "master",
+    "hugePage": 10240
+  },
+  {
+    "name": "node2",
+    "role": "agent",
+    "hugePage": 10240
+  }],
+  "vms":[{
+    "name": "vm_01",
+    "image": "openEuler-22.03-everything",
+    "ram": 8192,
+    "node": "node1",
+    "removable": false,
+    "cpu": 1
+  },
+  {
+    "name": "vm_02",
+    "image": "openEuler-22.03-everything",
+    "ram": 2048,
+    "node": "node1",
+    "removable": false,
+    "cpu": 1
+  },
+  {
+    "name": "vm_03",
+    "image": "openEuler-22.03-everything",
+    "ram": 2048,
+    "node": "node1",
+    "removable": false,
+    "cpu": 1
+  },
+  {
+    "name": "vm_04",
+    "image": "openEuler-22.03-everything",
+    "ram": 4096,
+    "node": "node1",
+    "removable": false,
+    "cpu": 2
+  },
+  {
+    "name": "vm_05",
+    "image": "openEuler-22.03-everything",
+    "ram": 1024,
+    "node": "node1",
+    "removable": false,
+    "cpu": 1
+  },
+  {
+    "name": "vm_06",
+    "image": "openEuler-22.03-everything",
+    "ram": 8192,
+    "node": "node1",
+    "removable": false,
+    "cpu": 1
+  }]
+}
