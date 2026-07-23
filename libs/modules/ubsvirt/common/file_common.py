@@ -90,8 +90,15 @@ def comment_config(node, config_path: str, key: str) -> bool:
     """
     ek = escape_sed_pattern(key)
     cmd = f"sed -i 's/^{ek}\\s*=/# &/' {config_path}"
-    result = node.run({'command': [cmd]})
-    return result.get('rc') == 0
+    node.run({'command': [cmd]})
+    # 校验：存在被注释的 key = 行
+    grep_check_cmd = f"grep '^#[[:space:]]*{ek}[[:space:]]*=' {config_path}"
+    grep_result = node.run({'command': [grep_check_cmd]}).get('stdout')
+    if not (grep_result and key in grep_result):
+        logger.warning(f"注释未生效：文件未找到目标配置行，路径 ={config_path}, key={key}")
+        return False
+    logger.info(f"注释配置成功，路径 ={config_path}, key={key}")
+    return True
 
 
 def uncomment_config(node, config_path: str, key: str) -> bool:
@@ -106,5 +113,13 @@ def uncomment_config(node, config_path: str, key: str) -> bool:
     """
     ek = escape_sed_pattern(key)
     cmd = f"sed -i 's/^#\\s*\\({ek}\\s*=\\)/\\1/' {config_path}"
-    result = node.run({'command': [cmd]})
-    return result.get('rc') == 0
+    node.run({'command': [cmd]})
+    # 校验：存在未注释的原生 key = 行
+    grep_check_cmd = f"grep '^[[:space:]]*{ek}[[:space:]]*=' {config_path}"
+    # 第二步校验结果
+    grep_result = node.run({'command': [grep_check_cmd]}).get('stdout')
+    if not (grep_result and key in grep_result):
+        logger.warning(f"取消注释未生效：文件未找到目标配置行，路径 ={config_path}, key={key}")
+        return False
+    logger.info(f"取消注释配置成功，路径 ={config_path}, key={key}")
+    return True

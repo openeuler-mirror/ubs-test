@@ -57,6 +57,7 @@ class TestVirtualMsAgent010(OpenStackBaseCase):
         self.logStep("E1.日志记录失败信息，Ubs Scheduler Agent组件状态正常")
         log = client.get_ms_log_info(self.agent, log_start_time, self.ubs_agent_error_log,
                                      self.ubs_agent_log_path, "50")
+        self.assertIsNotNone(log, "get_ms_log_info returned None, expected log containing error message")
         self.assertIn(self.ubs_agent_error_log, log)
 
         service_status = self.get_service_status(self.agent, "ubs-scheduler-agent")
