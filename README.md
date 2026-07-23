@@ -159,7 +159,8 @@ cp -r hcom_perf /home/ubs-comm/hcom/perf_test
 
 需要在执行节点上配置以下操作：
 
-1. 根据安装指南安装好vas进程包以及vas进程需要的qemu、libvirt、libboundscheck等软件，启动libvirtd进程，确保vas可以正常启动，
+1. 执行硬件环境的cpu需要为鲲鹏950版本以及以上版本，OS和虚拟机OS版本需要为openEuler-22.03及以上版本。
+2. 根据安装指南安装好vas进程包以及vas进程需要的qemu、libvirt、libboundscheck等软件，启动libvirtd进程，确保vas可以正常启动，
 再配置好vas内核启动参数，修改报存后重启节点生效。
 2. 修改SELINUX配置，修改/etc/selinux/config文件，修改SELINUX=permissive，修改报存后重启节点生效。
 3. yum安装edk2安装包，测试用例创建虚拟机需要此软件。
