@@ -70,6 +70,7 @@ class TestVirtualMsAgent010(OpenStackBaseCase):
 
         self.logStep("E2.虚机创建失败")
         status_detail = self.wait_server_target_status('vm_5g_01', {'status': 'ERROR'})
+        self.assertIsNotNone(status_detail, "wait_server_target_status timeout")
         self.assertEqual(status_detail['status'], 'ERROR')
 
         self.logStep("S3.UBSE恢复后，node1匀一匀创建5G虚机")
