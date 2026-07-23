@@ -23,7 +23,7 @@ class TestVmMemBorrow010(OpenStackBaseCase):
     TestStep:
         S1、登录VM1/VM2，对VM1/VM2加压，使得内存超过第二水位线92%，查看水位线告警、借用策略、借入借出点水位线告警变化情况
     ExpectedResult:
-        E1、两个节点存在水位线告警，预期借用收益1G，借用账本借用量1G，触发内存借用操作，内存借入点水位线会降低，内存借出点水线会上涨。
+        E1、两个节点存在水位线告警，预期借用总收益2G，借用账本借用量各1G，触发内存借用操作，内存借入点水位线会降低，内存借出点水线会上涨。
     Author:
         fq
     """
@@ -41,6 +41,6 @@ class TestVmMemBorrow010(OpenStackBaseCase):
             self.add_stress_to_vm(vm, 96)
 
         self.logStep(
-            "E1、.两个numa存在水位线告警，预期借用收益1G，分别借用账本借用量1G，触发内存借用操作，水位线会降低，内存借出点水线会上涨。"
+            "E1、.两个numa存在水位线告警，预期借用总收益1G，分别借用账本借用量1G，触发内存借用操作，水位线会降低，内存借出点水线会上涨。"
         )
         self.assertTrue(self.check_borrowed_numa_size("node1", 1000, 2048), "the borrowed size is not 2048M")

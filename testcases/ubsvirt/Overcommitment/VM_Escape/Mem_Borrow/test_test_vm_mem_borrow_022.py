@@ -33,11 +33,11 @@ class TestVmMemBorrow022(OpenStackBaseCase):
             "S1、登录VM1，执行加压命令对VM1加压，使得内存超过第二水位线92%（3.68G），"
             "查看水位线告警、借用策略、借入借出点水位线告警变化情况（obmm占用256M内存，虚拟机自身进程占用8-10%大页内存）"
         )
-        self.add_stress_to_vm(self.vms[1], 98)
+        self.add_stress_to_vm(self.vms[0], 98)
         self.logStep(
             "S2、登录VM2，执行加压命令对VM2加压，使得内存超过第二水位线92%（0.92G）,查看虚机状态"
         )
-        self.add_stress_to_vm(self.vms[0], 98)
+        self.add_stress_to_vm(self.vms[1], 98)
 
         self.assertTrue(self.check_borrowed_numa_size("node1", 1800, 1024), "the borrowed size is 1G")
 
