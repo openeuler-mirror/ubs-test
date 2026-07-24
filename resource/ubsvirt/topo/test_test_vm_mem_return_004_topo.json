@@ -1,0 +1,22 @@
+{
+  "nodes":[{
+    "name": "node1",
+    "role": "master",
+    "hugePage": 2048,
+    "numa": 1
+  },
+  {
+    "name": "node2",
+    "role": "agent",
+    "hugePage": 10000,
+    "numa": 1
+  }],
+  "vms":[{
+    "name": "test_vm_mem_return_004",
+    "image": "openEuler-22.03-everything",
+    "ram": 4096,
+    "node": "node1",
+    "cpu": 2,
+    "removable": false
+  }]
+}
