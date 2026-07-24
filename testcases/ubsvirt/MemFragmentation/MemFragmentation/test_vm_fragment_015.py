@@ -7,7 +7,7 @@ from libs.modules.ubsvirt.model.model import VMResource
 class TestVmFragment013002(OpenStackBaseCase):
     """
     CaseNumber:
-        test_vm_fragment_013_002
+        test_vm_fragment_015
     RunLevel:
         Level 1
     EnvType:
@@ -52,9 +52,9 @@ class TestVmFragment013002(OpenStackBaseCase):
     def teardown_method(self):
         self.clear_server()
 
-    def test_vm_fragment_013_002(self, get_topo_path):
+    def test_vm_fragment_015(self, get_topo_path):
         self.logStep("S1、在可视化界面创建8G虚机A")
-        self.vm_list = self.prepare_topo(str(get_topo_path("test_vm_fragment_013_002")))
+        self.vm_list = self.prepare_topo(str(get_topo_path("test_vm_fragment_015")))
         server_detail = self.wait_server_target_status(
             "test_vm_fragment_013_01",
             {"status": "ACTIVE", "OS-EXT-SRV-ATTR:host": self.node_dict["node1"].host},
