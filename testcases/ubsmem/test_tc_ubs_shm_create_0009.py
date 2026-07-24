@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2025-2025. All rights reserved.
+
 from libs.core.basecase.ubsmem import UbsMemCase
 from libs.modules.ubsmem.ubsshmem.ubs_mem_models import (
     PROT_NONE,

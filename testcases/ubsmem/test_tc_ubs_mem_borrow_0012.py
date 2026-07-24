@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2025-2025. All rights reserved.
+
 from libs.core.basecase.ubsmem import UbsMemCase
 from libs.modules.ubsmem.common import get_random_char
 from libs.modules.ubsmem.ubsshmem.ubs_mem_models import UBSM_FLAG_MALLOC_WITH_NUMA, UbsMemInstance, UBSM_SHMEM_OK
