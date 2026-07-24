@@ -1,6 +1,5 @@
 #!/usr/bin/python3.7
 # -*- coding: utf-8 -*-
-# 版权所有 (c) 华为技术有限公司 2025-2025
 
 import time
 from dataclasses import dataclass

@@ -1,6 +1,5 @@
 #!/usr/bin/python3.7
 # -*- coding: utf-8 -*-
-# 版权所有 (c) 华为技术有限公司 2025-2025
 
 import re
 from typing import Optional, List, Union
@@ -28,7 +27,7 @@ class UbsMemHttpClient:
         payload = {"action": action, "params": params or {}}
         self.logger.info(f"[UbsMemHttpClient] send to {self._api_url}, action: {action}, params: {params}")
         try:
-            resp = requests.post(self._api_url, json=payload, timeout=630)
+            resp = requests.post(self._api_url, json=payload, timeout=830)
             result = resp.json()
         except requests.exceptions.RequestException as e:
             result = {"success": False, "message": str(e)}

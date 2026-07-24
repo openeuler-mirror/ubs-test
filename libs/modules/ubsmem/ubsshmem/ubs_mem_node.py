@@ -1,6 +1,5 @@
 #!/usr/bin/python3.7
 # -*- coding: utf-8 -*-
-# 版权所有 (c) 华为技术有限公司 2025-2025
 
 import re
 import sys
@@ -21,7 +20,8 @@ class UbsMemNode(NodeExecutor):
         self._install_path = install_path
         self.node_id = node_id
         self.default_app_num = 16
-        self._app_ids = range(5123, 5199)
+        app_base = 5123 + (self.node_id - 1) * self.default_app_num
+        self._app_ids = range(app_base, app_base + self.default_app_num)
         self.host_name = ""
         self.apps: List[UbsMemHttpClient] = [UbsMemHttpClient(ssh_host, self._install_path, app_id)
                                       for app_id in self._app_ids]
@@ -29,7 +29,7 @@ class UbsMemNode(NodeExecutor):
         self.log_path = f"{self._install_path}/log"
         self.stress_ng_path = f"{self._install_path}/bin/stress-ng"
         self._app_path = f"{self._install_path}/bin/{self.app_name}"
-        self._app_dependency = "UBSM_SDK_TRACE_ENABLE=1 MXM_CHANNEL_TIMEOUT=610 LD_LIBRARY_PATH=/usr/local/ubs_mem/lib/:$LD_LIBRARY_PATH prlimit --nofile=4096:4096"
+        self._app_dependency = "UBSM_SDK_TRACE_ENABLE=1 MXM_CHANNEL_TIMEOUT=810 LD_LIBRARY_PATH=/usr/local/ubs_mem/lib/:$LD_LIBRARY_PATH prlimit --nofile=4096:4096"
         self.ubsm_service = "ubsmd.service"
         self.ubsm_service_proc_name = "/usr/local/ubs_mem/bin/ubsmd"
         self.ubsm_service_log = "/var/log/ubsm/ubsmd.log"
@@ -114,7 +114,7 @@ class UbsMemNode(NodeExecutor):
 
     def app_is_alive(self, count: int) -> bool:
         for app_id in self._app_ids[:count]:
-            pids = self.pgrep_process_id(f"\"{self.app_name} {app_id}\"")
+            pids = self.pgrep_process_id(f"\"{self.app_name} -p {app_id}\"")
             if len(pids) == 0:
                 self.logger.error(f"The process with ID:{app_id} does not exist. ")
                 return False
@@ -607,4 +607,4 @@ commonName              = supplied"""
             return False
 
     def clear_obmm(self):
-        self.run(f"{self._app_path} --clear_obmm")
+        self.run(f"{self._app_path} --clear-obmm")

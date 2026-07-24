@@ -188,6 +188,37 @@ pytest --cov=libs --cov-report=html
 # 报告位置: htmlcov/index.html
 ```
 
+### 执行 ubsmem 测试
+
+**Windows：**
+```powershell
+# 通过 suite JSON 执行全部 ubsmem 用例
+.venv\Scripts\python.exe run_suite.py testcases/ubsmem/ubsmem_suite.json --resource-config=conf\env.json --no-cov -v -o log_cli=true --log-cli-level=INFO -W ignore::SyntaxWarning
+
+# 只跑 smoke 标签的用例
+.venv\Scripts\python.exe -m pytest testcases/ubsmem/ --resource-config=conf\env.json --no-cov -v -o log_cli=true -o log_cli_level=INFO -o "addopts=" -m "smoke" --test-hook "libs.modules.ubsmem.ubsshmem.ubs_mem_hook.UbsMemHook" --test-params "{\"install_path\": \"/home/ci/ubs_mem\", \"log_bak_path\": \"/home/ubs_mem_log_bak\", \"tls_path\": \"/usr/local/ubs_mem/.pkey\", \"cmc_package_path\": \"/ko/matrix_shmem\"}"
+```
+
+**Linux / openEuler：**
+```bash
+# 通过 suite JSON 执行全部 ubsmem 用例
+.venv/bin/python run_suite.py testcases/ubsmem/ubsmem_suite.json \
+    --resource-config=conf/env.json \
+    --no-cov -v \
+    -o log_cli=true --log-cli-level=INFO \
+    -W ignore::SyntaxWarning
+
+# 只跑 smoke 标签的用例
+.venv/bin/python -m pytest testcases/ubsmem/ \
+    --resource-config=conf/env.json \
+    --no-cov -v \
+    -o log_cli=true -o log_cli_level=INFO \
+    -o "addopts=" \
+    -m "smoke" \
+    --test-hook "libs.modules.ubsmem.ubsshmem.ubs_mem_hook.UbsMemHook" \
+    --test-params '{"install_path": "/home/ci/ubs_mem", "log_bak_path": "/home/ubs_mem_log_bak", "tls_path": "/usr/local/ubs_mem/.pkey", "cmc_package_path": "/ko/matrix_shmem"}'
+```
+
 ***
 
 > 💡 **提示**: 详细的环境搭建、测试执行、用例编写、常见问题解答请参阅下文「测试执行完整指南」章节。
@@ -476,7 +507,7 @@ pytest --resource-config=test_nodes.json -n 4 -v
 
 ```json
 {
-  "hook": "libs.ubsmem.ubsshmem.ubs_mem_hook.UbsMemHook",
+  "hook": "libs.modules.ubsmem.ubsshmem.ubs_mem_hook.UbsMemHook",
   "tests": [
     "testcases/ubsmem/test_tc_ubs_mem_borrow_0007.py",
     "testcases/ubsmem/test_tc_ubs_mem_borrow_0008.py"
@@ -489,7 +520,7 @@ pytest --resource-config=test_nodes.json -n 4 -v
 }
 ```
 
-- `hook` — (可选) hook 类全限定名，如 `libs.ubsmem.ubsshmem.ubs_mem_hook.UbsMemHook`。`run_suite.py` 自动将其传递为 `--test-hook`
+- `hook` — (可选) hook 类全限定名，如 `libs.modules.ubsmem.ubsshmem.ubs_mem_hook.UbsMemHook`。`run_suite.py` 自动将其传递为 `--test-hook`
 - `tests` — 用例脚本列表（相对于项目根目录的路径）
 - `params` — 统一入参，对应 `--test-params`，测试中通过 `custom_params` fixture 读取，hook 的 `_init_from_fixture()` 也会接收此参数
 
@@ -556,7 +587,7 @@ python run_suite.py testcases/ubsmem/ubsmem_suite.json \
    - `afterPostTestSet()` — 后置操作
    - 三个方法**缺一不可**；`_init_from_fixture` 被框架识别后会自动调用，即使为空也需定义
 
-   > 💡 如果 hook 逻辑较复杂需要日志、`sleep()` 等辅助方法，可继承 `libs.ubsmem.common.mem_hook_base.MemHookBase`（提供 `self.logger`、`self.sleep()` 等），但**非强制**。
+   > 💡 如果 hook 逻辑较复杂需要日志、`sleep()` 等辅助方法，可继承 `libs.modules.ubsmem.common.mem_hook_base.MemHookBase`（提供 `self.logger`、`self.sleep()` 等），但**非强制**。
 
 **执行流程：**
 
