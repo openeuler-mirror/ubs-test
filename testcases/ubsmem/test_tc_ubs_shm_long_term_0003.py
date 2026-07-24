@@ -15,7 +15,7 @@ from libs.modules.ubsmem.ubsshmem.ubs_mem_models import (
 )
 
 
-@pytest.mark.ubs_mem_smoke
+@pytest.mark.smoke
 class TestTcUbsShmLongTerm0003(UbsMemCase):
     """
     CaseNumber:
@@ -32,26 +32,26 @@ class TestTcUbsShmLongTerm0003(UbsMemCase):
         P3.UBS-Memory服务加载正常
         P4.释放借用内存缓存
     TestStep:
-        S1.查看节点是否有16个app进程，没有就启动16个
+        S1.查看节点是否�?6个app进程，没有就启动16�?
         S2.每个节点依次进行以下步骤
-        S3.每个进程按照128M、1G、4G的粒度中的随机大小去并发进行fd借用
-        S4.每个进程按照128M、1G、4G的粒度中的随机大小去并发进行numa借用
-        S5.每个进程去并发释放借用的内存
-        S6.每个进程按照128M、1G、4G的粒度中的随机大小去并发进行fd借用
-        S7.每个进程按照128M、1G、4G的粒度中的随机大小去并发进行numa借用
-        S8.执行dd if=/dev/urandom of=write_test.txt bs=1M count=size按内存大小生成随机文件并获取md5值
-        S9.每个进程写入文件到借入的内存
-        S10.每个进程去读取接入的内存，并对比读写内存一致性
-        S11.每个进程去并发归还借用的内存
+        S3.每个进程按照128M�?G�?G的粒度中的随机大小去并发进行fd借用
+        S4.每个进程按照128M�?G�?G的粒度中的随机大小去并发进行numa借用
+        S5.每个进程去并发释放借用的内�?
+        S6.每个进程按照128M�?G�?G的粒度中的随机大小去并发进行fd借用
+        S7.每个进程按照128M�?G�?G的粒度中的随机大小去并发进行numa借用
+        S8.执行dd if=/dev/urandom of=write_test.txt bs=1M count=size按内存大小生成随机文件并获取md5�?
+        S9.每个进程写入文件到借入的内�?
+        S10.每个进程去读取接入的内存，并对比读写内存一致�?
+        S11.每个进程去并发归还借用的内�?
     ExpectedResult:
         E1.APP进程启动成功
-        E2.开始执行
+        E2.开始执�?
         E3.fd内存借用成功
         E4.numa内存借用成功
         E5.内存归还成功
         E6.fd内存借用成功
         E7.numa内存借用成功
-        E8.md5值获取成功
+        E8.md5值获取成�?
         E9.内存写入成功
         E10.内存读取成功
         E11.内存归还成功
@@ -73,7 +73,7 @@ class TestTcUbsShmLongTerm0003(UbsMemCase):
     def test_tc_ubs_shm_long_term_0003(self):
 
         app_count = 10
-        self.logStep("S1.查看节点是否有16个app进程，没有就启动16个")
+        self.logStep("S1.查看节点是否�?6个app进程，没有就启动16�?)
         for node in self.host_nodes:
             app_num = node.get_active_app_num()
             if app_num < app_count:
@@ -87,11 +87,11 @@ class TestTcUbsShmLongTerm0003(UbsMemCase):
         self.logStep("S2.每个节点依次进行以下步骤")
         sizes = [128 * 1024 * 1024, 1024 * 1024 * 1024]
         for node in self.host_nodes:
-            self.logStep("E2.开始执行")
+            self.logStep("E2.开始执�?)
             task = MultiTask(node.apps[:app_count])
             sizes1 = sizes.copy()
             while sizes1:
-                self.logStep("S3.每个进程按照128M、1G、4G的粒度中的随机大小去并发进行fd借用")
+                self.logStep("S3.每个进程按照128M�?G�?G的粒度中的随机大小去并发进行fd借用")
 
                 size = pop_random_element(sizes1)
                 fd_addr_desc_list1 = task.ubsmem_lease_malloc([(self.default_region, size,UbsMemInstance.DISTANCE_DIRECT_NODE,0) for _ in range(app_count)])
@@ -99,13 +99,13 @@ class TestTcUbsShmLongTerm0003(UbsMemCase):
                 succ_count = sum(1 for addr_desc in fd_addr_desc_list1 if addr_desc.rc == UBSM_SHMEM_OK)
                 self.assertEqual(succ_count, app_count)
 
-                self.logStep("S4.每个进程按照128M、1G、4G的粒度中的随机大小去并发进行numa借用")
+                self.logStep("S4.每个进程按照128M�?G�?G的粒度中的随机大小去并发进行numa借用")
                 numa_addr_desc_list1 = task.ubsmem_lease_malloc([(self.default_region,size,UbsMemInstance.DISTANCE_DIRECT_NODE,UBSM_FLAG_MALLOC_WITH_NUMA)for _ in range(app_count)])
                 self.logStep("E4.numa内存借用成功")
                 succ_count = sum(1 for addr_desc in numa_addr_desc_list1 if addr_desc.rc == UBSM_SHMEM_OK)
                 self.assertEqual(succ_count, app_count)
 
-                self.logStep("S5.每个进程去并发释放借用的内存")
+                self.logStep("S5.每个进程去并发释放借用的内�?)
                 fd_results1 = task.ubsmem_lease_free([(addr_desc.addr,)for addr_desc in fd_addr_desc_list1])
                 self.assertEqual(fd_results1.count(UBSM_SHMEM_OK),app_count)
                 self.logStep("E5.内存归还成功")
@@ -114,36 +114,36 @@ class TestTcUbsShmLongTerm0003(UbsMemCase):
 
             sizes2 = sizes.copy()
             while sizes2:
-                self.logStep("S6.每个进程按照128M、1G、4G的粒度中的随机大小去并发进行fd借用")
+                self.logStep("S6.每个进程按照128M�?G�?G的粒度中的随机大小去并发进行fd借用")
                 size2 = pop_random_element(sizes2)
                 fd_addr_desc_list2 = task.ubsmem_lease_malloc([(self.default_region,size2,UbsMemInstance.DISTANCE_DIRECT_NODE,0)for i in range(app_count)])
                 self.logStep("E6.fd内存借用成功")
                 succ_count = sum(1 for addr_desc in fd_addr_desc_list2 if addr_desc.rc == UBSM_SHMEM_OK)
                 self.assertEqual(succ_count, app_count)
 
-                self.logStep("S7.每个进程按照128M、1G、4G的粒度中的随机大小去并发进行numa借用")
+                self.logStep("S7.每个进程按照128M�?G�?G的粒度中的随机大小去并发进行numa借用")
                 numa_addr_desc_list2 = task.ubsmem_lease_malloc([(self.default_region,size2,UbsMemInstance.DISTANCE_DIRECT_NODE,UBSM_FLAG_MALLOC_WITH_NUMA)for i in range(app_count)])
                 self.logStep("E7.numa内存借用成功")
                 succ_count = sum(1 for addr_desc in numa_addr_desc_list2 if addr_desc.rc == UBSM_SHMEM_OK)
                 self.assertEqual(succ_count, app_count)
-                self.logStep("S8.执行dd if=/dev/urandom of=write_test.txt bs=1M count=size按内存大小生成随机文件并获取md5值")
+                self.logStep("S8.执行dd if=/dev/urandom of=write_test.txt bs=1M count=size按内存大小生成随机文件并获取md5�?)
 
-                self.logStep("E8.md5值获取成功")
+                self.logStep("E8.md5值获取成�?)
                 src_chr = get_random_char()
-                self.logStep("S9.每个进程写入文件到借入的内存")
+                self.logStep("S9.每个进程写入文件到借入的内�?)
                 append_res_list = task.mem_write([(desc.addr,size2,src_chr)for desc in fd_addr_desc_list2])
                 self.assertEqual(append_res_list.count(UBSM_SHMEM_OK),app_count)
                 self.logStep("E9.内存写入成功")
                 append_res_list = task.mem_write([(desc.addr,size2,src_chr)for desc in numa_addr_desc_list2])
                 self.assertEqual(append_res_list.count(UBSM_SHMEM_OK), app_count)
 
-                self.logStep("S10.每个进程去读取接入的内存，并对比读写内存一致性")
+                self.logStep("S10.每个进程去读取接入的内存，并对比读写内存一致�?)
                 read_res_list = task.mem_check([(desc.addr,size2,src_chr)for desc in fd_addr_desc_list2])
                 self.assertEqual(read_res_list.count(UBSM_SHMEM_OK), app_count)
                 self.logStep("E10.内存读取成功")
                 read_res_list = task.mem_check([(desc.addr, size2, src_chr) for desc in numa_addr_desc_list2])
                 self.assertEqual(read_res_list.count(UBSM_SHMEM_OK), app_count)
-                self.logStep("S11.每个进程去并发归还借用的内存")
+                self.logStep("S11.每个进程去并发归还借用的内�?)
                 fd_results2 = task.ubsmem_lease_free([(addr_desc.addr,)for addr_desc in fd_addr_desc_list2])
                 self.assertEqual(fd_results2.count(UBSM_SHMEM_OK),app_count)
                 self.logStep("E11.内存归还成功")

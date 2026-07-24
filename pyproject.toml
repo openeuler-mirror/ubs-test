@@ -140,7 +140,7 @@ markers = [
     "unit: marks tests as unit tests",
     "virt: marks tests as virtualization tests",
     "container: marks tests as container tests",
-    "ubs_mem_smoke: marks tests as ubsmem smoke tests",
+    "smoke: marks tests as smoke tests for quick validation",
 ]
 
 [tool.coverage.run]

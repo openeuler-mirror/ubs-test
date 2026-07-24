@@ -11,7 +11,7 @@ from libs.modules.ubsmem.ubsshmem.ubs_mem_models import (
 import pytest
 
 
-@pytest.mark.ubs_mem_smoke
+@pytest.mark.smoke
 class TestTcUbsShmCreate0010(UbsMemCase):
     """
     CaseNumber:
@@ -21,7 +21,7 @@ class TestTcUbsShmCreate0010(UbsMemCase):
     EnvType:
 
     CaseName:
-        010验证单次创建UBSM_FLAG_CACHE(0)类型的4M共享内存
+        010验证单次创建UBSM_FLAG_CACHE(0)类型�?M共享内存
     PreCondition:
         P1.UBS-Engine进程正常拉起
         P2.MMI组件加载正常

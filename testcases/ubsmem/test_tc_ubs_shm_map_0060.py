@@ -17,7 +17,7 @@ from libs.modules.ubsmem.ubsshmem.ubs_mem_models import (
 import pytest
 
 
-@pytest.mark.ubs_mem_smoke
+@pytest.mark.smoke
 class TestTcUbsShmMap0060(UbsMemCase):
     """
     CaseNumber:
@@ -27,19 +27,19 @@ class TestTcUbsShmMap0060(UbsMemCase):
     EnvType:
 
     CaseName:
-        060每节点按1G粒度创建512G共享内存后互相映射
+        060每节点按1G粒度创建512G共享内存后互相映�?
     PreCondition:
         P1.UBS-Engine进程正常拉起
         P2.MMI组件加载正常
         P3.UBS-Memory服务加载正常
     TestStep:
-        S1.每个节点调用接口ubsmem_create_region name0 0 2 host0 1 host1 0，以当前节点为导出节点
+        S1.每个节点调用接口ubsmem_create_region name0 0 2 host0 1 host1 0，以当前节点为导出节�?
         S2.每个节点调用接口ubsmem_shmem_allocate_batch  region_name shm_name 1024*1024*1024 0600 shm_count=512 ...
         S3.每个节点调用接口ubsmem_shmem_map_batch 0 1024*1024*1024 PROT_READ|PROT_WRITE(3) MAP_SHARED(1) shm_name 0 512 ...
         S4.每个节点都调用接口ubsmem_shmem_unmap_batch shm_name 1024*1024*1024 512将映射的共享内存解除映射
         S5.每个节点都调用接口ubsmem_shmem_deallocate_batch shm_name 512删除共享内存映射
     ExpectedResult:
-        E1.共享域创建成功
+        E1.共享域创建成�?
         E2.共享内存创建成功
         E3.共享内存映射成功
         E4.共享内存解除映射成功
@@ -63,7 +63,7 @@ class TestTcUbsShmMap0060(UbsMemCase):
         host_nodes_shm_list = []
 
         self.logStep(
-            "S1.每个节点调用接口ubsmem_create_region name0 0 2 host0 1 host1 0，以当前节点为导出节点")
+            "S1.每个节点调用接口ubsmem_create_region name0 0 2 host0 1 host1 0，以当前节点为导出节�?)
         for node in self.host_nodes:
             reg_attr = UbsmemRegionAttributes(
                 self.node_count,
@@ -72,8 +72,8 @@ class TestTcUbsShmMap0060(UbsMemCase):
                     for n_node in self.host_nodes
                 ],)
             res = node.apps[0].ubsmem_create_region(region_name, 0, reg_attr)
-            self.logStep("E1.共享域创建成功")
-            self.assertEqual(res, UBSM_SHMEM_OK, "共享域创建失败")
+            self.logStep("E1.共享域创建成�?)
+            self.assertEqual(res, UBSM_SHMEM_OK, "共享域创建失�?)
             host_nodes_shm_list.append((node, f"{shm_name_prefix}_{node.node_id}"))
 
         self.logStep(
@@ -110,7 +110,7 @@ class TestTcUbsShmMap0060(UbsMemCase):
 
         for node in self.host_nodes:
             res = node.apps[0].ubsmem_destroy_region(region_name)
-            self.assertEqual(res, UBSM_SHMEM_OK, "共享域删除失败")
+            self.assertEqual(res, UBSM_SHMEM_OK, "共享域删除失�?)
 
     def teardown_method(self):
         super().teardown_method()

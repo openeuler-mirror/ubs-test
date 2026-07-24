@@ -13,7 +13,7 @@ from libs.modules.ubsmem.ubsshmem.ubs_mem_models import (
 import pytest
 
 
-@pytest.mark.ubs_mem_smoke
+@pytest.mark.smoke
 class TestTcUbsShmCreatePerformance0001(UbsMemCase):
     """
     CaseNumber:
@@ -23,21 +23,21 @@ class TestTcUbsShmCreatePerformance0001(UbsMemCase):
     EnvType:
 
     CaseName:
-        001验证多次在请求节点创建共享内存1024M性能
+        001验证多次在请求节点创建共享内�?024M性能
     PreCondition:
         P1.UBS-Engine进程正常拉起
         P2.MMI组件加载正常
         P3.UBS-Memory服务加载正常
-        P4.CPU负载加压到50%
+        P4.CPU负载加压�?0%
     TestStep:
         S1.重启测试程序,获取进程pid
         S2.调用接口ubsmem_create_region name 0 0 2 host0 1 host1 0指定请求节点导出内存
         S3.节点0循环10次调用接口ubsmem_shmem_allocate region_name shm_name 1024*1024*1024 0600 0
-        S4.查询借用性能文件，查询创建共享内存时延
-        S5.节点1调用接口ubsmem_shmem_deallocate shm_name删除所有共享内存
+        S4.查询借用性能文件，查询创建共享内存时�?
+        S5.节点1调用接口ubsmem_shmem_deallocate shm_name删除所有共享内�?
     ExpectedResult:
         E1.重启成功，获取pid成功
-        E2.共享域创建成功
+        E2.共享域创建成�?
         E3.共享内存创建成功
         E4.查询共享内存创建时延符合要求
         E5.共享内存删除成功
@@ -75,7 +75,7 @@ class TestTcUbsShmCreatePerformance0001(UbsMemCase):
                 UbsmemRegionNodeDesc(self.host_nodes[1].host_name, False),
             ]))
 
-        self.logStep("E2.共享域创建成功")
+        self.logStep("E2.共享域创建成�?)
         self.assertEqual(rc, UBSM_SHMEM_OK)
 
         self.logStep("S3.节点0循环10次调用接口ubsmem_shmem_allocate region_name shm_name 1024*1024*1024 0600 0")
@@ -90,13 +90,13 @@ class TestTcUbsShmCreatePerformance0001(UbsMemCase):
 
         self.sleep(35)
 
-        self.logStep("S4.查询借用性能文件，查询创建共享内存时延")
+        self.logStep("S4.查询借用性能文件，查询创建共享内存时�?)
         latency_time = self.host_nodes[0].get_perf_data(pid, UbsMemPerfTp.TP_UBSM_SHM_CREATE)
 
         self.logStep("E4.查询共享内存创建时延符合要求")
         self.logger.info(f"malloc time {latency_time}")
 
-        self.logStep("S5.节点1调用接口ubsmem_shmem_deallocate shm_name删除所有共享内存")
+        self.logStep("S5.节点1调用接口ubsmem_shmem_deallocate shm_name删除所有共享内�?)
         for shm_name in shm_name_list:
             rc = self.host_nodes[0].apps[0].ubsmem_shmem_deallocate(shm_name)
             self.logStep("E5.共享内存删除成功")
