@@ -32,20 +32,20 @@ class TestTcUbsMemProcFault0008(UbsMemCase):
         S2.执行kill -9构造usmd故障
         S3.等待usbmd服务启动
         S4.随机选择一个字符写入内存中
-        S5.检查内存的内容是否与写入的一�?
+        S5.检查内存的内容是否与写入的一�?
         S6.调用接口ubsmem_lease_free addr释放借用内存
-        S7.所有app read size addr 1024 test.txt读取内存的内容到文件，并获取文件的MD5�?
-        S8.对比文件的md5�?
+        S7.所有app read size addr 1024 test.txt读取内存的内容到文件，并获取文件的MD5�?
+        S8.对比文件的md5�?
         S9.调用接口ubsmem_lease_free addr释放借用内存
     ExpectedResult:
         E1.内存借用成功
         E2.命令执行成功
         E3.ubsmd服务启动成功
         E4.内存写入成功
-        E5.内存检查一�?
+        E5.内存检查一�?
         E6.内存释放成功
         E7.内存读取成功
-        E8.两次md5值一�?
+        E8.两次md5值一�?
         E9.内存释放成功
     Author:
         tanghongcheng 30062639
@@ -84,9 +84,9 @@ class TestTcUbsMemProcFault0008(UbsMemCase):
         self.logStep("E4.内存写入成功")
         self.assertEqual(rc, UBSM_SHMEM_OK)
 
-        self.logStep("S5.检查内存的内容是否与写入的一�?)
+        self.logStep("S5.检查内存的内容是否与写入的一�?)
         rc = self.host_nodes[0].apps[0].mem_check(addr_desc.addr, mem_size_1g, expect_char)
-        self.logStep("E5.内存检查一�?)
+        self.logStep("E5.内存检查一�?)
         self.assertEqual(rc, UBSM_SHMEM_OK)
 
         self.logStep("S6.调用接口ubsmem_lease_free addr释放借用内存")

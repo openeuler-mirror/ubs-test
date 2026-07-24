@@ -28,7 +28,7 @@ class TestTcUbsMemBorrowPerformance0003(UbsMemCase):
         P2.MMI组件加载正常
         P3.UBS-Memory服务加载正常
         P4.环境无借用内存缓存
-        P5.CPU负载加压�?0%
+        P5.CPU负载加压�?0%
     TestStep:
         S1.重启测试程序,获取进程pid
         S2.循环10次调用接口ubsmem_lease_malloc name 1024*1024*1024 0 0进行fd借用

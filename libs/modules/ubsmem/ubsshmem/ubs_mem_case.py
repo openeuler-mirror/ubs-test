@@ -1,4 +1,4 @@
-﻿#!/usr/bin/python3
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 """UBS Memory test case base - migrated from legacy UbsMemCase.
 

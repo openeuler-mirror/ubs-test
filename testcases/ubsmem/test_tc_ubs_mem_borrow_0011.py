@@ -18,20 +18,20 @@ class TestTcUbsMemBorrow0011(UbsMemCase):
     EnvType:
 
     CaseName:
-        011验证numa借用128内存后进行先写后读操�?
+        011验证numa借用128内存后进行先写后读操�?
     PreCondition:
         P1.UBS-Engine进程正常拉起
         P2.MMI组件加载正常
         P3.UBS-Memory服务加载正常
     TestStep:
         S1.调用接口ubsmem_lease_malloc name 128*1024*1024 0 64
-        S2.随机取一个字符并写入得到的地址�?
-        S3.检查内存内容是否与写入的一�?
+        S2.随机取一个字符并写入得到的地址�?
+        S3.检查内存内容是否与写入的一�?
         S4.调用接口ubsmem_lease_free addr释放借用内存
     ExpectedResult:
         E1.内存申请成功，有相应的远端numa呈现
         E2.内存写入成功
-        E3.内存检查结果一�?
+        E3.内存检查结果一�?
         E4.内存归还成功
     Author:
         yangdonglin 00919887
@@ -55,13 +55,13 @@ class TestTcUbsMemBorrow0011(UbsMemCase):
         remote_numa = self.host_nodes[0].get_remote_numa()
         self.assertNotEqual(len(remote_numa), 0)
         expect_char = get_random_char()
-        self.logStep("S2.随机取一个字符并写入得到的地址�?)
+        self.logStep("S2.随机取一个字符并写入得到的地址�?)
         rc = self.host_nodes[0].apps[0].mem_write(addr_desec.addr, size, expect_char)
         self.logStep("E2.内存写入成功")
         self.assertEqual(rc, UBSM_SHMEM_OK)
-        self.logStep("S3.检查内存内容是否与写入的一�?)
+        self.logStep("S3.检查内存内容是否与写入的一�?)
         rc = self.host_nodes[0].apps[0].mem_check(addr_desec.addr, size, expect_char)
-        self.logStep("E3.内存检查结果一�?)
+        self.logStep("E3.内存检查结果一�?)
         self.assertEqual(rc, UBSM_SHMEM_OK)
         self.logStep("S4.调用接口ubsmem_lease_free addr释放借用内存")
         rc = self.host_nodes[0].apps[0].ubsmem_lease_free(addr_desec.addr)

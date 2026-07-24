@@ -17,7 +17,7 @@ class TestTcUbsMemProcFault0013(UbsMemCase):
     EnvType:
 
     CaseName:
-        013验证创建共享内存后使用kill -9构造ubsmd服务故障后查看内存共享信�?
+        013验证创建共享内存后使用kill -9构造ubsmd服务故障后查看内存共享信�?
     PreCondition:
         P1.UBS-Engine进程正常拉起
         P2.MMI组件加载正常

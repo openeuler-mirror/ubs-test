@@ -1,4 +1,4 @@
-﻿#!/usr/bin/python3.7
+#!/usr/bin/python3.7
 # -*- coding: utf-8 -*-
 
 import re
@@ -202,7 +202,7 @@ class UbsMemNode(NodeExecutor):
     def get_numa_node_memory(self) -> List[int]:
         """
         获取每个numa的内存量
-        :return: 内存大小的列表，MB为单�?
+        :return: 内存大小的列表，MB为单位
         """
         result = self.run(f"numastat -c -vm")
         match = re.search(r'MemTotal\s+(.*)', result.std_out)
@@ -214,7 +214,7 @@ class UbsMemNode(NodeExecutor):
     def get_numa_node_huge_memory(self) -> List[int]:
         """
         获取每个numa的空闲大页内存量
-        :return: 内存大小的列表，MB为单�?
+        :return: 内存大小的列表，MB为单位
         """
         if self.is_borrow_from_1G_huge():
             local_numa_list = self.get_loacl_numa()
@@ -233,7 +233,7 @@ class UbsMemNode(NodeExecutor):
 
     def get_shm_account(self, shm_name: str) -> Optional[ShmAccount]:
         """
-        获取账本共享内存中的：name, 1borrow_node�?provider导出节点�?size�?导出numa�?导出socket,6shm_status�?handle
+        获取账本共享内存中的：name, 1borrow_node、2provider导出节点、5size、3导出numa，4导出socket,6shm_status、7handle
         """
         result = self.run("sudo -u ubse ubsectl display memory -t borrow_detail")
         if len(shm_name) <= 30:
@@ -277,8 +277,8 @@ class UbsMemNode(NodeExecutor):
         """
         :param shm_name: 共享内存名字
         :param timeout: 等待时间
-        等待共享内存中的特定账户信息被清�?
-        :return: True已经自动释放,False未释�?
+        等待共享内存中的特定账户信息被清除
+        :return: True已经自动释放,False未释放
         """
         start_time = time.time()
         while time.time() - start_time < timeout + 35:
@@ -344,7 +344,7 @@ class UbsMemNode(NodeExecutor):
         return False
 
     def get_borrow_huge_limit(self) -> List[int]:
-        """返回字节为单�?""
+        """返回字节为单位"""
         numa_mem_list = self.get_numa_node_huge_memory()
         numa_mem_list = [size if size < 256 * 1024 else 256 * 1024 for size in numa_mem_list]
         return [size * 1024 * 1024 for size in numa_mem_list]
@@ -388,8 +388,8 @@ class UbsMemNode(NodeExecutor):
 
     def get_perf_data(self, pid: int, tp: UbsMemPerfTp) -> PerfLatency:
         """
-        获取指定打点的时�?
-        :param pid: 进程�?
+        获取指定打点的时延
+        :param pid: 进程号
         :param tp: 打点枚举
         :return: 返回时延，ms单位
         """
@@ -425,14 +425,14 @@ class UbsMemNode(NodeExecutor):
 
     def injection_fault(self, mode, *args) -> bool:
         """
-        TODO: dcat_entry模块缺失,故障注入功能需要重新实�?
+        TODO: dcat_entry模块缺失,故障注入功能需要重新实现
         """
         self.logger.warn("injection_fault not implemented - dcat_entry module missing")
         return False
 
     def recover_fault(self, mode, *args):
         """
-        TODO: dcat_entry模块缺失,故障恢复功能需要重新实�?
+        TODO: dcat_entry模块缺失,故障恢复功能需要重新实现
         """
         self.logger.warn("recover_fault not implemented - dcat_entry module missing")
         return False
@@ -562,7 +562,7 @@ commonName              = supplied"""
         """
         与verify_log_correctness配合使用，检查是否有不应该出现的日志出现
         :param level: 日志级别
-        :return: �?
+        :return: 无
         """
         self.run(f"tail -F -n 0 {self.ubsm_service_log}  > {self.ubsm_filter_log} 2>&1 & disown")
 

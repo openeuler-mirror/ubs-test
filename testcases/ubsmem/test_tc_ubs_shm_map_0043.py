@@ -26,7 +26,7 @@ class TestTcUbsShmMap0043(UbsMemCase):
     EnvType:
 
     CaseName:
-        043验证导出方CC导入方NC创建1024共享内存一致�?
+        043验证导出方CC导入方NC创建1024共享内存一致�?
     PreCondition:
         P1.UBS-Engine进程正常拉起
         P2.MMI组件加载正常
@@ -36,18 +36,18 @@ class TestTcUbsShmMap0043(UbsMemCase):
         S2.节点0进程0调用接口ubsmem_shmem_allocate region_name shm_name 1024*1024*1024 0600 UBSM_FLAG_ONLY_IMPORT_NONCACHE|UBSM_FLAG_WR_DELAY_COMP(12)
         S3.节点0进程0调用接口ubsmem_shmem_map addr 1024*1024*1024 PROT_WRITE|PROT_READ(3) 1 shm_name 0
         S4.节点1进程0调用接口ubsmem_shmem_map addr 1024*1024*1024 PROT_WRITE|PROT_READ(3) 1 shm_name 0
-        S5.随机取一个字符并写入得到的地址�?
-        S5.检查内存内容是否与写入的一�?
+        S5.随机取一个字符并写入得到的地址�?
+        S5.检查内存内容是否与写入的一�?
         S7.两个进程都调用接口ubsmem_shmem_unmap addr 1024*1024*1024
         S8.节点0进程0调用接口ubsmem_shmem_deallocate shm_name
         S9.节点0进程0调用接口ubsmem_shmem_deallocate shm_name
     ExpectedResult:
-        E1.共享域创建成�?
+        E1.共享域创建成�?
         E2.共享内存创建成功
         E3.共享内存映射成功
         E4.共享内存映射成功
         E5.内存写入成功
-        E6.内存检查结果一�?
+        E6.内存检查结果一�?
         E7.内存解除映射成功
         E8.共享内存删除成功
         E9.共享内存删除成功
@@ -75,7 +75,7 @@ class TestTcUbsShmMap0043(UbsMemCase):
                 UbsmemRegionNodeDesc(self.host_nodes[0].host_name, False),
                 UbsmemRegionNodeDesc(self.host_nodes[1].host_name, True),
             ]))
-        self.logStep("E1.共享域创建成�?)
+        self.logStep("E1.共享域创建成�?)
         self.assertEqual(rc, UBSM_SHMEM_OK)
         self.logStep(
             "S2.节点0进程0调用接口ubsmem_shmem_allocate region_name shm_name 1024 0600 UBSM_FLAG_ONLY_IMPORT_NONCACHE|UBSM_FLAG_WR_DELAY_COMP(12)")
@@ -97,13 +97,13 @@ class TestTcUbsShmMap0043(UbsMemCase):
         for i in range(2):
             self.logInfo(f"This is {i}th test")
             expect_char = get_random_char()
-            self.logStep("S5.随机取一个字符并写入得到的地址�?)
+            self.logStep("S5.随机取一个字符并写入得到的地址�?)
             rc = self.host_nodes[0].apps[0].mem_write(addr_desc1.addr, size, expect_char)
             self.logStep("E5.内存写入成功")
             self.assertEqual(rc, UBSM_SHMEM_OK)
-            self.logStep("S6.检查内存内容是否与写入的一�?)
+            self.logStep("S6.检查内存内容是否与写入的一�?)
             rc = self.host_nodes[1].apps[0].mem_check(addr_desc2.addr, size, expect_char)
-            self.logStep("E6.内存检查结果一�?)
+            self.logStep("E6.内存检查结果一�?)
             self.assertEqual(rc, UBSM_SHMEM_OK)
 
         self.logStep("S7.两个进程都调用接口ubsmem_shmem_unmap addr 1024")

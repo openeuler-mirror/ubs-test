@@ -1,4 +1,4 @@
-﻿#!/usr/bin/python3.7
+#!/usr/bin/python3.7
 # -*- coding: utf-8 -*-
 
 from __future__ import annotations
@@ -35,7 +35,7 @@ class NodeExecutor(CommandExecutor):
         :param cmd 要执行的命令
         :param uid 指定的uid
         :param gid 指定gid
-        :param groups 辅助�?
+        :param groups 辅助组
         """
         if groups != "":
             return self.run(f"{env} setpriv --reuid {uid} --regid {gid} --groups {groups} {cmd}")
@@ -109,7 +109,7 @@ class NodeExecutor(CommandExecutor):
     def update_config_item(self, config_path: str, config_key: str, new_value: str, separator: str,
                            flag: str = "/") -> bool:
         """
-        修改key:value格式的配置文�?
+        修改key:value格式的配置文件
         """
         result = self.run(
             f"sed -i 's{flag}^{config_key}\s*{separator}\s*.*${flag}{config_key}{separator}{new_value}{flag}g' {config_path}")

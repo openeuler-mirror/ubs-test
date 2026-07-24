@@ -1,4 +1,4 @@
-﻿#!/usr/bin/python3.7
+#!/usr/bin/python3.7
 # -*- coding: utf-8 -*-
 import operator
 from dataclasses import dataclass, asdict, field

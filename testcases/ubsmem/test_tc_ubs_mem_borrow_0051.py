@@ -23,13 +23,13 @@ class TestTcUbsMemBorrow0051(UbsMemCase):
     CaseName:
         051验证单次最大借用512G内存
     PreCondition:
-        P1.环境�?G大页导出内存
+        P1.环境�?G大页导出内存
         P2.UBS-Engine进程正常拉起
         P3.MMI组件加载正常
         P4.UBS-Memory服务加载正常
     TestStep:
         S1.调用接口ubsmem_lease_malloc region_name 512*1024*1024*1024 0 32进行fd借用
-        S2.调用接口ubsmem_lease_free addr释放借用的内�?
+        S2.调用接口ubsmem_lease_free addr释放借用的内�?
         S3.查看借用信息，如果存在缓存，则释放掉借用环境
     ExpectedResult:
         E1.内存借用成功
@@ -40,7 +40,7 @@ class TestTcUbsMemBorrow0051(UbsMemCase):
     """
 
     def setup_method(self):
-        self.logStep("P1.环境�?G大页导出内存")
+        self.logStep("P1.环境�?G大页导出内存")
 
         self.logStep("P2.UBS-Engine进程正常拉起")
 
@@ -58,7 +58,7 @@ class TestTcUbsMemBorrow0051(UbsMemCase):
         self.logStep("E1.内存借用成功")
         self.assertEqual(addr_desc.rc, UBSM_SHMEM_OK)
 
-        self.logStep("S2.调用接口ubsmem_lease_free addr释放借用的内�?)
+        self.logStep("S2.调用接口ubsmem_lease_free addr释放借用的内�?)
         rc = self.host_nodes[0].apps[0].ubsmem_lease_free(addr_desc.addr)
 
         self.logStep("E2.内存释放成功")

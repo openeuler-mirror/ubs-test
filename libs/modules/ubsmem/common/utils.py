@@ -1,4 +1,4 @@
-﻿import dataclasses
+import dataclasses
 import random
 import string
 import time
@@ -16,7 +16,7 @@ def calculate_address(start_addr: str, offset: int) -> str:
     """
     进行地址偏移转换
     :param start_addr: 16进制起始地址
-    :param offset: 偏移�?
+    :param offset: 偏移量
     :return: 16进制计算结果
     """
     start = int(start_addr, 16)
@@ -25,7 +25,7 @@ def calculate_address(start_addr: str, offset: int) -> str:
 
 def round_down_to_align(size: int, alignment: int) -> int:
     """
-    向下以指定单位对�?
+    向下以指定单位对齐
     :param size: 原始大小
     :param alignment: 对齐单位
     :return:
@@ -67,7 +67,7 @@ def pop_random_element(lst):
 
 def get_random_char() -> str:
     """
-    随机获取0-9、a-z、A-Z中的一个字�?
+    随机获取0-9、a-z、A-Z中的一个字符
     """
     chars = string.digits + string.ascii_lowercase + string.ascii_uppercase
     return random.choice(chars)

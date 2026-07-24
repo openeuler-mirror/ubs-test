@@ -21,7 +21,7 @@ class TestTcUbsShmCreate0010(UbsMemCase):
     EnvType:
 
     CaseName:
-        010验证单次创建UBSM_FLAG_CACHE(0)类型�?M共享内存
+        010验证单次创建UBSM_FLAG_CACHE(0)类型�?M共享内存
     PreCondition:
         P1.UBS-Engine进程正常拉起
         P2.MMI组件加载正常

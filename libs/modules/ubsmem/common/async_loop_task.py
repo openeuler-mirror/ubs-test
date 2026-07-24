@@ -1,4 +1,4 @@
-﻿#!/usr/bin/python3.7
+#!/usr/bin/python3.7
 # -*- coding: utf-8 -*-
 
 import threading
@@ -11,8 +11,8 @@ from libs.utils.logger_compat import Log
 class AsyncLoopTask:
     """
     并发任务类，通过 A.func()的方式调用传入的类对象的func()
-    支持统一参数和定制参�?
-    统一参数与原func(a,b,c)调用方式一�?
+    支持统一参数和定制参数
+    统一参数与原func(a,b,c)调用方式一致
     """
 
     def __init__(self, obj: object, interval: float = 1.0, loop_run: bool = True):
