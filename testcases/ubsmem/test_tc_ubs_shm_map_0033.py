@@ -24,7 +24,7 @@ class TestTcUbsShmMap0033(UbsMemCase):
     EnvType:
 
     CaseName:
-        033验证刷新4K粒度大小的内�?
+        033验证刷新4K粒度大小的内存
     PreCondition:
         P1.UBS-Engine进程正常拉起
         P2.MMI组件加载正常
@@ -34,9 +34,9 @@ class TestTcUbsShmMap0033(UbsMemCase):
         S2.节点0进程0调用接口ubsmem_shmem_map addr 128*1024*1024 PROT_NONE(0) 1 shm_name 0
         S3.节点1进程0调用接口ubsmem_shmem_map addr 128*1024*1024 PROT_NONE(0) 1 shm_name 0
         S4.节点0进程0调用接口ubsmem_shmem_set_ownership shm_name 0 4K PROT_WRITE|PROT_READ(3)
-        S5.随机取一个字符并写入得到的地址�?
+        S5.随机取一个字符并写入得到的地址中
         S6.节点1进程0调用接口ubsmem_shmem_set_ownership shm_name 0 4K PROT_READ(1)
-        S7.检查内存内容是否与写入的一�?
+        S7.检查内存内容是否与写入的一致
         S8.两个进程都调用接口ubsmem_shmem_unmap addr 128*1024*1024
         S9.节点1进程0调用接口ubsmem_shmem_deallocate shm_name
         S10.节点1进程0调用接口ubsmem_shmem_deallocate shm_name
@@ -44,10 +44,10 @@ class TestTcUbsShmMap0033(UbsMemCase):
         E1.共享内存创建成功
         E2.共享内存映射成功
         E3.共享内存映射成功
-        E4.共享内存状态修改成�?
+        E4.共享内存状态修改成功
         E5.内存写入成功
-        E6.共享内存状态修改成�?
-        E7.内存检查结果一�?
+        E6.共享内存状态修改成功
+        E7.内存检查结果一致
         E8.内存解除映射成功
         E9.共享内存删除成功
         E10.共享内存删除成功
@@ -88,9 +88,9 @@ class TestTcUbsShmMap0033(UbsMemCase):
             "S5.节点0进程0调用接口ubsmem_shmem_set_ownership shm_name 0 4K PROT_WRITE|PROT_READ(3)")
         rc = self.host_nodes[0].apps[0].ubsmem_shmem_set_ownership(
             shm_name, addr_desc1.addr, 4 * 1024, PROT_WRITE | PROT_READ)
-        self.logStep("E5.共享内存状态修改成�?)
+        self.logStep("E5.共享内存状态修改成功")
         self.assertEqual(rc, UBSM_SHMEM_OK)
-        self.logStep("S6.随机取一个字符并写入得到的地址�?)
+        self.logStep("S6.随机取一个字符并写入得到的地址中")
         rc = self.host_nodes[0].apps[0].mem_write(addr_desc1.addr, 4 * 1024, expect_char)
         self.logStep("E6.内存写入成功")
         self.assertEqual(rc, UBSM_SHMEM_OK)
@@ -100,11 +100,11 @@ class TestTcUbsShmMap0033(UbsMemCase):
         self.logStep("S7.节点1进程0调用接口ubsmem_shmem_set_ownership shm_name 0 4K PROT_READ(1)")
         rc = self.host_nodes[1].apps[0].ubsmem_shmem_set_ownership(
             shm_name, addr_desc2.addr, 4 * 1024, PROT_READ)
-        self.logStep("E7.共享内存状态修改成�?)
+        self.logStep("E7.共享内存状态修改成功")
         self.assertEqual(rc, UBSM_SHMEM_OK)
-        self.logStep("S8.检查内存内容是否与写入的一�?)
+        self.logStep("S8.检查内存内容是否与写入的一致")
         rc = self.host_nodes[1].apps[0].mem_check(addr_desc2.addr, 4 * 1024, expect_char)
-        self.logStep("E8.内存检查结果一�?)
+        self.logStep("E8.内存检查结果一致")
         self.assertEqual(rc, UBSM_SHMEM_OK)
         self.logStep("S9.两个进程都调用接口ubsmem_shmem_unmap addr 128")
         rc = self.host_nodes[0].apps[0].ubsmem_shmem_unmap(addr_desc1.addr, size)

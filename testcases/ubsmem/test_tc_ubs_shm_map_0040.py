@@ -25,7 +25,7 @@ class TestTcUbsShmMap0040(UbsMemCase):
     EnvType:
 
     CaseName:
-        040验证NC同节点多进程使用写模式映�?G共享内存
+        040验证NC同节点多进程使用写模式映射1G共享内存
     PreCondition:
         P1.UBS-Engine进程正常拉起
         P2.MMI组件加载正常
@@ -38,7 +38,7 @@ class TestTcUbsShmMap0040(UbsMemCase):
         S5.两个进程都调用接口ubsmem_shmem_unmap addr 1024*1024*1024
         S6.进程0调用接口ubsmem_shmem_deallocate shm_name
     ExpectedResult:
-        E1.共享域创建成�?
+        E1.共享域创建成功
         E2.共享内存创建成功
         E3.共享内存映射成功
         E4.共享内存映射成功
@@ -68,7 +68,7 @@ class TestTcUbsShmMap0040(UbsMemCase):
                 UbsmemRegionNodeDesc(self.host_nodes[0].host_name, True),
                 UbsmemRegionNodeDesc(self.host_nodes[1].host_name, False),
             ]))
-        self.logStep("E1.共享域创建成�?)
+        self.logStep("E1.共享域创建成功")
         self.assertEqual(rc, UBSM_SHMEM_OK)
         self.logStep(
             "S2.节点0进程0调用接口ubsmem_shmem_allocate region_name shm_name 1024*1024*1024 0600 UBSM_FLAG_NONCACHE|UBSM_FLAG_WR_DELAY_COMP(6)")

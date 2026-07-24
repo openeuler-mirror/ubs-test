@@ -29,7 +29,7 @@ class TestTcUbsShmLookup0001(UbsMemCase):
         P2.MMI组件加载正常
         P3.UBS-Memory服务加载正常
     TestStep:
-        S1.节点0调用接口ubsmem_create_region region_name 0 2 host0 host1创建共享�?
+        S1.节点0调用接口ubsmem_create_region region_name 0 2 host0 host1创建共享域
         S2.节点0调用接口ubsmem_shmem_allocate region_name shm_name 1024*1024*1024 0600 0
         S3.节点0调用接口ubsmem_shmem_map addr 1024*1024*1024 PROT_READ|PROT_WRITE(3) 1 shm_name 0
         S4.调用接口ubsmem_shmem_lookup  shm_name查询共享内存信息是否合理
@@ -40,7 +40,7 @@ class TestTcUbsShmLookup0001(UbsMemCase):
         S9.节点1调用接口ubsmem_shmem_deallocate shm_name
         S10.app ubsmem_destroy_region region_name
     ExpectedResult:
-        E1.共享域创建成�?
+        E1.共享域创建成功
         E2.共享内存创建成功
         E3.共享内存映射成功
         E4.共享内存信息合理
@@ -49,7 +49,7 @@ class TestTcUbsShmLookup0001(UbsMemCase):
         E7.内存解除映射成功
         E8.内存解除映射成功
         E9.共享内存删除成功
-        E10.共享域删除成�?
+        E10.共享域删除成功
     Author:
         wanghaojie 60104182
     """
@@ -66,13 +66,13 @@ class TestTcUbsShmLookup0001(UbsMemCase):
         region_name = "TC_UBS_SHM_LOOKUP_0001"
         shm_name = "TC_UBS_SHM_LOOKUP_0001"
         size = 1024 * 1024 * 1024
-        self.logStep("S1.节点0调用接口ubsmem_create_region region_name 0 2 host0 host1创建共享�?)
+        self.logStep("S1.节点0调用接口ubsmem_create_region region_name 0 2 host0 host1创建共享域")
         rc = self.host_nodes[0].apps[0].ubsmem_create_region(
             region_name, 0,
             UbsmemRegionAttributes(2, [
                 UbsmemRegionNodeDesc(self.host_nodes[0].host_name, False),
                 UbsmemRegionNodeDesc(self.host_nodes[1].host_name, True)]))
-        self.logStep("E1.共享域创建成�?)
+        self.logStep("E1.共享域创建成功")
         self.assertEqual(rc, UBSM_SHMEM_OK)
 
         self.logStep("S2.节点0调用接口ubsmem_shmem_allocate region_name shm_name 1024*1024*1024 0600 0")
@@ -129,7 +129,7 @@ class TestTcUbsShmLookup0001(UbsMemCase):
         self.assertEqual(rc, UBSM_SHMEM_OK)
         self.logStep("S10.app ubsmem_destroy_region region_name")
         rc = self.host_nodes[0].apps[0].ubsmem_destroy_region(region_name)
-        self.logStep("E10.共享域删除成�?)
+        self.logStep("E10.共享域删除成功")
         self.assertEqual(rc, UBSM_SHMEM_OK)
 
     def teardown_method(self):

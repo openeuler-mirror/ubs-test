@@ -19,7 +19,7 @@ class TestTcUbsMemBorrowWithLoc0002(UbsMemCase):
     CaseName:
         002验证指定numa进行fd借用1024M
     PreCondition:
-        P1.四节点环�?
+        P1.四节点环境
         P2.UBS-Engine进程正常拉起
         P3.MMI组件加载正常
         P4.UBS-Memory服务加载正常
@@ -38,7 +38,7 @@ class TestTcUbsMemBorrowWithLoc0002(UbsMemCase):
     """
 
     def setup_method(self):
-        self.logStep("P1.四节点环�?)
+        self.logStep("P1.四节点环境")
 
         self.logStep("P2.UBS-Engine进程正常拉起")
 

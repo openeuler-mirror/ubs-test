@@ -32,16 +32,16 @@ class TestTcUbsMemProcFault0016(UbsMemCase):
         S1.进程0调用接口ubsmem_create_region region_name 0 2 host0 host1
         S2.执行kill -9构造usmd故障
         S3.等待ubsm服务启动成功
-        S4.进程1调用接口ubsmem_create_region region_name 0 2 host0 host1创建共享�?
+        S4.进程1调用接口ubsmem_create_region region_name 0 2 host0 host1创建共享域
         S5.进程1调用接口ubsmem_shmem_allocate region_name shm_name 1024*1024*1024 0600 0 创建共享内存
         S6.进程0调用接口ubsmem_shmem_map addr 1024*1024*1024 PROT_READ(1) 1 shm_name 0映射共享内存
         S7.进程0调用接口ubsmem_shmem_unmap addr 1024*1024*1024解除映射共享内存
         S8.节点0进程0调用接口ubsmem_shmem_deallocate shm_name
     ExpectedResult:
-        E1.共享域创建成�?
+        E1.共享域创建成功
         E2.命令执行成功
         E3.ubsmd服务启动成功
-        E4.共享域创建失�?
+        E4.共享域创建失败
         E5.共享内存创建成功
         E6.共享内存映射成功
         E7.共享内存借出映射成功
@@ -69,7 +69,7 @@ class TestTcUbsMemProcFault0016(UbsMemCase):
 
         self.logStep("S1.进程0调用接口ubsmem_create_region region_name 0 2 host0 host1")
         res = self.host_nodes[0].apps[0].ubsmem_create_region(region_name, 0, reg_attr)
-        self.logStep("E1.共享域创建成�?)
+        self.logStep("E1.共享域创建成功")
         self.assertEqual(res, UBSM_SHMEM_OK)
 
         self.logStep("S2.执行kill -9构造usmd故障")
@@ -82,9 +82,9 @@ class TestTcUbsMemProcFault0016(UbsMemCase):
         self.logStep("E3.ubsmd服务启动成功")
         self.assertEqual(result, True)
         self.sleep(15)
-        self.logStep("S4.进程1调用接口ubsmem_create_region region_name 0 2 host0 host1创建共享�?)
+        self.logStep("S4.进程1调用接口ubsmem_create_region region_name 0 2 host0 host1创建共享域")
         res = self.host_nodes[0].apps[1].ubsmem_create_region(region_name, 0, reg_attr)
-        self.logStep("E4.共享域创建失�?)
+        self.logStep("E4.共享域创建失败")
         self.assertEqual(res, UBSM_SHMEM_ERR_ALREADY_EXIST)
 
         self.logStep(
