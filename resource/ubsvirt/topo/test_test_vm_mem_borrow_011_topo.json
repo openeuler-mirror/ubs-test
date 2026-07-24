@@ -1,0 +1,38 @@
+{
+  "nodes":[{
+    "name": "node1",
+    "role": "master",
+    "hugePage": 2048
+  },
+  {
+    "name": "node2",
+    "role": "agent",
+    "hugePage": 4096
+  },
+  {
+    "name": "node3",
+    "role": "agent",
+    "hugePage": 10240
+  },
+  {
+    "name": "node4",
+    "role": "agent",
+    "hugePage": 10240
+  }],
+  "vms":[{
+    "name": "vm_01",
+    "image": "openEuler-22.03-everything",
+    "ram": 4096,
+    "node": "node1",
+    "cpu": 2,
+    "removable": false
+  },
+  {
+    "name": "vm_02",
+    "image": "openEuler-22.03-everything",
+    "ram": 8192,
+    "node": "node2",
+    "removable": false,
+    "cpu": 2
+  }]
+}
