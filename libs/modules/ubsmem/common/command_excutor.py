@@ -1,6 +1,5 @@
-#!/usr/bin/python3.7
+﻿#!/usr/bin/python3.7
 # -*- coding: utf-8 -*-
-# 版权所有 (c) 华为技术有限公司 2025-2025
 
 import time
 from dataclasses import dataclass
@@ -24,9 +23,9 @@ class CommandExecutor:
     def _split_stdout(std_out, start_index: int = 0, end_index: int = None) -> str:
         """
         对stdout输出进行切片
-        @param std_out: 命令的所有输出
-        @param start_index: stdout的起始行数
-        @param end_index: stdout的结束函数(不包含)
+        @param std_out: 命令的所有输�?
+        @param start_index: stdout的起始行�?
+        @param end_index: stdout的结束函�?不包�?
         """
         return '\n'.join([x.strip() for x in std_out.split('\n')][start_index:end_index])
 

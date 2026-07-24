@@ -1,6 +1,5 @@
-#!/usr/bin/python3.7
+﻿#!/usr/bin/python3.7
 # -*- coding: utf-8 -*-
-# 版权所有 (c) 华为技术有限公司 2025-2025
 import time
 
 from libs.core.base import TestCase
@@ -60,7 +59,7 @@ class UbsMemHook(TestCase):
             node.mkdir(self.install_path)
             node.mkdir(self.log_path)
             node.mkdir(f"{self.install_path}/bin")
-            # 把测试工具拷贝过来#todo 待测试，拷贝测试工具到工作目录
+            # 把测试工具拷贝过�?todo 待测试，拷贝测试工具到工作目�?
             node.copy_file(f"/opt/install/tmp/ubs-mem-dist/ubs_mem_test", f"{self.install_path}/bin/")
             node.chmod(self.install_path, 0o777, True)
 

@@ -1,4 +1,4 @@
-from concurrent.futures import ThreadPoolExecutor
+﻿from concurrent.futures import ThreadPoolExecutor
 from typing import List
 
 from libs.utils.logger_compat import Log
@@ -7,9 +7,9 @@ from libs.utils.logger_compat import Log
 class MultiTask:
     """
     并发任务类，通过 A.func()的方式调用传入的类对象的func()
-    支持统一参数和定制参数
-    统一参数与原func(a,b,c)调用方式一致
-    定制参数使用func([(a,b,c),(d,e,f)])元祖列表的方式传入
+    支持统一参数和定制参�?
+    统一参数与原func(a,b,c)调用方式一�?
+    定制参数使用func([(a,b,c),(d,e,f)])元祖列表的方式传�?
     """
     def __init__(self, objects: List[object]):
         self.objects = objects

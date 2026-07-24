@@ -1,6 +1,5 @@
-#!/usr/bin/python3.7
+﻿#!/usr/bin/python3.7
 # -*- coding: utf-8 -*-
-# 版权所有 (c) 华为技术有限公司 2025-2025
 
 import re
 from typing import Optional, List, Union
@@ -66,9 +65,9 @@ class UbsMemHttpClient:
     def get_map_addr(self, shm_name: str, index: int, count: int) -> List[str]:
         """
         :param shm_name: 共享内存的前缀
-        :param index: 下标，从0开始
-        :param count: 查询的数量
-        :return: 返回16进制地址字符串列表
+        :param index: 下标，从0开�?
+        :param count: 查询的数�?
+        :return: 返回16进制地址字符串列�?
         """
         result = self._host_node.run(f"head -n {index + count} {self.get_map_addr_file(shm_name)} | tail -n {count}")
         matches = re.findall(r"(0x[0-9a-fA-F]+)", result.std_out)
