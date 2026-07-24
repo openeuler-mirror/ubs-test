@@ -176,12 +176,33 @@ pytest --cov=libs --cov-report=html
 
 ### 执行 ubsmem 测试
 
+**Windows：**
 ```powershell
 # 通过 suite JSON 执行全部 ubsmem 用例
 .venv\Scripts\python.exe run_suite.py testcases/ubsmem/ubsmem_suite.json --resource-config=conf\env.json --no-cov -v -o log_cli=true --log-cli-level=INFO -W ignore::SyntaxWarning
 
 # 只跑 smoke 标签的用例
 .venv\Scripts\python.exe -m pytest testcases/ubsmem/ --resource-config=conf\env.json --no-cov -v -o log_cli=true -o log_cli_level=INFO -o "addopts=" -m "smoke" --test-hook "libs.modules.ubsmem.ubsshmem.ubs_mem_hook.UbsMemHook" --test-params "{\"install_path\": \"/home/ci/ubs_mem\", \"log_bak_path\": \"/home/ubs_mem_log_bak\", \"tls_path\": \"/usr/local/ubs_mem/.pkey\", \"cmc_package_path\": \"/ko/matrix_shmem\"}"
+```
+
+**Linux / openEuler：**
+```bash
+# 通过 suite JSON 执行全部 ubsmem 用例
+.venv/bin/python run_suite.py testcases/ubsmem/ubsmem_suite.json \
+    --resource-config=conf/env.json \
+    --no-cov -v \
+    -o log_cli=true --log-cli-level=INFO \
+    -W ignore::SyntaxWarning
+
+# 只跑 smoke 标签的用例
+.venv/bin/python -m pytest testcases/ubsmem/ \
+    --resource-config=conf/env.json \
+    --no-cov -v \
+    -o log_cli=true -o log_cli_level=INFO \
+    -o "addopts=" \
+    -m "smoke" \
+    --test-hook "libs.modules.ubsmem.ubsshmem.ubs_mem_hook.UbsMemHook" \
+    --test-params '{"install_path": "/home/ci/ubs_mem", "log_bak_path": "/home/ubs_mem_log_bak", "tls_path": "/usr/local/ubs_mem/.pkey", "cmc_package_path": "/ko/matrix_shmem"}'
 ```
 
 ***
