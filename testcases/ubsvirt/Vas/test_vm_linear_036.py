@@ -29,7 +29,7 @@ class TestVmLinear036(VasBaseCase):
         S2.等待5s后，执行vasctl query affinity --scope all查看虚机绑核情况，有预期结果1
     ExpectedResult:
         E1.配置成功
-        E2.虚拟机VM2绑定VCPU2~7
+        E2.虚拟机VM2绑定VCPU8-13
     Author:
         wufangzhou 00644577
     """

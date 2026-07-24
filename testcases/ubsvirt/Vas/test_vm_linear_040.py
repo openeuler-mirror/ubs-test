@@ -46,7 +46,7 @@ class TestVmLinear040(VasBaseCase):
         self.command_check(f'\cp {self.config_file} {self.config_file}.bak', "cp config file failed")
         command = f'sed -i \'s/--skip-cpuset ""/--skip-cpuset "0-1"/g\' {self.config_file}'
         self.command_check(command, "change skip-cpuset failed")
-        command1 = 'sed -i \'s/--range-affinity true/--range-affinity false/g\' /usr/lib/systemd/system/vas-daemon.service'
+        command1 = 'sed -i \'s/--range-affinity true/--range-affinity false/g\' {self.config_file}'
         self.command_check(command1, "change range-affinity failed")
         command2 = f'sed -i \'s/--sched-policy affinity /--sched-policy dynamicAffinity /g\' {self.config_file}'
         self.command_check(command2, "change sched-policy failed")

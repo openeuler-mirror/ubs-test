@@ -67,6 +67,6 @@ class TestVmLinear027(VasBaseCase):
     def teardown_method(self):
         """Cleanup: Restore configuration."""
         self.destroy_all()
-        self.node.run({'command': [f'\cp {self.config_file}.bak {self.config_file}']})
+        self.command_check(f'\cp {self.config_file}.bak {self.config_file}', "cp config file failed")
         self.reload_daemon()
         self.restart_vas()

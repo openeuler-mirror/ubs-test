@@ -45,7 +45,7 @@ class TestVmLinear038(VasBaseCase):
             f'\'s/-smt true --sched-policy affinity --dynamic-util-thresh 85 --skip-cpuset "" '
             f'--range-affinity true/-smt false --sched-policy affinity --dynamic-util-thresh 80 '
             f'--skip-cpuset 0-1 --range-affinity false/g\' '
-            f'/usr/lib/systemd/system/vas-daemon.service'
+            f'{self.config_file}'
         )
         self.command_check(command, "change vas-daemon.service failed")
         self.reload_daemon()

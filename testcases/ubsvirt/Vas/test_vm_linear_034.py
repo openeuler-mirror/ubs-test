@@ -63,7 +63,7 @@ class TestVmLinear034(VasBaseCase):
         res3 = self.check_query_affinity("VM3", self.cluster_size * 2, self.cluster_size * 3 - 1)
         self.assertTrue(res1, "The vm1's bound vCPUs are not equal 2.")
         self.assertTrue(res2, "The vm2's bound vCPUs are not in cluster_size - (cluster_size * 2 - 3).")
-        self.assertTrue(res3, "The vm2's bound vCPUs are not in cluster_size * 2 - (cluster_size * 3 - 1).")
+        self.assertTrue(res3, "The vm3's bound vCPUs are not in cluster_size * 2 - (cluster_size * 3 - 1).")
 
     def test_vm_linear_034(self):
         """Test dynamic binding VM reassignment in overcommit scenario."""
