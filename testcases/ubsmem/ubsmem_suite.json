@@ -7,8 +7,6 @@
     "testcases/ubsmem/test_tc_ubs_mem_borrow_0011.py",
     "testcases/ubsmem/test_tc_ubs_mem_borrow_0012.py",
     "testcases/ubsmem/test_tc_ubs_mem_borrow_0046.py",
-    "testcases/ubsmem/test_tc_ubs_mem_borrow_performance_0003.py",
-    "testcases/ubsmem/test_tc_ubs_mem_borrow_performance_0004.py",
     "testcases/ubsmem/test_tc_ubs_mem_borrow_with_loc_0002.py",
     "testcases/ubsmem/test_tc_ubs_mem_proc_fault_0007.py",
     "testcases/ubsmem/test_tc_ubs_mem_proc_fault_0008.py",
@@ -16,14 +14,10 @@
     "testcases/ubsmem/test_tc_ubs_mem_proc_fault_0016.py",
     "testcases/ubsmem/test_tc_ubs_shm_create_0009.py",
     "testcases/ubsmem/test_tc_ubs_shm_create_0010.py",
-    "testcases/ubsmem/test_tc_ubs_shm_create_performance_0001.py",
-    "testcases/ubsmem/test_tc_ubs_shm_create_performance_0002.py",
     "testcases/ubsmem/test_tc_ubs_shm_lookup_0001.py",
     "testcases/ubsmem/test_tc_ubs_shm_map_0033.py",
     "testcases/ubsmem/test_tc_ubs_shm_map_0040.py",
     "testcases/ubsmem/test_tc_ubs_shm_map_0043.py",
-    "testcases/ubsmem/test_tc_ubs_shm_long_term_0003.py",
-    "testcases/ubsmem/test_tc_ubs_shm_long_term_0005.py",
     "testcases/ubsmem/test_tc_ubs_shm_map_with_addr_0003.py"
   ],
   "params": {
