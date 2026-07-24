@@ -16,7 +16,6 @@ class UbsMemHook(TestCase):
     install_path: str = "/home/ci/ubs_mem"
     log_path: str = ""
     nodes: list = []
-    packages_list: list = [ "ubs-mem-shmem-*.*.aarch64.rpm"]
 
     def sleep(self, time_s: float) -> None:
         self.logInfo(f"start waiting for {time_s} seconds")

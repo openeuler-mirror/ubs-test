@@ -45,7 +45,7 @@ class TestTcUbsMemBorrow0003(UbsMemCase):
         self.logStep("P3.UBS-Memory服务加载正常")
         super().setup_method()
 
-    def test_tc_ubs_mem_borrow_0007(self):
+    def test_tc_ubs_mem_borrow_0003(self):
         alloc_size = 4 * 1024 * 1024
         self.logStep("S1.调用接口ubsmem_lease_malloc region 4*1024*1024 0 0")
         addr_desc = self.host_nodes[0].apps[0].ubsmem_lease_malloc(

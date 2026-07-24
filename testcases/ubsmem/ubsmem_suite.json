@@ -23,7 +23,6 @@
   "params": {
     "install_path": "/home/ci/ubs_mem",
     "log_bak_path": "/home/ubs_mem_log_bak",
-    "tls_path": "/usr/local/ubs_mem/.pkey",
-    "cmc_package_path": "/ko/matrix_shmem"
+    "tls_path": "/usr/local/ubs_mem/.pkey"
   }
 }
