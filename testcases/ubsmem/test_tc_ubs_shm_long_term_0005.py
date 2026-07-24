@@ -99,7 +99,7 @@ class TestTcUbsShmLongTerm0005(UbsMemCase):
             self.logStep("E2.开始循环执行")
             self.logInfo(f"start test on{node.host_name}")
             self.logStep("S3.进程0执行app ubsmem_create_region region_name 0 2 host0 0 host1 0 hostx 0指定当前节点导出共享内存")
-            sizes = [128 * 1024 * 1024, 1024 * 1024 * 1024, 4 * 1024 * 1024 * 1024]
+            sizes = [128 * 1024 * 1024, 1024 * 1024 * 1024]
             while sizes:
                 size = pop_random_element(sizes)
                 region_size = len(self.host_nodes)

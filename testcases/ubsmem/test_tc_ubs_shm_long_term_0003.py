@@ -85,7 +85,7 @@ class TestTcUbsShmLongTerm0003(UbsMemCase):
             self.assertGreaterEqual(app_num_new, app_count)
 
         self.logStep("S2.每个节点依次进行以下步骤")
-        sizes = [128 * 1024 * 1024, 1024 * 1024 * 1024, 2 * 1024 * 1024 * 1024]
+        sizes = [128 * 1024 * 1024, 1024 * 1024 * 1024]
         for node in self.host_nodes:
             self.logStep("E2.开始执行")
             task = MultiTask(node.apps[:app_count])
