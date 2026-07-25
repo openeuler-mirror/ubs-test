@@ -47,7 +47,7 @@ class TestContainerMemBorrow036(KubernetesBaseCase):
         E5.查询到一次借用事件成功
         E6.删除成功，清理环境成功
     Author:
-        luoyikang 00668584
+        yangfan
     """
 
 

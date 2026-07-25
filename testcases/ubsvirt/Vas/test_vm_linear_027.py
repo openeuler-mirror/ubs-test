@@ -1,6 +1,5 @@
 #!/usr/local/python
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2012-2025. All rights reserved.
 """Test dynamic binding VM creation with same cluster priority."""
 
 import time
@@ -31,7 +30,7 @@ class TestVmLinear027(VasBaseCase):
         E1.创建成功
         E2.虚拟机绑定VCPU16~31，为同一个cluster
     Author:
-        wufangzhou 00644577
+        yangfan
     """
 
     def setup_method(self):

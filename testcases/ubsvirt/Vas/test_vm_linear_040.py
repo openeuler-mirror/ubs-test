@@ -34,7 +34,7 @@ class TestVmLinear040(VasBaseCase):
         E2.虚拟机VM2绑定VCPU2~9，VM3绑核信息不变化
         E3.虚拟机VM3绑定VCPU16-25
     Author:
-        wufangzhou 00644577
+        yangfan
     """
 
     def setup_method(self):

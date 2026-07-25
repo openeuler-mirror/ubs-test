@@ -62,7 +62,7 @@ class TestContainerShareMemRecycle002(KubernetesBaseCase):
         E10.返回ubsm_shmem_deallocate ret(0)
         E11.在容器/dev/目录下没有映射的文件
     Author:
-        handongkang 30046606
+        yangfan
     """
 
     def init_shm_params(self):

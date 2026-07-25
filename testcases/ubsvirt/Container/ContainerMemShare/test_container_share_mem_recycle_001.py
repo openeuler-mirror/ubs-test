@@ -46,7 +46,7 @@ class TestContainerShareMemRecycle001(KubernetesBaseCase):
         E5.退出删除pod成功
         E6.主机/dev/(主机侧5min内消失)与/root/kubernetes/var/lib/kubelet/plugins/tmpdev/sharememory目录下映射的文件消失。
     Author:
-        handongkang 30046606
+        yangfan
     """
 
     def init_shm_params(self):

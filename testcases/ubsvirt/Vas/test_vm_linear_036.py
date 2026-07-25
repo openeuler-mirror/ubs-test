@@ -31,7 +31,7 @@ class TestVmLinear036(VasBaseCase):
         E1.配置成功
         E2.虚拟机VM2绑定VCPU8-13
     Author:
-        wufangzhou 00644577
+        yangfan
     """
 
     def setup_method(self):

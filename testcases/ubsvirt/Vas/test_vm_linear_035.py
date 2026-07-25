@@ -30,7 +30,7 @@ class TestVmLinear035(VasBaseCase):
     ExpectedResult:
         E1.删除成功，VM3绑核信息没有变化，没有碎片整理，VM2绑定2-9
     Author:
-        wufangzhou 00644577
+        yangfan
     """
 
     def setup_method(self):

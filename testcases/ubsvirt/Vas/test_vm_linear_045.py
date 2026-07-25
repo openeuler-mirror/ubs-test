@@ -34,7 +34,7 @@ class TestVmLinear045(VasBaseCase):
         E3.查看虚拟机绑核信息，绑核信息为16-31
         E4.查看虚拟机绑核信息，绑核信息为8-11，为第二层
     Author:
-        luzeren 30077053
+        yangfan
     """
 
     def setup_method(self):

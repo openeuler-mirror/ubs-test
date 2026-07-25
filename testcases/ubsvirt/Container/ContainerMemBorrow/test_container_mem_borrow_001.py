@@ -32,7 +32,7 @@ class TestContainerMemBorrow001(KubernetesBaseCase):
         E2.配置成功
         E3.nodeA节点watermark-escape-strategy标签为node，nodeB节点watermark-escape-strategy标签为numa
     Author:
-        luzeren 30077053
+        yangfan
     """
 
     def setup_method(self):

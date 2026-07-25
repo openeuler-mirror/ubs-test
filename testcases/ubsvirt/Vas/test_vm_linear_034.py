@@ -32,7 +32,7 @@ class TestVmLinear034(VasBaseCase):
         E1.删除成功，VM3绑核信息没有变化，没有碎片整理，VM2碎片整理，绑定变化成绑cpu2-9
         E2.VM3绑核信息变化。变成16-31
     Author:
-        wufangzhou 00644577
+        yangfan
     """
 
     def setup_method(self):

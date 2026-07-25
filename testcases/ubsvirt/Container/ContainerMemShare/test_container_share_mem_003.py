@@ -60,7 +60,7 @@ class TestContainerShareMem003(KubernetesBaseCase):
         E8.pod0、pod1分别返回ubsm_shmem_unmap ret(0) 读成功
         E9.pod0、pod1分别返回ubsm_shmem_deallocate ret(0)
     Author:
-        handongkang 30046606
+        yangfan
     """
 
     def init_shm_params(self):

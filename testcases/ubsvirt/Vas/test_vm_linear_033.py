@@ -1,6 +1,5 @@
 #!/usr/local/python
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2012-2025. All rights reserved.
 """Test VM CPU defragmentation after skip-cpuset change."""
 
 import time
@@ -32,7 +31,7 @@ class TestVmLinear033(VasBaseCase):
         E1.配置成功
         E2.虚拟机绑定VCPU0~15
     Author:
-        yangfan 30066933
+        yangfan
     """
 
     def setup_method(self):

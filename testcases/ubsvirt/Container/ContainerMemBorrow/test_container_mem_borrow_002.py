@@ -30,7 +30,7 @@ class TestContainerMemBorrow002(KubernetesBaseCase):
         E1.执行成功
         E2.所有节点watermark-escape-strategy标签为numa
     Author:
-        luzeren 30077053
+        yangfan
     """
 
     def setup_method(self):

@@ -49,7 +49,7 @@ class TestContainerMemBorrow043(KubernetesBaseCase):
         E5.杀掉加压进程成功
         E6.日志可以查到对应记录，且node上借用内存归还成功
     Author:
-        dongrenchen 00889960
+        yangfan
     """
 
     def init_mem_borrow_params(self):

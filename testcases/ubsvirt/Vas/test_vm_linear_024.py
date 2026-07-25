@@ -1,6 +1,5 @@
 #!/usr/local/python
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2012-2025. All rights reserved.
 """Test VAS query affinity command functionality."""
 
 import time
@@ -33,7 +32,7 @@ class TestVmLinear024(VasBaseCase):
         E2.执行成功，返回主机上所有虚机相关信息
         E3.执行成功，返回为空
     Author:
-        wufangzhou 00644577
+        yangfan
     """
 
     def setup_method(self):

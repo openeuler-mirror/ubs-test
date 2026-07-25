@@ -1,6 +1,5 @@
 #!/usr/local/python
 # -*- coding: utf-8 -*-
-# Copyright (c) Huawei Technologies Co., Ltd. 2012-2025. All rights reserved.
 """Test dynamic binding VM creation with minimal cross-cluster."""
 
 import pytest
@@ -29,7 +28,7 @@ class TestVmLinear030(VasBaseCase):
         E1.创建成功
         E2.虚拟机绑定VCPU16~47，跨2个cluster
     Author:
-        wufangzhou 00644577
+        yangfan
     """
 
     def setup_method(self):

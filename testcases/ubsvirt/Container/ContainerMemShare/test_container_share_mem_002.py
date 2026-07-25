@@ -58,7 +58,7 @@ class TestContainerShareMem002(KubernetesBaseCase):
         E7.返回ubsm_shmem_unmap ret(0)
         E8.返回ubsm_shmem_deallocate ret(0)
     Author:
-        handongkang 30046606
+        yangfan
     """
 
     def init_shm_params(self):

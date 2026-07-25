@@ -25,7 +25,7 @@ class TestVmLinear038(VasBaseCase):
     ExpectedResult:
         E1.配置成功，进程配置项-smt false --sched-policy affinity --dynamic-util-thresh 80 --skip-cluster-cpumask 0-1 --range-affinity false
     Author:
-        wufangzhou 00644577
+        yangfan
     """
 
     def setup_method(self):
