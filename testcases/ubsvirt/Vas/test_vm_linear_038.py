@@ -33,6 +33,7 @@ class TestVmLinear038(VasBaseCase):
         self.logStep("P1.环境中已部署libvirt和vas awared scheduler服务且服务正常")
         self.destroy_all()
 
+    @pytest.mark.case_info(level='P1', type='Functional')
     def test_vm_linear_038(self):
         """Test vas-daemon configuration parameters."""
         self.logStep(

@@ -50,6 +50,7 @@ class TestContainerMemBorrow001(KubernetesBaseCase):
         self.master.run({'command': ["kubectl label nodes master watermark-escape-strategy=numa --overwrite"]})
         self.master.run({'command': ["kubectl label nodes worker1 watermark-escape-strategy=node --overwrite"]})
 
+    @pytest.mark.case_info(level='P1', type='Functional')
     def test_container_mem_borrow_001(self):
         """测试命令行配置节点标签支持绑定NUMA"""
 

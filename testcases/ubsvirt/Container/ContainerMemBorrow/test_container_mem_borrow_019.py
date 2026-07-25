@@ -3,9 +3,10 @@
 
 import time
 from pathlib import Path
+
 import pytest
 
-from libs.modules.ubsvirt.basecase.kubernetes_basecase import KubernetesBaseCase, PodResource
+from libs.modules.ubsvirt.basecase.kubernetes_basecase import KubernetesBaseCase
 
 
 @pytest.mark.smoke
@@ -60,6 +61,7 @@ class TestContainerMemBorrow019(KubernetesBaseCase):
         self.logStep("P4.已完成内存规格容器C1的创建，且不配置remote-mem-allocation-ratio")
         self.test_pod = self.create_pod(str(self.yaml_base_path / "pod_config1.yaml"))
 
+    @pytest.mark.case_info(level='P1', type='Functional')
     def test_container_mem_borrow_019(self):
         self.logStep("S1.登录容器C1，执行加压命令加压")
         self.clear_huge_pages(self.node_dict['worker1'])

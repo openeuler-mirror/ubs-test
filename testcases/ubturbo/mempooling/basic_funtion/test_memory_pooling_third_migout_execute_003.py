@@ -1,14 +1,13 @@
-"""
-Migrated from legacy: memory_pooling_third_migout_execute_003
-"""
+import json
+
 import pytest
+
+import libs.ubturbo.api.libvirt as lv_api
+import libs.ubturbo.api.mempooling as mempooling_common
+import libs.ubturbo.api.mempooling_api as api
 from libs.core.basecase.ubturbo.at_basecase import ATBaseCase
 from libs.ubturbo.common import basic, env
-import libs.ubturbo.api.mempooling as mempooling_common
-import libs.ubturbo.api.libvirt as lv_api
-import libs.ubturbo.api.mempooling_api as api
-import json
-from libs.ubturbo.hooks import hook_mem_pooling
+
 
 @pytest.mark.smoke
 @pytest.mark.mempooling
@@ -55,6 +54,7 @@ class TestMemoryPoolingThirdMigoutExecute003(ATBaseCase):
         if env.get_env_type(self.nodemaster) in [env.UB_simulation, env.UB_hardware]:
             mempooling_common.alloc_hugePage_with_check(self.nodemaster, 0, 8192)
 
+    @pytest.mark.case_info(level='P0', type='Functional')
     def test_memory_pooling_third_migout_execute_003(self):
         """
         memory_pooling_third_migout_execute_003

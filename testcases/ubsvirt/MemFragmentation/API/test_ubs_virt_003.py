@@ -1,7 +1,9 @@
+import pytest
+
 from libs.modules.ubsvirt.api import client
 from libs.modules.ubsvirt.api import test_api
-from libs.modules.ubsvirt.model.model import VMResource
 from libs.modules.ubsvirt.basecase.openstack_basecase import OpenStackBaseCase
+from libs.modules.ubsvirt.model.model import VMResource
 
 
 class TestUbsVirt003(OpenStackBaseCase):
@@ -38,6 +40,7 @@ class TestUbsVirt003(OpenStackBaseCase):
             node = self.node_dict[node_name]
             self.clear_huge_pages(node.ssh_node)
 
+    @pytest.mark.case_info(level='P2', type='Functional')
     def test_ubs_virt_003(self, get_topo_path):
         self.vms = self.prepare_topo(str(get_topo_path("test_ubs_virt_003")))
         vm_02 = VMResource('vm_02', 'openEuler-22.03-everything', 1024, 'node1', False,

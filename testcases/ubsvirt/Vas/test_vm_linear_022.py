@@ -46,6 +46,7 @@ class TestVmLinear022(VasBaseCase):
         self.create_vm("VM2")
         time.sleep(5)
 
+    @pytest.mark.case_info(level='P3', type='Functional')
     def test_vm_linear_022(self):
         """Test VAS manual reassign command."""
         self.logStep("S1.执行vasctl opt reassign --scope VM1")

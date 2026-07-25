@@ -51,6 +51,7 @@ class TestTcUbsMemBorrowPerformance0003(UbsMemCase):
         self.logStep("P3.UBS-Memory服务加载正常")
         super().setup_method()
 
+    @pytest.mark.case_info(level='P3', type='Performance')
     def test_tc_ubs_mem_borrow_performance_0003(self):
         self.logStep("S1.重启测试程序,获取进程pid")
         self.host_nodes[0].start_app_by_index(0)

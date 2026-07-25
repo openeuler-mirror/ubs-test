@@ -1,3 +1,5 @@
+import pytest
+
 from libs.core.basecase.ubsio.dfc_basecase import DFCBaseCase
 
 
@@ -15,6 +17,7 @@ class TestUbsioKvcachePut_002(DFCBaseCase):
         self.dfc_node_cli[0].delete_file(self.script_name)
         self.dfc_node_cli[0].send_scripts(self.script_name)
 
+    @pytest.mark.case_info(level='P3', type='Functional')
     def test_ubsio_kvcache_put_002(self):
         self.logStep("运行脚本" + self.script_name)
         put_result = self.dfc_kv_cli[0].Execute_Python_Scripts(

@@ -46,7 +46,6 @@ from libs.ubturbo.api.rack_manager import (
 from libs.ubturbo.common import basic, env, file_transport
 from libs.ubturbo.model import libvirt
 from libs.ubturbo.model.mempoolingcli import REMOTE_MEMPOOLING_CLI_PATH
-from libs.core.fixtures import resource_config
 
 rack_conf_files = [RACK_PLUGIN_ADIMISSION_CONF]
 rack_plugin_conf_files = [MEMPOOLNG_PLUGIN_CONF]

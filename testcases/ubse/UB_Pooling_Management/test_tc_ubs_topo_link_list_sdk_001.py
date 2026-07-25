@@ -1,9 +1,8 @@
 import pytest
-from typing import Any, Dict, List
 
 from libs.modules.ubse.basecase.mem_pooling_basecase import MEM_Pooling_BaseCase
 from libs.modules.ubse.basecase.ub_pooling_basecase import UB_Pooling_BaseCase
-from libs.utils.logger_compat import Log
+
 
 @pytest.mark.hook("libs.modules.ubse.hook.mem_pooling_hook.MEM_Pooling_Hook")
 @pytest.mark.smoke
@@ -40,6 +39,7 @@ class TestTcUbsTopoLinkListSdk001(MEM_Pooling_BaseCase, UB_Pooling_BaseCase):
         
         pass
 
+    @pytest.mark.case_info(level='P3', type='Functional')
     def test_tc_ubs_topo_link_list_sdk_001(self):
 
         lcne_result = []

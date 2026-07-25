@@ -1,6 +1,7 @@
 
 
 import pytest
+
 from libs.modules.ubsvirt.api import client
 from libs.modules.ubsvirt.basecase.openstack_basecase import OpenStackBaseCase
 
@@ -37,6 +38,7 @@ class TestVmMemReturn008(OpenStackBaseCase):
     def teardown_method(self):
         self.clear_server()
 
+    @pytest.mark.case_info(level='P1', type='Functional')
     def test_vm_mem_return_008(self, get_topo_path):
 
         self.logStep("P4.已完成内存规格4G虚拟机VM1的创建")

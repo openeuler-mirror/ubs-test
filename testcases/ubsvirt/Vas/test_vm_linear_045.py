@@ -54,6 +54,7 @@ class TestVmLinear045(VasBaseCase):
         self.reload_daemon()
         self.restart_vas()
 
+    @pytest.mark.case_info(level='P1', type='Functional')
     def test_vm_linear_045(self):
         """Test dynamic binding VM creation in overcommit scenario with layer."""
         self.logStep("S1.创建8U16G的范围绑核的虚拟机VM1，cpuset限制设置为0-32")

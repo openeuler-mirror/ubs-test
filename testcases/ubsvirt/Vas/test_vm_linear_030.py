@@ -45,6 +45,7 @@ class TestVmLinear030(VasBaseCase):
         self.reload_daemon()
         self.restart_vas()
 
+    @pytest.mark.case_info(level='P1', type='Functional')
     def test_vm_linear_030(self):
         """Test dynamic binding VM creation with minimal cross-cluster."""
         self.logStep("S1.创建32U64G的范围绑核的虚拟机VM1（绑定范围为当前numa所有vcpu）")

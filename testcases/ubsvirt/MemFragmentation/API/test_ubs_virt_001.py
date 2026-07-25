@@ -1,3 +1,5 @@
+import pytest
+
 from libs.modules.ubsvirt.api import test_api
 from libs.modules.ubsvirt.basecase.openstack_basecase import OpenStackBaseCase
 
@@ -27,6 +29,7 @@ class TestUbsVirt001(OpenStackBaseCase):
         self.logStep("P2.获取环境中keystone的token信息")
         self.token = self.get_keystone_token()
 
+    @pytest.mark.case_info(level='P2', type='Functional')
     def test_ubs_virt_001(self):
         self.logStep("S1.调用status相关接口，查看响应结果是否满足预期")
         query_res = test_api.apitest_ubs_scheduler_status(self.controller, self.token)

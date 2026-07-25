@@ -78,6 +78,7 @@ class TestTcUbsShmLongTerm0005(UbsMemCase):
         self.logStep("P4.环境Biso开启Snoop")
         super().setup_method()
 
+    @pytest.mark.case_info(level='P3', type='Functional')
     def test_tc_ubs_shm_long_term_0005(self):
         region_name = "TC_UBS_SHM_LONG_TERM_0005"
         shm_name = "TC_UBS_SHM_LONG_TERM_0005"

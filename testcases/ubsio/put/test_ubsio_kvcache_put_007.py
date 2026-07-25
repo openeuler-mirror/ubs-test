@@ -1,3 +1,5 @@
+import pytest
+
 from libs.core.basecase.ubsio.dfc_basecase import DFCBaseCase
 
 
@@ -36,6 +38,7 @@ class TestUbsioKvcachePut007(DFCBaseCase):
         self.dfc_node_cli[0].delete_file(self.script_name)
         self.dfc_node_cli[0].send_scripts(self.script_name)
 
+    @pytest.mark.case_info(level='P0', type='Functional')
     def test_ubsio_kvcache_put_007(self):
         self.logStep("运行脚本" + self.script_name)
         for put_num, wait_time in self.batch_num_dict.items():

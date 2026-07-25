@@ -1,3 +1,5 @@
+import pytest
+
 from libs.modules.ubsvirt.api import client
 from libs.modules.ubsvirt.basecase.openstack_basecase import OpenStackBaseCase
 
@@ -35,6 +37,7 @@ class TestVmMigrate005(OpenStackBaseCase):
             node = self.node_dict[node_name]
             self.clear_huge_pages(node.ssh_node)
 
+    @pytest.mark.case_info(level='P1', type='Functional')
     def test_vm_migrate_005(self, get_topo_path):
         self.logInfo("创建虚机")
         self.vm_list = self.prepare_topo(str(get_topo_path("test_vm_migrate_005")))

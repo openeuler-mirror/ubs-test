@@ -58,6 +58,7 @@ class TestVmLinear033(VasBaseCase):
         res = self.check_query_affinity("VM1", self.cluster_size, self.cluster_size * 2 - 1)
         self.assertTrue(res, f"The vm1's bound vCPUs are not {self.cluster_size} - {self.cluster_size * 2 - 1}.")
 
+    @pytest.mark.case_info(level='P1', type='Functional')
     def test_vm_linear_033(self):
         """Test VM CPU defragmentation after skip-cpuset change."""
         self.logStep("S1.修改/usr/lib/systemd/system/vas-daemon.service中--skip-cluster配置为\"\"，重新加载后重启服务")

@@ -3,10 +3,11 @@
 
 import time
 from pathlib import Path
+
 import pytest
 
-from libs.modules.ubsvirt.basecase.kubernetes_basecase import KubernetesBaseCase
 from libs.modules.ubsvirt.api.client import get_date_timestamp
+from libs.modules.ubsvirt.basecase.kubernetes_basecase import KubernetesBaseCase
 
 
 @pytest.mark.smoke
@@ -73,6 +74,7 @@ class TestContainerMemBorrow040(KubernetesBaseCase):
         }
         self.upload_file("master", params)
 
+    @pytest.mark.case_info(level='P1', type='Functional')
     def test_container_mem_borrow_040(self):
         self.logStep("S1.创建pod")
         self.delete_pod_by_name("pod-for-mem")

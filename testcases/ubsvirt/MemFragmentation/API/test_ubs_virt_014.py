@@ -1,6 +1,7 @@
+import pytest
+
 from libs.modules.ubsvirt.api import client
 from libs.modules.ubsvirt.api import test_api
-
 from libs.modules.ubsvirt.basecase.openstack_basecase import OpenStackBaseCase
 
 
@@ -41,6 +42,7 @@ class TestUbsVirt014(OpenStackBaseCase):
         self.waitServiceStatus(self.master, "openstack-nova-compute", 600)
         self.waitServiceStatus(self.agent, "openstack-nova-compute", 600)
 
+    @pytest.mark.case_info(level='P2', type='Functional')
     def test_ubs_virt_014(self):
         self.logStep("S1.调用相关接口，查看响应结果是否满足预期")
         client.echo_hugePage(self.master, 0, 2048)

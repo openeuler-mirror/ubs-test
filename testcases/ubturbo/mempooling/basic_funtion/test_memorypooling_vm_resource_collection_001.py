@@ -1,14 +1,13 @@
-"""
-Migrated from legacy: memorypooling_vm_resource_collection_001
-"""
-import pytest
-from libs.core.basecase.ubturbo.mempooling_basecase import MempoolingBaseCase
-import libs.ubturbo.api.mempooling as mempooling_common
-from libs.ubturbo.common import basic
-import libs.ubturbo.api.libvirt as lv_api
-import libs.ubturbo.api.mempooling_api as api
 import re
-from libs.ubturbo.hooks import hook_mem_pooling
+
+import pytest
+
+import libs.ubturbo.api.libvirt as lv_api
+import libs.ubturbo.api.mempooling as mempooling_common
+import libs.ubturbo.api.mempooling_api as api
+from libs.core.basecase.ubturbo.mempooling_basecase import MempoolingBaseCase
+from libs.ubturbo.common import basic
+
 
 @pytest.mark.smoke
 @pytest.mark.mempooling
@@ -57,11 +56,8 @@ class TestMemorypoolingVmResourceCollection001(MempoolingBaseCase):
         """Legacy: preTestCase"""
         mempooling_common.pre_test(self.nodemaster)
 
+    @pytest.mark.case_info(level='P0', type='Functional')
     def test_memorypooling_vm_resource_collection_001(self):
-        """
-        memorypooling_vm_resource_collection_001
-        """
-
         self.logStep("S1、查看内存池大小, 环境配置为2numa, 内存池16g, 节点一numa0分配10g大页")
         ret1 = basic.run(self.nodemaster, "cat /sys/module/obmm/parameters/mempool_size").stdout.strip("\n")
         if ret1.endswith("G"):
@@ -154,7 +150,6 @@ class TestMemorypoolingVmResourceCollection001(MempoolingBaseCase):
         self.logStep("S5、校对S3和S4的信息的信息一致性")
 
     def teardown_method(self):
-        """Legacy: postTestCase"""
         mempooling_common.delete_all_vms(self.nodemaster)
         mempooling_common.post_test(self.nodes)
 

@@ -1,18 +1,16 @@
-"""
-Migrated from legacy: memory_pooling_white_list_001
-"""
+import time
 
 import pytest
-import time
-from typing import Any, Dict, List
-from libs.core.basecase.ubturbo.mempooling_basecase import MempoolingBaseCase, mem_return
+
 import libs.ubturbo.api.mempooling as mempooling_common
 import libs.ubturbo.api.mempooling_api as api
+from libs.core.basecase.ubturbo.mempooling_basecase import MempoolingBaseCase, mem_return
 from libs.ubturbo.api import rack_manager, system
+from libs.ubturbo.api.mempooling import RACK_INSTALL_PATH
 from libs.ubturbo.api.rack_manager import RACK_CONF
 from libs.ubturbo.common import basic
 from libs.ubturbo.common.string_utils import STR_ENTER
-from libs.ubturbo.api.mempooling import RACK_INSTALL_PATH
+
 
 @pytest.mark.smoke
 @pytest.mark.mempooling
@@ -53,6 +51,7 @@ class TestMemoryPoolingWhiteList001(MempoolingBaseCase):
         mempooling_common.alloc_hugePage(self.nodes[0], self.socket2numa[self.socket[0]][0], 5120)
         mempooling_common.alloc_hugePage(self.nodes[1], self.socket2numa[self.socket[0]][0], 5120)
 
+    @pytest.mark.case_info(level='P2', type='Functional')
     def test_memory_pooling_white_list_001(self):
         """Legacy: procedure"""
         self.logStep("S1、修改两个节点的rackmanager.conf配置文件，新增两行：group=computer01,computer02 provider=computer01,S2、重启两个节点rack：systemctl restart scbus-daemon")

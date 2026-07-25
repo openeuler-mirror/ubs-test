@@ -1,6 +1,8 @@
+import pytest
+
+import libs.modules.ubsvirt.common.file_common as file_aw
 from libs.modules.ubsvirt.api import client
 from libs.modules.ubsvirt.basecase.openstack_basecase import OpenStackBaseCase
-import libs.modules.ubsvirt.common.file_common as file_aw
 
 
 class TestVmEscapeDfx006(OpenStackBaseCase):
@@ -47,6 +49,7 @@ class TestVmEscapeDfx006(OpenStackBaseCase):
         self.restart_service(self.master, "ubse")
         self.wait_ubse_status(self.master, 1200, 30)
 
+    @pytest.mark.case_info(level='P2', type='Functional')
     def test_vm_escape_dfx_006(self, get_topo_path):
         self.logInfo("创建虚机")
         self.vms = self.prepare_topo(str(get_topo_path("test_vm_escape_dfx_006")))

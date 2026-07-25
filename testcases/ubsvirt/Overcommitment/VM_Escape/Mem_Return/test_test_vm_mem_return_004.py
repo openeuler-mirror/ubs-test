@@ -33,6 +33,7 @@ class TestVmMemReturn004(OpenStackBaseCase):
     def teardown_method(self):
         self.clear_server()
 
+    @pytest.mark.case_info(level='P1', type='Functional')
     def test_vm_mem_return_004(self, get_topo_path):
 
         self.logStep("P4.已完成基于numa2内存规格4G虚拟机VM1的创建")

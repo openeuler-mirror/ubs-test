@@ -1,8 +1,9 @@
 import time
+
 import pytest
 
-from libs.modules.ubsvirt.basecase.openstack_basecase import OpenStackBaseCase
 from libs.modules.ubsvirt.api import client
+from libs.modules.ubsvirt.basecase.openstack_basecase import OpenStackBaseCase
 from libs.modules.ubsvirt.model.model import VMResource
 
 
@@ -53,6 +54,7 @@ class TestVmFragment025(OpenStackBaseCase):
     def teardown_method(self):
         self.clear_server()
 
+    @pytest.mark.case_info(level='P2', type='Functional')
     def test_vm_fragment_025(self, get_topo_path):
         
 

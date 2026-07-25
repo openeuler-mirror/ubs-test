@@ -351,6 +351,10 @@ def pytest_configure(config: pytest.Config) -> None:
     config.addinivalue_line(
         "markers", "hook(module): mark test with legacy hook module to run"
     )
+    config.addinivalue_line(
+        "markers", "case_info(level, type): mark test with structured case info "
+        "(level=P0/P1/P2/P3, type=Functional/Performance/Reliability)"
+    )
 
 
 # ========== Node execution and Hook fixtures ==========

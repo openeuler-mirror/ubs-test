@@ -46,6 +46,7 @@ class TestContainerMemBorrow002(KubernetesBaseCase):
         self.logStep("P3.按照资料配置cpuManagerPolicy字段为static")
         self.set_node_label()
 
+    @pytest.mark.case_info(level='P1', type='Functional')
     def test_container_mem_borrow_002(self):
         """测试命令行批量配置节点标签支持绑定NUMA"""
 

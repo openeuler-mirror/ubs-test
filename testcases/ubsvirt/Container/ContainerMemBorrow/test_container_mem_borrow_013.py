@@ -4,9 +4,10 @@
 
 import time
 from pathlib import Path
+
 import pytest
 
-from libs.modules.ubsvirt.basecase.kubernetes_basecase import KubernetesBaseCase, PodResource
+from libs.modules.ubsvirt.basecase.kubernetes_basecase import KubernetesBaseCase
 from libs.modules.ubsvirt.common.node_manager import get_new_sshconnect
 
 
@@ -76,6 +77,7 @@ class TestContainerMemBorrow013(KubernetesBaseCase):
         self.test_pod2 = self.create_pod(str(self.yaml_base_path / "pod_config2.yaml"))
         time.sleep(10)
 
+    @pytest.mark.case_info(level='P1', type='Functional')
     def test_container_mem_borrow_013(self):
         self.logStep("S1.登录C1，C2加压，使得内存超过第二水位线92%")
         self.start_redis_server(self.run_node_name, "test-pod-01")

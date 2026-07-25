@@ -1,4 +1,5 @@
 import pytest
+
 from libs.modules.ubse.basecase.mem_pooling_basecase import MEM_Pooling_BaseCase
 
 
@@ -45,6 +46,7 @@ class TestTcMemFdCreateWithCandidateSdk001(MEM_Pooling_BaseCase):
         self.logStep("清理内存")
         self.clear_all_borrow_mem()
 
+    @pytest.mark.case_info(level='P3', type='Functional')
     def test_tc_fd_create_with_candidate_test_name_001(self):
 
         self.logStep("S1.调用ubse_mem_fd_create_with_candidate接口，参数合法")

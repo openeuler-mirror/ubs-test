@@ -58,6 +58,7 @@ class TestVmLinear036(VasBaseCase):
         res = self.check_query_affinity("VM2", 3, 3)
         self.assertTrue(res, "The vm2's bound vCPUs are not equal 3.")
 
+    @pytest.mark.case_info(level='P1', type='Functional')
     def test_vm_linear_036(self):
         """Test dynamic binding VM same-cluster defragmentation in overcommit scenario."""
         self.logStep("S1.删除VM1")

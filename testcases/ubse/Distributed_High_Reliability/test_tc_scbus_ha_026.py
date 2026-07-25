@@ -1,10 +1,9 @@
 import pytest
-from typing import Any, Dict, List
 
 from libs.modules.ubse.basecase.distributed_high_reliability_basecase import (
     Distributed_High_Reliability_BaseCase
 )
-from libs.utils.logger_compat import Log
+
 
 @pytest.mark.smoke
 class TestTcScbusHa026(Distributed_High_Reliability_BaseCase):
@@ -42,6 +41,7 @@ class TestTcScbusHa026(Distributed_High_Reliability_BaseCase):
         
         pass
 
+    @pytest.mark.case_info(level='P0', type='Reliability')
     def test_tc_scbus_ha_026(self):
 
         self.tcStep("S1.停止主节点进程")

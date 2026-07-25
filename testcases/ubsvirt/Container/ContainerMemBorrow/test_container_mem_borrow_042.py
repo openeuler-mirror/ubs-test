@@ -3,10 +3,10 @@
 
 import time
 from pathlib import Path
+
 import pytest
 
 from libs.modules.ubsvirt.basecase.kubernetes_basecase import KubernetesBaseCase
-from libs.modules.ubsvirt.api.client import get_date_timestamp
 
 
 @pytest.mark.smoke
@@ -87,6 +87,7 @@ class TestContainerMemBorrow042(KubernetesBaseCase):
         self.delete_pod_by_name(self.pod_name)
         self.clear_huge_pages(self.node_dict.get('worker1'))
 
+    @pytest.mark.case_info(level='P1', type='Functional')
     def test_container_mem_borrow_042(self):
         """测试绑numa容器清除压力后内存归还成功"""
 

@@ -3,9 +3,10 @@
 
 import time
 from pathlib import Path
+
 import pytest
 
-from libs.modules.ubsvirt.basecase.kubernetes_basecase import KubernetesBaseCase, PodResource
+from libs.modules.ubsvirt.basecase.kubernetes_basecase import KubernetesBaseCase
 
 
 @pytest.mark.smoke
@@ -70,6 +71,7 @@ class TestContainerMemBorrow012(KubernetesBaseCase):
         self.test_pod2 = self.create_pod(str(self.yaml_base_path / "pod_config2.yaml"))
         time.sleep(10)
 
+    @pytest.mark.case_info(level='P1', type='Functional')
     def test_container_mem_borrow_012(self):
         self.logStep("S1.登录C1，C2加压，使得内存超过第二水位线92%")
         self.assertIn(int(self.test_pod1.numa_affinity), [0, 1, 2, 3],

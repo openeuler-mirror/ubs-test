@@ -1,3 +1,5 @@
+import pytest
+
 from libs.core.basecase.ubsio.dfc_basecase import DFCBaseCase
 from libs.ubsio import get_file_name, put_file_name
 
@@ -38,6 +40,7 @@ class TestUbsiokvcacheDelete001(DFCBaseCase):
         self.dfc_node_cli[0].delete_file(self.script_name)
         self.dfc_node_cli[0].send_scripts(self.script_name)
 
+    @pytest.mark.case_info(level='P0', type='Functional')
     def test_ubsio_kvcache_delete_001(self):
         self.logStep("运行脚本" + self.script_name)
         put_result = self.dfc_kv_cli[0].Execute_Python_Scripts(self.script_name, f"{put_file_name} {get_file_name}")

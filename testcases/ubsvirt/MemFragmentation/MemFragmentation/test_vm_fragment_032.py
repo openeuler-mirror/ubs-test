@@ -52,6 +52,7 @@ class TestVmFragment032(OpenStackBaseCase):
     def teardown_method(self):
         self.clear_server()
 
+    @pytest.mark.case_info(level='P1', type='Functional')
     def test_vm_fragment_032(self, get_topo_path):
         self.logStep("S1、在可视化界面创建8G虚机A")
         self.vm_list = self.prepare_topo(str(get_topo_path("test_vm_fragment_032")))

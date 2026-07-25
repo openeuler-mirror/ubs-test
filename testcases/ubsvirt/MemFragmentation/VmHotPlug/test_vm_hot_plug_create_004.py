@@ -1,9 +1,11 @@
 from pathlib import Path
 
-from libs.modules.ubsvirt.basecase.vmhotplug_basecase import VMHotPlugBaseCase
 from libs.modules.ubsvirt.api import client
+from libs.modules.ubsvirt.basecase.vmhotplug_basecase import VMHotPlugBaseCase
 
 XML_BASE_PATH = Path(__file__).parent.parent.parent.parent.parent / "resource" / "ubsvirt" / "xml"
+import pytest
+
 
 
 class TestVmHotPlugCreate004(VMHotPlugBaseCase):
@@ -72,6 +74,7 @@ class TestVmHotPlugCreate004(VMHotPlugBaseCase):
         )
         self.distribute_huge_page(self.master, 0, 0)
 
+    @pytest.mark.case_info(level='P0', type='Functional')
     def test_vm_hot_plug_create_004(self):
         
 

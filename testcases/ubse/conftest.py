@@ -120,4 +120,3 @@ def pytest_runtestloop(session):
 
 
 # Keep package_hook_fixture import for backward compatibility
-from libs.core.hook_runner import package_hook_fixture
