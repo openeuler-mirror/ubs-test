@@ -1,14 +1,10 @@
-"""
-Migrated from legacy: mempooling_001
-"""
-
 import pytest
-from typing import Any, Dict, List
-from libs.ubturbo.hooks import hook_mem_pooling
-from libs.core.basecase.ubturbo.mempooling_basecase import MempoolingBaseCase
-from libs.ubturbo.common import basic
+
 import libs.ubturbo.api.mempooling as mempooling_common
 import libs.ubturbo.api.mempooling_api as api
+from libs.core.basecase.ubturbo.mempooling_basecase import MempoolingBaseCase
+from libs.ubturbo.common import basic
+
 
 @pytest.mark.smoke
 @pytest.mark.mempooling
@@ -68,10 +64,8 @@ class TestMempooling001(MempoolingBaseCase):
             mempooling_common.delete_all_vms(node)
         mempooling_common.post_test(self.nodes)
 
+    @pytest.mark.case_info(level='P3', type='Functional')
     def test_mempooling_001(self):
-        """
-        mempooling_001
-        """
         self.logStep("S1、给node0的numa0分配13G大页，并成功创建2个1u2g虚机")
         mempooling_common.alloc_hugePage_with_check(self.nodemaster, 0, int(13 * 1024 / 2))
         mempooling_common.alloc_hugePage_with_check(self.nodeagent, 0, int(13 * 1024 / 2))

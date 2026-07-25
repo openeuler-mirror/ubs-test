@@ -1,8 +1,10 @@
 import time
+
 import pytest
 
-from libs.modules.ubsvirt.basecase.vmxml_basecase import VMxmlBaseCase
 from libs.modules.ubsvirt.api import client
+from libs.modules.ubsvirt.basecase.vmxml_basecase import VMxmlBaseCase
+
 
 @pytest.mark.smoke
 class TestVmMigrateXml001(VMxmlBaseCase):
@@ -40,6 +42,7 @@ class TestVmMigrateXml001(VMxmlBaseCase):
         self.distribute_huge_page(self.master, 0, 0)
         self.distribute_huge_page(self.agent, 0, 0)
     
+    @pytest.mark.case_info(level='P0', type='Functional')
     def test_vm_migrate_xml_001(self, xml_base_path):
         self.logStep("P1、环境中存在2个及以上节点")
         self.logStep("P2、libvirt和qemu组件正常部署")

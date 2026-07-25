@@ -1,12 +1,11 @@
-"""
-Migrated from legacy: memorypooling_node_resource_collection_001
-"""
 import pytest
-from libs.core.basecase.ubturbo.mempooling_basecase import MempoolingBaseCase
+
 import libs.ubturbo.api.mempooling as mempooling_common
-from libs.ubturbo.common import basic
 import libs.ubturbo.api.mempooling_api as api
+from libs.core.basecase.ubturbo.mempooling_basecase import MempoolingBaseCase
+from libs.ubturbo.common import basic
 from libs.ubturbo.hooks import hook_mem_pooling
+
 
 @pytest.mark.smoke
 @pytest.mark.mempooling
@@ -53,6 +52,7 @@ class TestMemorypoolingNodeResourceCollection001(MempoolingBaseCase):
         hook_mem_pooling.download_qcow(self.nodemaster)
         mempooling_common.pre_test(self.nodemaster)
 
+    @pytest.mark.case_info(level='P0', type='Functional')
     def test_memorypooling_node_resource_collection_001(self):
         """
         memorypooling_node_resource_collection_001

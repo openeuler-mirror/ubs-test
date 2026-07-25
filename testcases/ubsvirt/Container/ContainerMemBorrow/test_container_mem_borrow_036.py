@@ -3,10 +3,11 @@
 
 import time
 from pathlib import Path
+
 import pytest
 
-from libs.modules.ubsvirt.basecase.kubernetes_basecase import KubernetesBaseCase
 from libs.modules.ubsvirt.api.client import get_date_timestamp
+from libs.modules.ubsvirt.basecase.kubernetes_basecase import KubernetesBaseCase
 
 
 @pytest.mark.smoke
@@ -83,6 +84,7 @@ class TestContainerMemBorrow036(KubernetesBaseCase):
         }
         self.upload_file("master", params)
 
+    @pytest.mark.case_info(level='P0', type='Functional')
     def test_container_mem_borrow_036(self):
         """测试绑numa容器加压超水线后内存借用成功"""
 

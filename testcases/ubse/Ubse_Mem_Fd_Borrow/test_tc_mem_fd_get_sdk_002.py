@@ -1,4 +1,5 @@
 import pytest
+
 from libs.modules.ubse.basecase.mem_pooling_basecase import MEM_Pooling_BaseCase
 
 
@@ -48,6 +49,7 @@ class TestTcMemFdGetSdk002(MEM_Pooling_BaseCase):
         self.logStep("清理内存")
         self.clear_all_borrow_mem()
 
+    @pytest.mark.case_info(level='P3', type='Functional')
     def test_tc_fd_get_func_001(self):
 
         name = "mem_fd_get_sdk_002"

@@ -43,6 +43,7 @@ class TestVmFragment013(OpenStackBaseCase):
         
         self.clear_server()
 
+    @pytest.mark.case_info(level='P1', type='Functional')
     def test_vm_fragment_013(self, get_topo_path):
         
 

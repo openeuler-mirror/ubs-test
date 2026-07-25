@@ -1,17 +1,12 @@
-"""
-Migrated from legacy: memory_pooling_first_return_success_1
-"""
+import time
 
 import pytest
-import time
-from typing import Any, Dict, List
-from libs.core.basecase.ubturbo.at_basecase import ATBaseCase
-from libs.ubturbo.common import basic, env
-import libs.ubturbo.api.mempooling as mempooling_common
-from libs.ubturbo.api.mempooling import get_pid, REMOTE_VM_XML_PATH, VM_2U2G_A_CONFIG_FILE, VM_2U2G_B_CONFIG_FILE
-import libs.ubturbo.api.mempooling_api as api
-from libs.ubturbo.hooks import hook_mem_pooling
 
+import libs.ubturbo.api.mempooling as mempooling_common
+import libs.ubturbo.api.mempooling_api as api
+from libs.core.basecase.ubturbo.at_basecase import ATBaseCase
+from libs.ubturbo.api.mempooling import get_pid, REMOTE_VM_XML_PATH, VM_2U2G_A_CONFIG_FILE, VM_2U2G_B_CONFIG_FILE
+from libs.ubturbo.common import basic, env
 
 
 @pytest.mark.smoke
@@ -69,6 +64,7 @@ class TestMemoryPoolingFirstReturnSuccess1(ATBaseCase):
             api.create_vm_object(self._nodeagent, 'A')
             api.create_vm_object(self._nodeagent, 'B')
 
+    @pytest.mark.case_info(level='P2', type='Functional')
     def test_memory_pooling_first_return_success_1(self):
         """Legacy: procedure"""
         self.logStep("1-创建虚机大页内存不足，调用第一层借用内存策略接口借用2228224KB内存")

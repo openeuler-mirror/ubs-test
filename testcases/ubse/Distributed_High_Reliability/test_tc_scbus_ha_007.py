@@ -1,11 +1,9 @@
 import pytest
-import time
-from typing import Any, Dict, List
 
 from libs.modules.ubse.basecase.distributed_high_reliability_basecase import (
     Distributed_High_Reliability_BaseCase
 )
-from libs.utils.logger_compat import Log
+
 
 @pytest.mark.smoke
 class TestTcScbusHa007(Distributed_High_Reliability_BaseCase):
@@ -37,6 +35,7 @@ class TestTcScbusHa007(Distributed_High_Reliability_BaseCase):
         
         pass
 
+    @pytest.mark.case_info(level='P0', type='Reliability')
     def test_tc_scbus_ha_007(self):
 
         self.logStep("S1.同时启动4节点进程")

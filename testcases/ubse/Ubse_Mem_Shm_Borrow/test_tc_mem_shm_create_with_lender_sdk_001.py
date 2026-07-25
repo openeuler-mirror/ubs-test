@@ -1,4 +1,5 @@
 import pytest
+
 from libs.modules.ubse.basecase.mem_pooling_basecase import MEM_Pooling_BaseCase
 
 
@@ -42,6 +43,7 @@ class TestTcMemShmCreateWithLenderSdk001(MEM_Pooling_BaseCase):
         self.logStep("清理内存")
         self.clear_all_borrow_mem()
 
+    @pytest.mark.case_info(level='P3', type='Functional')
     def test_tc_mem_shm_create_with_lender_sdk_001(self):
 
         self.logStep("S1.调用shm_create_with_lender接口创建共享内存，参数合法")

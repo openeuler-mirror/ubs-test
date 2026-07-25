@@ -47,6 +47,7 @@ class TestVmLinear027(VasBaseCase):
         self.reload_daemon()
         self.restart_vas()
 
+    @pytest.mark.case_info(level='P1', type='Functional')
     def test_vm_linear_027(self):
         """Test dynamic binding VM creation with same cluster priority."""
         self.logStep("S1.创建16U32G的范围绑核的虚拟机VM1（绑定范围为当前numa所有vcpu）")

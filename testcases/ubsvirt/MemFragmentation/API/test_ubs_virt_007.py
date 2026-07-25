@@ -1,7 +1,8 @@
 import re
 
-from libs.modules.ubsvirt.api import test_api
+import pytest
 
+from libs.modules.ubsvirt.api import test_api
 from libs.modules.ubsvirt.basecase.openstack_basecase import OpenStackBaseCase
 
 
@@ -30,6 +31,7 @@ class TestUbsVirt007(OpenStackBaseCase):
     def teardown_method(self):
         self.master.run({'command': [f'rm -f {self.path}']})
 
+    @pytest.mark.case_info(level='P2', type='Functional')
     def test_ubs_virt_007(self, get_topo_path):
         self.logStep("S1.调用ubs_case_conf_info相关接口查询场景和超分比例，查看响应结果是否满足预期")
         overcommitment = str(self.get_overcommitment(self.master)[1])

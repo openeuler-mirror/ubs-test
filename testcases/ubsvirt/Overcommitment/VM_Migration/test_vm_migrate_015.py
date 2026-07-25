@@ -1,10 +1,12 @@
 import time
 
+import pytest
+
+import libs.modules.ubsvirt.common.file_common as file_aw
+import libs.modules.ubsvirt.common.service_common as service_aw
 from libs.modules.ubsvirt.api import client
 from libs.modules.ubsvirt.basecase.openstack_basecase import OpenStackBaseCase
 from libs.modules.ubsvirt.model.model import VMResource
-import libs.modules.ubsvirt.common.file_common as file_aw
-import libs.modules.ubsvirt.common.service_common as service_aw
 
 
 class TestVmMigrate015(OpenStackBaseCase):
@@ -68,6 +70,7 @@ class TestVmMigrate015(OpenStackBaseCase):
             service_aw.exec_service(node, 'restart', 'ubse')
         self.wait_ubse_status(self.master, 900, 10)
 
+    @pytest.mark.case_info(level='P1', type='Functional')
     def test_vm_migrate_015(self, get_topo_path):
         self.logInfo("创建虚机")
         self.vm_list = self.prepare_topo(str(get_topo_path("test_vm_migrate_015")))

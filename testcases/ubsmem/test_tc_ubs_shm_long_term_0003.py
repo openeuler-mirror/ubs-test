@@ -70,6 +70,7 @@ class TestTcUbsShmLongTerm0003(UbsMemCase):
         self.logStep("P4.释放借用内存缓存")
         super().setup_method()
 
+    @pytest.mark.case_info(level='P3', type='Functional')
     def test_tc_ubs_shm_long_term_0003(self):
 
         app_count = 10

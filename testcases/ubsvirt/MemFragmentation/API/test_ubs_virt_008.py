@@ -1,5 +1,6 @@
-from libs.modules.ubsvirt.api import test_api
+import pytest
 
+from libs.modules.ubsvirt.api import test_api
 from libs.modules.ubsvirt.basecase.openstack_basecase import OpenStackBaseCase
 
 
@@ -46,6 +47,7 @@ class TestUbsVirt008(OpenStackBaseCase):
         new_overcommitment = self.get_overcommitment(self.master)[1]
         self.assertEqual(new_overcommitment, self.overcommitment, '恢复超分比例失败')
 
+    @pytest.mark.case_info(level='P2', type='Functional')
     def test_ubs_virt_008(self, get_topo_path):
         self.logStep("S1.调用ubs_case_conf_set相关接口设置场景和超分比例，查看响应结果是否满足预期")
         self.logInfo("删库重启ubse")

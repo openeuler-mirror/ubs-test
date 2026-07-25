@@ -1,4 +1,5 @@
 import time
+
 import pytest
 
 from libs.modules.ubsvirt.basecase.openstack_basecase import OpenStackBaseCase
@@ -36,6 +37,7 @@ class TestVmFragment028(OpenStackBaseCase):
     def teardown_method(self):
         self.clear_server()
 
+    @pytest.mark.case_info(level='P3', type='Functional')
     def test_vm_fragment_028(self, get_topo_path):
         self.logStep("S1、启动服务：systemctl start ubs-scheduler-agent/ubs-scheduler-controller")
         ubs_scheduler_controller_status = self.get_service_status(self.controller, "ubs-scheduler-controller")

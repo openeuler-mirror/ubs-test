@@ -1,6 +1,7 @@
 
 
 import pytest
+
 from libs.modules.ubsvirt.basecase.openstack_basecase import OpenStackBaseCase
 from libs.modules.ubsvirt.model.model import VMResource
 
@@ -11,6 +12,7 @@ class TestVirtualVmCreate002(OpenStackBaseCase):
     def teardown_method(self):
         self.clear_server()
 
+    @pytest.mark.case_info(level='P3', type='Functional')
     def test_virtual_vm_create_002(self, get_topo_path):
 
         self.logStep("S1、创建内存规格2U5G的虚机VM0")

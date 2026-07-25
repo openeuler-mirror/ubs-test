@@ -1,3 +1,5 @@
+import pytest
+
 from libs.modules.ubsvirt.api import client
 from libs.modules.ubsvirt.api import test_api
 from libs.modules.ubsvirt.basecase.openstack_basecase import OpenStackBaseCase
@@ -37,6 +39,7 @@ class TestUbsVirt005(OpenStackBaseCase):
             node = self.node_dict[node_name]
             self.clear_huge_pages(node.ssh_node)
 
+    @pytest.mark.case_info(level='P2', type='Functional')
     def test_ubs_virt_005(self, get_topo_path):
         self.logStep("S1.调用/notOverAllocation/migration/numaInfo相关接口，查看响应结果是否满足预期")
         self.vm_list = self.prepare_topo(str(get_topo_path("test_ubs_virt_005")))

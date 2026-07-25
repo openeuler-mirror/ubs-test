@@ -2,7 +2,6 @@ import pytest
 
 from libs.modules.ubsvirt.basecase import OpenStackBaseCase
 
-
 openstack_nova_conf = "/etc/nova/nova.conf"
 
 @pytest.fixture(scope="package", autouse=True)

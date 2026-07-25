@@ -1,13 +1,12 @@
-"""
-Migrated from legacy: RMRS_Fragment_SamePlane_Priority_005
-"""
-
 import json
+
 import pytest
-from libs.ubturbo.common import basic
-from libs.core.basecase.ubturbo.mempooling_basecase import MempoolingBaseCase
+
 import libs.ubturbo.api.mempooling as mempooling_common
 import libs.ubturbo.api.mempooling_api as api
+from libs.core.basecase.ubturbo.mempooling_basecase import MempoolingBaseCase
+from libs.ubturbo.common import basic
+
 
 @pytest.mark.smoke
 @pytest.mark.mempooling
@@ -48,6 +47,7 @@ class TestRmrsFragmentSameplanePriority005(MempoolingBaseCase):
         self.logStep("P1、碎片场景正常设置")
         super().preTestCase()
 
+    @pytest.mark.case_info(level='P1', type='Functional')
     def test_rmrs_fragment_sameplane_priority_005(self):
         """
         RMRS_Fragment_SamePlane_Priority_005

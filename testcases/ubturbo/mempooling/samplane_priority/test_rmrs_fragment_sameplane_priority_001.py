@@ -1,12 +1,11 @@
-"""
-Migrated from legacy: RMRS_Fragment_SamePlane_Priority_001
-"""
-
 import time
+
 import pytest
-from libs.core.basecase.ubturbo.mempooling_basecase import MempoolingBaseCase
+
 import libs.ubturbo.api.mempooling as mempooling_common
 import libs.ubturbo.api.mempooling_api as api
+from libs.core.basecase.ubturbo.mempooling_basecase import MempoolingBaseCase
+
 
 @pytest.mark.smoke
 @pytest.mark.mempooling
@@ -44,6 +43,7 @@ class TestRmrsFragmentSameplanePriority001(MempoolingBaseCase):
         mempooling_common.alloc_hugePage(self.nodeagent, self.socket2numa[self.socket[1]][0], 5120)
         time.sleep(5)
 
+    @pytest.mark.case_info(level='P2', type='Functional')
     def test_rmrs_fragment_sameplane_priority_001(self):
         """Legacy: procedure"""
         self.logStep("S1、调用内存借用策略北向接口，参数为srcParam.srcNid=1,srcParam.srcSocketId=36,srcParam.srcNumaId=0,borrowSize=1048576；")

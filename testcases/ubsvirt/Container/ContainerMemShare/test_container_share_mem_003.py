@@ -1,9 +1,9 @@
 #!/usr/local/python
 # -*- coding: utf-8 -*-
 
-import os
 import time
 from pathlib import Path
+
 import pytest
 
 from libs.modules.ubsvirt.basecase.kubernetes_basecase import KubernetesBaseCase
@@ -127,6 +127,7 @@ class TestContainerShareMem003(KubernetesBaseCase):
                      "attach 123")
         self.logInfo("测试用例自带测试二进制")
 
+    @pytest.mark.case_info(level='P1', type='Functional')
     def test_container_share_mem_003(self):
         self.logStep("S1.创建2个pod，pod0和pod1")
         self.delete_pod_and_wait(self.pod0_name)

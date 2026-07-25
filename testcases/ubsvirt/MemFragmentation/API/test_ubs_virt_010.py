@@ -1,6 +1,7 @@
+import pytest
+
 from libs.modules.ubsvirt.api import client
 from libs.modules.ubsvirt.api import test_api
-
 from libs.modules.ubsvirt.basecase.openstack_basecase import OpenStackBaseCase
 
 
@@ -30,6 +31,7 @@ class TestUbsVirt010(OpenStackBaseCase):
         client.refresh_hugePage(self.master, {0: 0})
         self.master.run({'command': [f'rm -f {self.vm_py_path}']})
 
+    @pytest.mark.case_info(level='P2', type='Functional')
     def test_ubs_virt_010(self):
         self.logStep("S1.调用ubs_node_info_list相关接口查看节点信息，查看响应结果是否满足预期")
         node_dict = {0: 2048}

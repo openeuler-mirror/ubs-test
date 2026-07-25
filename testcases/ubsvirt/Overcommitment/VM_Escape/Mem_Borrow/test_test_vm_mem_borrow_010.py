@@ -1,6 +1,7 @@
 
 
 import pytest
+
 from libs.modules.ubsvirt.basecase.openstack_basecase import OpenStackBaseCase
 
 
@@ -32,6 +33,7 @@ class TestVmMemBorrow010(OpenStackBaseCase):
     def teardown_method(self):
         self.clear_server()
 
+    @pytest.mark.case_info(level='P1', type='Functional')
     def test_vm_mem_borrow_010(self, get_topo_path):
         self.logStep(" P1、环境中存在2个及以上节点")
         self.logStep(" P2、OpenStack/RackManager功能正常无异常")

@@ -1,9 +1,8 @@
 #!/usr/local/python
 # -*- coding: utf-8 -*-
 
-import os
-import time
 from pathlib import Path
+
 import pytest
 
 from libs.modules.ubsvirt.basecase.kubernetes_basecase import KubernetesBaseCase
@@ -88,6 +87,7 @@ class TestContainerShareMemRecycle001(KubernetesBaseCase):
         }
         self.upload_file("master", params)
 
+    @pytest.mark.case_info(level='P3', type='Functional')
     def test_container_share_mem_recycle_001(self):
         self.logStep("S1.创建pod")
         self.delete_pod_and_wait(self.pod_name)

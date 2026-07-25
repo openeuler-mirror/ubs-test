@@ -1,6 +1,7 @@
 
 
 import pytest
+
 from libs.modules.ubsvirt.basecase.openstack_basecase import OpenStackBaseCase
 
 
@@ -31,6 +32,7 @@ class TestVmMemBorrow009(OpenStackBaseCase):
     def teardown_method(self):
         self.clear_server()
 
+    @pytest.mark.case_info(level='P1', type='Functional')
     def test_vm_mem_borrow_009(self, get_topo_path):
 
         self.logStep("P4.已完成内存规格4G虚拟机VM1、8G虚拟机VM2的创建")

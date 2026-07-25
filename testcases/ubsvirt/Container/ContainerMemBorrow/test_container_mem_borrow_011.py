@@ -4,10 +4,11 @@
 import re
 import time
 from pathlib import Path
+
 import pytest
 
-from libs.modules.ubsvirt.basecase.kubernetes_basecase import KubernetesBaseCase
 from libs.modules.ubsvirt.api.client import get_date_timestamp
+from libs.modules.ubsvirt.basecase.kubernetes_basecase import KubernetesBaseCase
 
 
 @pytest.mark.smoke
@@ -70,6 +71,7 @@ class TestContainerMemBorrow011(KubernetesBaseCase):
         create_result = self.create_pod_by_name("pod_config.yaml")
         self.assertTrue(create_result, "创建测试pod失败")
 
+    @pytest.mark.case_info(level='P1', type='Functional')
     def test_container_mem_borrow_011(self):
         """测试numa级内存监控服务生成水线告警"""
         self.logStep("S1.登录容器执行redis加压脚本，加压到92，kubectl get event -A")

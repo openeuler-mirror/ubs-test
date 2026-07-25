@@ -3,6 +3,7 @@
 import time
 
 import pytest
+
 from libs.modules.ubsvirt.api import client
 from libs.modules.ubsvirt.basecase.openstack_basecase import OpenStackBaseCase
 
@@ -39,6 +40,7 @@ class TestVmMemBorrow023(OpenStackBaseCase):
         self.clear_server()
         client.oom_service_status_change(self.master, "stop")
 
+    @pytest.mark.case_info(level='P1', type='Functional')
     def test_vm_mem_borrow_023(self, get_topo_path):
 
         sysSentry_status, xalarmd_status = client.oom_service_status_change(self.master, "start")

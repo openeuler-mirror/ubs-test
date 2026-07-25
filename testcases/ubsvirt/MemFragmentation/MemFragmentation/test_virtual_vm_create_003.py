@@ -1,5 +1,7 @@
-from libs.modules.ubsvirt.model.model import VMResource
+import pytest
+
 from libs.modules.ubsvirt.basecase.openstack_basecase import OpenStackBaseCase
+from libs.modules.ubsvirt.model.model import VMResource
 
 
 class TestVirtualVmCreate003(OpenStackBaseCase):
@@ -26,6 +28,7 @@ class TestVirtualVmCreate003(OpenStackBaseCase):
         """Legacy: postTestCase"""
         self.clear_server()
 
+    @pytest.mark.case_info(level='P3', type='Functional')
     def test_virtual_vm_create_003(self, get_topo_path):
         """
         Test for test_virtual_vm_create_003

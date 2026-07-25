@@ -37,6 +37,7 @@ class TestVmLinear001(VasBaseCase):
         """PreCondition: 环境中已部署libvirt和vas awared scheduler服务且服务正常."""
         self.logStep("P1.环境中已部署libvirt和vas awared scheduler服务且服务正常")
 
+    @pytest.mark.case_info(level='P3', type='Functional')
     def test_vm_linear_001(self):
         """Test VAS daemon start/stop with SMT parameter modification."""
         self.logStep("S1.执行systemctl stop vas-daemon，后执行systemctl status vas-daemon查看服务")

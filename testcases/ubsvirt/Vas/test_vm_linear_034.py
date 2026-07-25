@@ -65,6 +65,7 @@ class TestVmLinear034(VasBaseCase):
         self.assertTrue(res2, "The vm2's bound vCPUs are not in cluster_size - (cluster_size * 2 - 3).")
         self.assertTrue(res3, "The vm3's bound vCPUs are not in cluster_size * 2 - (cluster_size * 3 - 1).")
 
+    @pytest.mark.case_info(level='P1', type='Functional')
     def test_vm_linear_034(self):
         """Test dynamic binding VM reassignment in overcommit scenario."""
         self.logStep("S1.删除虚拟机VM2, VM1，执行vasctl query affinity --scope all查看虚机绑核情况")

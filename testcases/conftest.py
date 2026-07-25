@@ -9,13 +9,9 @@ pytest fixture discovery mechanism:
 """
 
 from libs.core.basecase.hcom.hcom_basecase import inject_hcom_basecase_dependencies
-from libs.modules.ubse.basecase.cm_basecase import inject_cm_basecase_dependencies
-from libs.modules.ubse.basecase.distributed_high_reliability_basecase import (
-    inject_distributed_high_reliability_basecase_dependencies,
+from libs.core.basecase.ubsio.dfc_basecase import (
+    inject_dfc_basecase_dependencies,
 )
-from libs.modules.ubse.basecase.mem_pooling_basecase import inject_mem_pooling_dependencies
-from libs.modules.ubse.basecase.ub_pooling_basecase import inject_ub_pooling_dependencies
-
 from libs.core.basecase.ubturbo.at_basecase import inject_at_basecase_dependencies
 from libs.core.basecase.ubturbo.container_overcommit_basecase import (
     inject_container_overcommit_basecase_dependencies,
@@ -24,13 +20,6 @@ from libs.core.basecase.ubturbo.env_topo import inject_env_topo_dependencies
 from libs.core.basecase.ubturbo.mempooling_basecase import (
     inject_mempooling_basecase_dependencies,
 )
-from libs.core.basecase.ubsio.dfc_basecase import (
-    inject_dfc_basecase_dependencies,
-)
-from libs.modules.ubsvirt.basecase.kubernetes_basecase import inject_kubernetes_basecase_dependencies
-from libs.modules.ubsvirt.basecase.VasBaseCase import inject_vas_basecase_dependencies
-
-
 # Import pytest_configure with alias to avoid recursion
 from libs.core.fixtures import (
     cleanup_stack,
@@ -48,6 +37,14 @@ from libs.core.fixtures import (
     test_env_config,
 )
 from libs.core.fixtures import pytest_configure as _fixtures_pytest_configure
+from libs.modules.ubse.basecase.cm_basecase import inject_cm_basecase_dependencies
+from libs.modules.ubse.basecase.distributed_high_reliability_basecase import (
+    inject_distributed_high_reliability_basecase_dependencies,
+)
+from libs.modules.ubse.basecase.mem_pooling_basecase import inject_mem_pooling_dependencies
+from libs.modules.ubse.basecase.ub_pooling_basecase import inject_ub_pooling_dependencies
+from libs.modules.ubsvirt.basecase.VasBaseCase import inject_vas_basecase_dependencies
+from libs.modules.ubsvirt.basecase.kubernetes_basecase import inject_kubernetes_basecase_dependencies
 
 # Global storage for pytest config (accessible by sub-conftest.py)
 _pytest_global_config = None

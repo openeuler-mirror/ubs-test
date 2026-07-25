@@ -69,6 +69,7 @@ class TestVmLinear040(VasBaseCase):
         res = self.check_query_affinity("VM3", 2 * self.cluster_size, 5 * self.cluster_size / 2 + 1)
         self.assertTrue(res, "The vm3's bound vCPUs are not in expected range.")
 
+    @pytest.mark.case_info(level='P1', type='Functional')
     def test_vm_linear_040(self):
         """Test dynamic binding VM defragmentation with range-affinity=false."""
         self.logStep("S1.删除VM1")

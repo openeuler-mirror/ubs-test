@@ -1,5 +1,7 @@
+import pytest
+
 from libs.core.basecase.ubsio.dfc_basecase import DFCBaseCase
-from libs.ubsio import DOCKER_NAME, get_file_name, put_file_name
+from libs.ubsio import get_file_name, put_file_name
 
 
 class TestUbsioKvcacheGet005(DFCBaseCase):
@@ -38,6 +40,7 @@ class TestUbsioKvcacheGet005(DFCBaseCase):
         self.dfc_node_cli[0].delete_file(self.script_name)
         self.dfc_node_cli[0].send_scripts(self.script_name)
 
+    @pytest.mark.case_info(level='P1', type='Functional')
     def test_ubsio_kvcache_get_005(self):
         self.logStep("S1.生成key、value,长度为满足约束的随机长度")
         self.logStep("S2.调用put传入正确的key、value")

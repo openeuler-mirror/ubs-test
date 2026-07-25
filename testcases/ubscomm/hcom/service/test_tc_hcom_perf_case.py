@@ -1,6 +1,4 @@
 """
-Migrated from legacy: TC_HCOM_perf_Case
-
 Parametrized test covering 12 testset instances:
 - TC_HCOM_PERF_Service_UB_001
 - TC_HCOM_PERF_Service_UB_002
@@ -19,13 +17,6 @@ Parametrized test covering 12 testset instances:
 import pytest
 
 from libs.core.basecase.hcom.hcom_basecase import HCOMBaseCase
-from libs.hcom.constants import (
-    client_input_expect_server_v2,
-    quit_waitstr,
-    server_input,
-    server_waitstr,
-)
-
 
 TEST_SCENES_UB = [
     pytest.param(
@@ -175,6 +166,7 @@ class TestTcHcomPerfCase(HCOMBaseCase):
         super().preTestCase()
 
     @pytest.mark.parametrize("case_id, test_scene_param", TEST_SCENES_UB)
+    @pytest.mark.case_info(level='P2', type='Performance')
     def test_tc_hcom_perf_case(self, case_id: str, test_scene_param: dict):
         """
         TC_HCOM_V2_Perf_Case - Parametrized test for HCOM Perf scenarios
