@@ -32,6 +32,7 @@ class TestVmMemBorrow25(OpenStackBaseCase):
     def teardown_method(self):
         self.clear_server()
 
+    @pytest.mark.case_info(level='P1', type='Functional')
     def test_vm_mem_borrow_25(self, get_topo_path):
 
         self.logStep("P1、在Node0节点使用Openstack的主机聚合模式, 创建5G虚拟机")

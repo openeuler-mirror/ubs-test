@@ -15,6 +15,7 @@ class TestVmMemReturn001(OpenStackBaseCase):
     def teardown_method(self):
         self.clear_server()
 
+    @pytest.mark.case_info(level='P3', type='Functional')
     def test_test_vm_mem_return_001(self, get_topo_path):
         """
         Test for test_vm_mem_return_001
