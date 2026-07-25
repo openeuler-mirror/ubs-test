@@ -41,7 +41,7 @@ class TestContainerMemBorrow040(KubernetesBaseCase):
         E5.查询到一次借用失败事件
         E6.删除成功，清理环境成功
     Author:
-        luoyikang 00668584
+        yangfan
     """
 
     def init_mem_borrow_params(self):

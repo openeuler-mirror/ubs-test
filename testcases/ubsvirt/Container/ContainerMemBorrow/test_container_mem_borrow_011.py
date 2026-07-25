@@ -33,7 +33,7 @@ class TestContainerMemBorrow011(KubernetesBaseCase):
         E1.存在host水线告警，水线压力92
         E2.存在host水线告警，水线压力<80
     Author:
-        luzeren 30077053
+        yangfan
     """
 
     def init_mem_borrow_params(self):

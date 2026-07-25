@@ -1,32 +1,34 @@
 #!/usr/local/python
 # -*- coding: utf-8 -*-
-"""Test dynamic binding VM creation with minimal cross-cluster."""
+"""Test dynamic binding VM creation with same cluster priority."""
+
+import time
 
 import pytest
 
 from libs.modules.ubsvirt.basecase.VasBaseCase import VasBaseCase
 
 
-class TestVmLinear030(VasBaseCase):
-    """验证动态绑定虚机创建申请cpu尽可能少跨Cluster.
+class TestVmLinear027(VasBaseCase):
+    """验证动态绑定虚机创建申请cpu优先申请同一Cluster.
 
     CaseNumber:
-        test_vm_linear_030
+        test_vm_linear_027
     RunLevel:
         Level 1
     EnvType:
 
     CaseName:
-        验证动态绑定虚机创建申请cpu尽可能少跨Cluster
+        验证动态绑定虚机创建申请cpu优先申请同一Cluster
     PreCondition:
         P1.环境中已部署libvirt和vas awared scheduler服务
         P2.修改"/usr/lib/systemd/system/vas-daemon.service"中--skip-cluster配置为'0-1'，跳过vcpu0 vcpu1,重新加载后重启服务
     TestStep:
-        S1.创建32U64G的范围绑核的虚拟机VM1（绑定范围为当前numa所有vcpu）
+        S1.创建16U32G的范围绑核的虚拟机VM1（绑定范围为当前numa所有vcpu）
         S2.执行vasctl query affinity --scope ，查看虚机绑核情况，有预期结果1
     ExpectedResult:
         E1.创建成功
-        E2.虚拟机绑定VCPU16~47，跨2个cluster
+        E2.虚拟机绑定VCPU16~31，为同一个cluster
     Author:
         yangfan
     """
@@ -45,20 +47,21 @@ class TestVmLinear030(VasBaseCase):
         self.reload_daemon()
         self.restart_vas()
 
-    def test_vm_linear_030(self):
-        """Test dynamic binding VM creation with minimal cross-cluster."""
-        self.logStep("S1.创建32U64G的范围绑核的虚拟机VM1（绑定范围为当前numa所有vcpu）")
-        self.create_vm("VM1", self.cluster_size * 2, self.cluster_size * 4, 0)
+    def test_vm_linear_027(self):
+        """Test dynamic binding VM creation with same cluster priority."""
+        self.logStep("S1.创建16U32G的范围绑核的虚拟机VM1（绑定范围为当前numa所有vcpu）")
+        self.create_vm("VM1", self.cluster_size, self.cluster_size * 2)
+        time.sleep(5)
 
         self.logStep("E1.创建成功")
         res = self.check_vm("VM1")
         self.assertTrue(res, "VM1 create failed")
 
         self.logStep("S2.执行vasctl query affinity --scope ，查看虚机绑核情况，有预期结果1")
-        res = self.check_query_affinity("VM1", self.cluster_size, self.cluster_size * 3 - 1)
+        res = self.check_query_affinity("VM1", self.cluster_size, self.cluster_size * 2 - 1)
 
-        self.logStep("E2.虚拟机绑定VCPU16~47，跨2个cluster")
-        self.assertTrue(res, "The vm's bound vCPU are not in 2 clusters.")
+        self.logStep("E2.虚拟机绑定VCPU16~31，为同一个cluster")
+        self.assertTrue(res, "The vm's bound vCPU are not in self.cluster_size - (self.cluster_size * 2 - 1).")
 
     def teardown_method(self):
         """Cleanup: Restore configuration."""

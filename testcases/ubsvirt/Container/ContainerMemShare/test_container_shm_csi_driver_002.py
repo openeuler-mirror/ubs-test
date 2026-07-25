@@ -62,7 +62,7 @@ class TestContainerShmCsiDriver002(KubernetesBaseCase):
         E10.删除共享内存失败
         E11.matrix-csi-driver进程状态可以恢复正常，删除内存成功，返回ubsm_shmem_deallocate ret(0)
     Author:
-        luoyikang 00668584
+        yangfan
     """
 
     def init_shm_params(self):

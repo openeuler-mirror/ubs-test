@@ -33,7 +33,7 @@ class TestVmLinear022(VasBaseCase):
         E2.执行成功，无异常报错
         E3.执行成功，提示非法虚拟机名字
     Author:
-        wufangzhou 00644577
+        yangfan
     """
 
     def setup_method(self):

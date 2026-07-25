@@ -34,7 +34,7 @@ class TestContainerMemBorrow013(KubernetesBaseCase):
         E1.存在水位线告警，借用4G
         E2.存在水位线告警，借用8G
     Author:
-        luzeren 30077053
+        yangfan
     """
 
     def init_mem_borrow_params(self):

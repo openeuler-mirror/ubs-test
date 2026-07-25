@@ -58,7 +58,7 @@ class TestContainerShmCsiDriver008(KubernetesBaseCase):
         E8.返回ubsm_shmem_unmap  ret(0)
         E9.返回ubsm_shmem_deallocate ret(0)
     Author:
-        luoyikang 00668584
+        yangfan
     """
 
     def init_shm_params(self):

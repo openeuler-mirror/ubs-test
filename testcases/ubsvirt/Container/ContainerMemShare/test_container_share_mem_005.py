@@ -58,7 +58,7 @@ class TestContainerShareMem005(KubernetesBaseCase):
         E8.均返回ubsm_shmem_deallocate ret(0)
         E9.在容器/dev/目录下没有映射的文件
     Author:
-        luoyikang 00668584
+        yangfan
     """
 
     def init_shm_params(self):

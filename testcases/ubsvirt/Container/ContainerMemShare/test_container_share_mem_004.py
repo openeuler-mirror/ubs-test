@@ -61,7 +61,7 @@ class TestContainerShareMem004(KubernetesBaseCase):
         E8.返回ubsm_shmem_deallocate ret(0)
         E9.查看CR文件的Status，已经删除CR的status相应的name
     Author:
-        handongkang 30046606
+        yangfan
     """
 
     def init_shm_params(self):

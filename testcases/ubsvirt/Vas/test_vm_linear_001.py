@@ -30,7 +30,7 @@ class TestVmLinear001(VasBaseCase):
         E2.执行成功
         E3.启动成功，进程running状态，-smt参数为false
     Author:
-        wufangzhou 00644577
+        yangfan
     """
 
     def setup_method(self):

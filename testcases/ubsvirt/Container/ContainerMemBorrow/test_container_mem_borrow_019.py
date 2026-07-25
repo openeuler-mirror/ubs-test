@@ -30,7 +30,7 @@ class TestContainerMemBorrow019(KubernetesBaseCase):
     ExpectedResult:
         E1.event有水位线告警，Matrix agent日志本周期无内存借用决策打印
     Author:
-        dongrenchen 00889960
+        yangfan
     """
 
     def init_mem_borrow_params(self):
