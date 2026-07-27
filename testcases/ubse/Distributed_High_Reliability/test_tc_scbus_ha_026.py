@@ -5,7 +5,7 @@ from libs.modules.ubse.basecase.distributed_high_reliability_basecase import (
 )
 
 
-@pytest.mark.smoke
+# @pytest.mark.smoke
 class TestTcScbusHa026(Distributed_High_Reliability_BaseCase):
     """
     CaseNumber:

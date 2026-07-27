@@ -51,8 +51,8 @@ class TestTcMemFdChangePermissionSdk001(MEM_Pooling_BaseCase):
         self.clear_all_borrow_mem()
 
 
-    @pytest.mark.case_info(level='P3', type='Functional')
-    def test_tc_fd_change_permission_test_name_001(self):
+    @pytest.mark.case_info(level='P0', type='Functional')
+    def test_tc_mem_fd_change_permission_sdk_001(self):
 
         uid, gid = user_ops.get_uid_gid(self.master_node, username="test_user")
         self.logInfo(f"uid={uid} gid={gid} ")

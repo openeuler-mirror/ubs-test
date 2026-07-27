@@ -39,7 +39,7 @@ class TestTcUbsTopoLinkListSdk001(MEM_Pooling_BaseCase, UB_Pooling_BaseCase):
         
         pass
 
-    @pytest.mark.case_info(level='P3', type='Functional')
+    @pytest.mark.case_info(level='P0', type='Functional')
     def test_tc_ubs_topo_link_list_sdk_001(self):
 
         lcne_result = []
