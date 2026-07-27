@@ -14,7 +14,7 @@
   "vms": [
     {
       "name": "test_vm_migrate_013_01",
-      "image": "openEuler-22.03-everything",
+      "image": "openEuler-24.03-LTS-SP4-aarch64",
       "ram": 6144,
       "node": "node1",
       "removable": true,
@@ -22,7 +22,7 @@
     },
     {
       "name": "test_vm_migrate_013_02",
-      "image": "openEuler-22.03-everything",
+      "image": "openEuler-24.03-LTS-SP4-aarch64",
       "ram": 2048,
       "node": "node1",
       "removable": true,
@@ -30,7 +30,7 @@
     },
     {
       "name": "test_vm_migrate_013_03",
-      "image": "openEuler-22.03-everything",
+      "image": "openEuler-24.03-LTS-SP4-aarch64",
       "ram": 2048,
       "node": "node1",
       "removable": true,
