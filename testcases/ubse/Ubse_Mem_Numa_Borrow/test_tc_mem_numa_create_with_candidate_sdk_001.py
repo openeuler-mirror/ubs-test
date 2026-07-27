@@ -45,8 +45,8 @@ class TestTcMemNumaCreateWithCandidateSdk001(MEM_Pooling_BaseCase):
         self.logStep("清理内存")
         self.clear_all_borrow_mem()
 
-    @pytest.mark.case_info(level='P3', type='Functional')
-    def test_tc_mem_numa_with_candidate_sdk_001(self):
+    @pytest.mark.case_info(level='P0', type='Functional')
+    def test_tc_mem_numa_create_with_candidate_sdk_001(self):
 
         self.logStep("S1.调用ubse_mem_numa_create_with_candidate接口，参数正常")
         name = "mem_numa_create_with_candidate_sdk_001"

@@ -48,7 +48,7 @@ class TestTcAttachMemorySdkCli001(MEM_Pooling_BaseCase):
         self.logStep("清理内存")
         self.clear_all_borrow_mem()
 
-    @pytest.mark.case_info(level='P3', type='Functional')
+    @pytest.mark.case_info(level='P0', type='Functional')
     def test_tc_attach_memory_cli_001(self):
 
         name = "attach_memory_cli_001"

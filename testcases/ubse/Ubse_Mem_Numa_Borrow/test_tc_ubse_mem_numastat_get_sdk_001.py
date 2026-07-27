@@ -40,7 +40,7 @@ class TestTcUbseMemNumaStatGetSdk001(MEM_Pooling_BaseCase):
         
         pass
 
-    @pytest.mark.case_info(level='P3', type='Functional')
+    @pytest.mark.case_info(level='P0', type='Functional')
     def test_tc_ubse_mem_numastat_get_sdk_001(self):
 
         self.logStep("S1.调用ubs_mem_numastat_get接口查询，传入node_id 1.")

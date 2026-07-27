@@ -70,7 +70,7 @@ class TestTcDisplayMemoryCli(MEM_Pooling_BaseCase):
         self.logStep("清除所有内存")
         self.clear_all_borrow_mem()
 
-    @pytest.mark.case_info(level='P3', type='Functional')
+    @pytest.mark.case_info(level='P0', type='Functional')
     def test_tc_display_memory_cli(self):
 
         total_borrow_size = 256 * 2

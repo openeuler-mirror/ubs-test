@@ -45,7 +45,7 @@ class TestTcMemShmCreateSdk001(MEM_Pooling_BaseCase):
         self.logStep("清理内存")
         self.clear_all_borrow_mem()
 
-    @pytest.mark.case_info(level='P3', type='Functional')
+    @pytest.mark.case_info(level='P0', type='Functional')
     def test_tc_mem_shm_create_sdk_001(self):
         
         self.logStep("S1.调用ubse_mem_shm_create接口创建共享内存，参数合法")

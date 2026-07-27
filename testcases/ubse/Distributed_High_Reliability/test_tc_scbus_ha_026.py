@@ -5,7 +5,7 @@ from libs.modules.ubse.basecase.distributed_high_reliability_basecase import (
 )
 
 
-@pytest.mark.smoke
+# @pytest.mark.smoke
 class TestTcScbusHa026(Distributed_High_Reliability_BaseCase):
     """
     CaseNumber:
@@ -41,7 +41,7 @@ class TestTcScbusHa026(Distributed_High_Reliability_BaseCase):
         
         pass
 
-    @pytest.mark.case_info(level='P0', type='Reliability')
+    @pytest.mark.case_info(level='P1', type='Reliability')
     def test_tc_scbus_ha_026(self):
 
         self.tcStep("S1.停止主节点进程")
