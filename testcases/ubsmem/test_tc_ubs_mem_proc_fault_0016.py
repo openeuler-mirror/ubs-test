@@ -47,7 +47,7 @@ class TestTcUbsMemProcFault0016(UbsMemCase):
         E7.共享内存借出映射成功
         E8.共享内存删除成功
     Author:
-        liyupeng 30050169
+        wanghaojie
     """
 
     def setup_method(self):

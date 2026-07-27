@@ -34,7 +34,7 @@ class TestTcUbsMemBorrowWithLoc0002(UbsMemCase):
         E3.内存从指定的numa进行借出
         E4.内存释放成功
     Author:
-        yangdonglin 00919887
+        wanghaojie
     """
 
     def setup_method(self):

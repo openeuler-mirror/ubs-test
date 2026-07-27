@@ -52,7 +52,7 @@ class TestTcUbsShmMap0033(UbsMemCase):
         E9.共享内存删除成功
         E10.共享内存删除成功
     Author:
-        yangdonglin 00919887
+        wanghaojie
     """
 
     def setup_method(self):

@@ -51,7 +51,7 @@ class TestTcUbsShmLookup0001(UbsMemCase):
         E9.共享内存删除成功
         E10.共享域删除成功
     Author:
-        wanghaojie 60104182
+        wanghaojie
     """
 
     def setup_method(self):

@@ -41,7 +41,7 @@ class TestTcUbsMemBorrow0046(UbsMemCase):
         E4.内存释放成功
         E5.共享域删除成功
     Author:
-        wanghaojie 60104182
+        wanghaojie
     """
 
     def setup_method(self):

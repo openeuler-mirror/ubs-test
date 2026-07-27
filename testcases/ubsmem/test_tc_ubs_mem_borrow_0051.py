@@ -36,7 +36,7 @@ class TestTcUbsMemBorrow0051(UbsMemCase):
         E2.内存释放成功
         E3.内存缓存清空
     Author:
-        zhulinhao 30063494
+        wanghaojie
     """
 
     def setup_method(self):

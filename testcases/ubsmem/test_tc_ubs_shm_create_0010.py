@@ -39,7 +39,7 @@ class TestTcUbsShmCreate0010(UbsMemCase):
         E4.内存解除映射成功
         E5.共享内存删除成功
     Author:
-        penghaiqing 00842478
+        wanghaojie
     """
 
     def setup_method(self):

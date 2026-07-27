@@ -34,7 +34,7 @@ class TestTcUbsMemBorrow0012(UbsMemCase):
         E3.内存检查结果一致
         E4.内存归还成功
     Author:
-        yangdonglin 00919887
+        wanghaojie
     """
 
     def setup_method(self):

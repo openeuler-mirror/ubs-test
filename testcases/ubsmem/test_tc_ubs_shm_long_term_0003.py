@@ -56,7 +56,7 @@ class TestTcUbsShmLongTerm0003(UbsMemCase):
         E10.内存读取成功
         E11.内存归还成功
     Author:
-        wanghaojie 60117672
+        wanghaojie
     """
 
     def setup_method(self):

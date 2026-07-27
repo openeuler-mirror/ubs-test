@@ -41,7 +41,7 @@ class TestTcUbsMemProcFault0013(UbsMemCase):
         E7.共享内存解除映射成功
         E8.共享内存删除成功
     Author:
-        yangdonglin 00919887
+        wanghaojie
     """
 
     def setup_method(self):

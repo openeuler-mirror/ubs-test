@@ -45,7 +45,7 @@ class TestTcUbsShmMap0040(UbsMemCase):
         E5.内存解除映射成功
         E6.共享内存删除成功
     Author:
-        yangdonglin 00919887
+        wanghaojie
     """
 
     def setup_method(self):
