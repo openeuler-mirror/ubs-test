@@ -62,7 +62,7 @@ class TestTcUbsShmLookup0001(UbsMemCase):
         self.logStep("P3.UBS-Memory服务加载正常")
         super().setup_method()
 
-    @pytest.mark.case_info(level='P3', type='Functional')
+    @pytest.mark.case_info(level='P1', type='Functional')
     def test_tc_ubs_shm_lookup_0001(self):
         region_name = "TC_UBS_SHM_LOOKUP_0001"
         shm_name = "TC_UBS_SHM_LOOKUP_0001"

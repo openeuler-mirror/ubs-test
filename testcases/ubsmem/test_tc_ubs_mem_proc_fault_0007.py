@@ -55,7 +55,7 @@ class TestTcUbsMemProcFault0007(UbsMemCase):
         self.logStep("P3.UBS-Memory服务加载正常")
         super().setup_method()
 
-    @pytest.mark.case_info(level='P3', type='Functional')
+    @pytest.mark.case_info(level='P2', type='Reliability')
     def test_tc_ubs_mem_proc_fault_0007(self):
         mem_size_1g = 1024 * 1024 * 1024
         self.logStep("S1.调用接口ubsmem_lease_malloc name 1024*1024*1024 0 0进行fd借用")
