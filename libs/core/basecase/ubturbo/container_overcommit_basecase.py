@@ -47,8 +47,10 @@ QMP_PORT = {'1': 51000, '2': 51001, '3': 51002, '4': 51003}
 DEMON_CAT_EXEC = "/home/ctr_tools/6.6.0-1.2.20.x1.eulerx_a2.aarch64/dcat/dcat"
 LOCAL_SDK_SCRIPT_PATH = f'/home/ctr_tools/sdk/ubs_virt_agent_waterline_mem_{{0}}.py'
 GET_BORROW_CNA_INFO = '/home/autotest/os/test_stub/Tools/getCna.sh'
+GET_BORROW_EID_INFO = '/home/autotest/os/test_stub/Tools/getEid.sh'
 LOCAL_TOOL_PATH = "/home/ctr_tools/"
 LOCAL_SDK_PATH = LOCAL_TOOL_PATH + "sdk"
+JSON_TMP_PATH = "/tmp/ctrs/json"
 
 
 def _borrow_params2json(src_node, src_socket=None, src_numa=None, borrow_sizes_gib=None):
@@ -196,6 +198,7 @@ def inject_container_overcommit_basecase_dependencies(
     instance.socket2numa = {}
     instance.numa2socket = {}
     instance.cna2socket = {}
+    instance.eid2socket = {}
     instance.ledger = Ledger()
     
     logger.info(f"ContainerOvercommitBaseCase initialized: class={instance.__class__.__name__}")
@@ -231,11 +234,20 @@ class ContainerOvercommitBaseCase(ATBaseCase):
         self.init_cluster_env()
         self.logStep("setup_method3、准备SDK脚本")
         self.prepare_sdk()
-        self.logStep("setup_method2、初始化集群环境")
+        self.logStep("setup_method4、恢复宿主机水线")
+        for node in self.nodes:
+            for numa_idx in range(self.local_numa_counts):
+                virtualization.set_huge_pages(node, 0, numa_index=numa_idx)
+            system.rm(node, JSON_TMP_PATH)
 
     def teardown_method(self):
         """Post-test cleanup hook (legacy: postTestCase)."""
-        self.logStep("teardown_method、xxx")
+        self.logStep("teardown_method、恢复宿主机水线")
+        for node in self.nodes:
+            for numa_idx in range(self.local_numa_counts):
+                virtualization.set_huge_pages(node, 0, numa_index=numa_idx)
+            system.rm(node, JSON_TMP_PATH)
+
     
     def init_nodes(self):
         """初始化节点连接."""
@@ -310,7 +322,8 @@ class ContainerOvercommitBaseCase(ATBaseCase):
         self.socket = numa.get_socket_ids(node)
         self.socket2numa, self.numa2socket = numa.match_socket_numa(node)
         self.cna2socket = numa.get_cluster_cna2socket(self.nodes)
-    
+        self.eid2socket = numa.get_cluster_eid2socket(self.nodes)
+
     def borrow(self,
                exec_node,
                src_node,
@@ -386,6 +399,7 @@ class ContainerOvercommitBaseCase(ATBaseCase):
     
     def return_one_borrow(self, exec_node, entry: LedgerEntry, exclude_pids=None, daemon=False, numa_bind=False):
         """归还单个借用内存."""
+        time.sleep(5)
         self.logger.info(f"开始归还borrowId -- {entry.name}")
         return_cmd = f"python3 {LOCAL_SDK_SCRIPT_PATH.format('return')}"
         return_params = _return_params2json(entry, exclude_pids, self.numa2socket, numa_bind)
@@ -417,7 +431,7 @@ class ContainerOvercommitBaseCase(ATBaseCase):
         mem_used = mem_info['MemUsed'][f'Node {numa_id}']
         stress_val = math.floor(mem_total * target_percent - mem_used)
         if stress_val <= 0:
-            self.logger.warn("加压值小于0，已达到目标水线")
+            self.logger.info("加压值小于0，已达到目标水线")
             return
         _, cur_pages = virtualization.get_huge_pages(node, numa_index=numa_id)
         virtualization.set_huge_pages(node, number=(stress_val // 2) + cur_pages, numa_index=numa_id)
@@ -438,15 +452,15 @@ class ContainerOvercommitBaseCase(ATBaseCase):
     
     def fill_entry_info(self, node_dict, entry: LedgerEntry):
         """填充账目信息."""
-        res = basic.run(node_dict[str(entry.src_node)], f'bash {GET_BORROW_CNA_INFO} {entry.src_remote_numa}')
-        if 'No dev_x' in res.stdout:
-            basic.logger.warn("未找到当前借用账目对应的CNA信息")
+        res = basic.run(node_dict[str(entry.src_node)], f'bash {GET_BORROW_EID_INFO} {entry.src_remote_numa}')
+        if 'No dev' in res.stdout or res.rc != 0:
+            basic.logger.warn("未找到当前借用账目对应的CNA/EID信息， 脚本返回码非0")
             return
         else:
-            cna_info = json.loads(res.stdout)
+            eid_info = json.loads(res.stdout)
         
-        entry.src_numa = self.socket2numa[self.cna2socket[cna_info["scna"]]][0]
-        entry.lent_socket = self.cna2socket[cna_info["dcna"]]
+        entry.src_numa = self.socket2numa[self.eid2socket[eid_info["seid"]]][0]
+        entry.lent_socket = self.eid2socket[eid_info["deid"]]
     
     def clear_all_container(self):
         """清理所有容器."""
