@@ -101,7 +101,7 @@ class TestTcSmapFuncFeatureSmapMigrateOut002(SmapCase):
         if len(self.remote_numa_list) == 0 or len(self.local_numa_list) == 0:
             return
         vm_pid = self.hosts[0].vm_nodes[0].get_pid()
-        if vm_pid != -1:
+        if vm_pid == -1:
             return
         vm_numa = self.hosts[0].vm_nodes[0].get_unique_numa_node()
         self.cli[0].set_smap_remote_numa_info(vm_numa, self.remote_numa_list[0], 0)

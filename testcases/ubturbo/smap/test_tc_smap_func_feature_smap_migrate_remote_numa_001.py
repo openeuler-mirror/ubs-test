@@ -45,8 +45,6 @@ class TestTcSmapFuncFeatureSmapMigrateRemoteNuma001(SmapCase):
         self.assertEqual(rc in (0, -1), True)
 
     def test_tc_smap_func_feature_smap_migrate_remote_numa_001(self):
-        self.remote_numa_list = self.hosts[0].get_remote_numa()
-        self.assertNotEqual(len(self.remote_numa_list), 0)
         remote_numa = self.remote_numa_list[0]
         remote_numa_1 = self.remote_numa_list[1]
 

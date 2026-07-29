@@ -77,7 +77,6 @@ class TestTcSmapFuncFeatureSmapAddProcessTracking001(SmapCase):
 
     def teardown_method(self):
         super(TestTcSmapFuncFeatureSmapAddProcessTracking001, self).postTestCase()
-        vm_pid = self.hosts[0].vm_nodes[0].get_pid()
-        if vm_pid == -1:
-            return
-        self.cli[0].smap_remove_process_tracking([vm_pid], 1, 0)
+        if self.hosts[0].vm_nodes[0].in_use():
+            vm_pid = self.hosts[0].vm_nodes[0].get_pid()
+            self.cli[0].smap_remove_process_tracking([vm_pid], 1, 0)

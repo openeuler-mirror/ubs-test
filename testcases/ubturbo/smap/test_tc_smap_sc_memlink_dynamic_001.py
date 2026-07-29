@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from tkinter.tix import Select
-
 from libs.core.basecase.ubturbo import SmapCase, MigrateOutMsg, MigrateOutPayload, EnableNodeMsg
 
 

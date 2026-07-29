@@ -38,7 +38,8 @@ class TestTcSmapFuncFeatureSmapQueryProcessConfig001(SmapCase):
         remote_numa = self.remote_numa_list[0]
         self.logStep("1. 创建虚机")
         self.logStep("预期结果：1. 虚机创建成功")
-        self.hosts[0].vm_nodes[0].create()
+        result = self.hosts[0].vm_nodes[0].create()
+        self.assertEqual(result, True)
         vm_pid = self.hosts[0].vm_nodes[0].get_pid()
         self.logStep("2. 设置远端numa信息")
         self.logStep("预期结果：2. 设置远端numa信息成功")

@@ -79,7 +79,7 @@ class TestTcSmapFuncFeatureSmapRemove002(SmapCase):
         self.assertEqual(vm_pid in list(map(lambda payload: payload.pid, process_config.payload)), True)
 
         self.logStep("S5.调用SmapRemove vm_pid 1 将虚机进程移除纳管")
-        rc = self.cli[0].smap_remove(vm_pid, 1)
+        rc =  self.cli[0].smap_remove(RemoveMsg([vm_pid]), 1)
         self.logStep("E5.移除虚机纳管成功")
         self.assertEqual(rc, 0)
 
