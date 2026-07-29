@@ -1,0 +1,23 @@
+{
+  "hook": "libs.core.basecase.ubturbo.smap_hook.SmapHook",
+  "tests": [
+    "testcases/ubturbo/smap/test_tc_smap_func_feature_smap_init_001.py",
+    "testcases/ubturbo/smap/test_tc_smap_func_feature_enable_node_001.py",
+    "testcases/ubturbo/smap/test_tc_smap_func_feature_enable_node_002.py",
+    "testcases/ubturbo/smap/test_tc_smap_func_feature_smap_enable_process_migrate_001.py",
+    "testcases/ubturbo/smap/test_tc_smap_func_feature_smap_enable_process_migrate_002.py",
+    "testcases/ubturbo/smap/test_tc_smap_func_feature_smap_migrate_back_001.py",
+    "testcases/ubturbo/smap/test_tc_smap_func_feature_smap_migrate_out_001.py",
+    "testcases/ubturbo/smap/test_tc_smap_func_feature_smap_migrate_pid_remote_numa_001.py",
+    "testcases/ubturbo/smap/test_tc_smap_func_feature_set_smap_remote_numa_info_001.py",
+    "testcases/ubturbo/smap/test_tc_smap_func_feature_set_smap_remote_numa_info_002.py",
+    "testcases/ubturbo/smap/test_tc_smap_func_feature_set_run_mode_001.py",
+    "testcases/ubturbo/smap/test_tc_smap_func_feature_smap_remove_001.py",
+    "testcases/ubturbo/smap/test_tc_smap_sc_container_migout_001.py",
+    "testcases/ubturbo/smap/test_tc_smap_sc_container_migout_002.py"
+  ],
+  "params": {
+    "page_type": "4k",
+    "package_path": "/home/ubturbo-test/smap"
+  }
+}
