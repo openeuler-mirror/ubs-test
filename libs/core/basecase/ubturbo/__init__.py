@@ -4,3 +4,4 @@
 from .at_basecase import *
 from .env_topo import *
 from .mempooling_basecase import *
+from .smap_basecase import *
