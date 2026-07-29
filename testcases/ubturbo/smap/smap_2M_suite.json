@@ -1,0 +1,23 @@
+{
+  "hook": "libs.core.basecase.ubturbo.smap_hook.SmapHook",
+  "tests": [
+    "testcases/ubturbo/smap/test_tc_smap_func_feature_smap_init_002.py",
+    "testcases/ubturbo/smap/test_tc_smap_sc_vm_1650_heat_scan_001.py",
+    "testcases/ubturbo/smap/test_tc_smap_func_feature_smap_migrate_out_002.py",
+    "testcases/ubturbo/smap/test_tc_smap_func_feature_smap_migrate_out_sync_001.py",
+    "testcases/ubturbo/smap/test_tc_smap_func_feature_smap_migrate_remote_numa_001.py",
+    "testcases/ubturbo/smap/test_tc_smap_func_feature_smap_query_process_config_001.py",
+    "testcases/ubturbo/smap/test_tc_smap_func_feature_set_run_mode_002.py",
+    "testcases/ubturbo/smap/test_tc_smap_func_feature_smap_add_process_tracking_001.py",
+    "testcases/ubturbo/smap/test_tc_smap_func_feature_smap_query_vm_preq_001.py",
+    "testcases/ubturbo/smap/test_tc_smap_func_feature_smap_remove_002.py",
+    "testcases/ubturbo/smap/test_tc_smap_func_feature_smap_remove_process_tracking_001.py",
+    "testcases/ubturbo/smap/test_tc_smap_sc_vm_repeat_exec_001.py",
+    "testcases/ubturbo/smap/test_tc_smap_sc_memlink_dynamic_001.py",
+    "testcases/ubturbo/smap/test_tc_smap_sc_mem_fragmentation_001.py"
+  ],
+  "params": {
+    "page_type": "2m",
+    "package_path": "/home/ubturbo-test/smap"
+  }
+}
