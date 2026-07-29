@@ -74,7 +74,7 @@ class VmNode(SmapNodeExecutor):
         output = self._host_node.run(f"virsh list --all | grep --color=never \"{self.name}\"")
         if self._get_rc(output) == 0:
             match = re.search(rf'{re.escape(self.name)}\s+(\S+)', self._get_stdout(output))
-            if match:
+            if match and self._vm_status_dic.get(match.group(1)) is not None:
                 return self._vm_status_dic[match.group(1)]
         return VmStatus.STOP
 

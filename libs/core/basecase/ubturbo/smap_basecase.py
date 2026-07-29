@@ -109,7 +109,7 @@ class SmapCase(TestCase):
         try:
             self.performCleanUp()
         except Exception as error:
-            raise Exception("An Exception Occurred during The Post-TestCase:\n%s" % error)
+            raise Exception("An Exception Occurred during The Post-TestCase:\n%s" % error) from error
         return
 
     def preTestCase(self):
