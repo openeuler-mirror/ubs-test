@@ -1,0 +1,60 @@
+<domain type="kvm">
+  <name>smap-vm-1</name>
+  <memory unit="g" memory="4">4</memory>
+  <currentMemory unit="g" memory="4">4</currentMemory>
+  <memoryBacking>
+    <allocation mode="immediate" />
+    <hugepages />
+  </memoryBacking>
+  <numatune>
+    <memory mode="strict" nodeset="0" />
+  </numatune>
+  <vcpu placement="static">2</vcpu>
+  <cputune>
+    <vcpupin vcpu="0" cpuset="2" />
+    <vcpupin vcpu="1" cpuset="3" />
+    <emulatorpin cpuset="2-3" />
+  </cputune>
+  <os>
+    <type arch="aarch64" machine="virt">hvm</type>
+    <loader readonly="yes" type="pflash">/usr/share/edk2/aarch64/QEMU_EFI-pflash.raw</loader>
+    <nvram>/var/lib/libvirt/qemu/nvram/smap_2u_4g-1.fd</nvram>
+    <boot dev="hd" />
+  </os>
+  <features>
+    <acpi />
+    <gic version="3" />
+  </features>
+  <cpu mode="host-passthrough" check="none">
+    <topology sockets="1" cores="2" threads="1" />
+    <numa>
+      <cell id="0" cpus="0-1" memory="4" unit="g">4</cell>
+    </numa>
+  </cpu>
+  <clock offset="utc">
+  </clock>
+  <on_poweroff>destroy</on_poweroff>
+  <on_reboot>restart</on_reboot>
+  <on_crash>restart</on_crash>
+  <devices>
+    <emulator>/usr/bin/qemu-kvm</emulator>
+    <disk type="file" device="disk">
+      <driver name="qemu" type="qcow2" />
+      <source file="__SMAP_CASE_RESOURCE_ROOT__/openEuler-24.03-LTS-SP4-aarch64-1.qcow2" />
+      <target dev="sda" bus="scsi" />
+      <address type="drive" controller="0" bus="0" target="0" unit="0" />
+    </disk>
+    <interface type="network">
+      <source network="default"/>
+      <mac address='52:54:00:b2:17:10'/>
+      <model type="virtio" />
+      <driver name='vhost' queues='4' rx_queue_size='1024' tx_queue_size='1024'/>
+    </interface>
+    <console type="pty" />
+    <controller type="scsi" index="0" model="virtio-scsi" />
+    <channel type="unix">
+      <source mode="bind" />
+      <target type="virtio" name="org.qemu.guest_agent.0" />
+    </channel>
+  </devices>
+</domain>
