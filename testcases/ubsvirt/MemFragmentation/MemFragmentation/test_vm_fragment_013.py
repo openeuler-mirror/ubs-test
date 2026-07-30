@@ -72,7 +72,7 @@ class TestVmFragment013(OpenStackBaseCase):
         self.logStep("S2、创建5G虚机")
         vm_5g = VMResource(
             "vm_5g",
-            "openEuler-22.03-everything",
+            "openEuler-24.03-LTS-SP4-aarch64",
             5120,
             "node1",
             False,
