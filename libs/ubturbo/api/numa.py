@@ -307,8 +307,12 @@ def get_cluster_eid2socket(node_list):
     socket_ids = get_socket_ids(node_list[0])
     eid2socket = {}
     for node in node_list:
-        eid0 = basic.run(node, 'cat /sys/devices/ub_bus_controller0/00001/eid').stdout.strip()
-        eid1 = basic.run(node, 'cat /sys/devices/ub_bus_controller1/00002/eid').stdout.strip()
+        res0 = basic.run(node, 'cat /sys/devices/ub_bus_controller0/00001/eid')
+        res1 = basic.run(node, 'cat /sys/devices/ub_bus_controller1/00002/eid')
+        if res0.rc != 0 or res1.rc != 0:
+            raise Exception("读取环境EID失败")
+        eid0 = res0.stdout.strip()
+        eid1 = res1.stdout.strip()
         eid2socket[int(eid0, 0)] = socket_ids[0]
         eid2socket[int(eid1, 0)] = socket_ids[1]
     basic.logger.info(f"=====eid2socket: {eid2socket}=====")

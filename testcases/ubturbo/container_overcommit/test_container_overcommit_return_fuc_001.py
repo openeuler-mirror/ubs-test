@@ -39,6 +39,7 @@ class TestContainerOvercommitReturnFuc001(ContainerOvercommitBaseCase):
         res, entry_list = self.borrow(
             exec_node=node0, src_node=node0.slot_id, borrow_sizes_gib=[1, 1, 1]
         )
+        self.assertNotEqual(len(entry_list), 0, "借用失败")
         self.borrow_remote_numa = entry_list[0].src_remote_numa
         self.logStep("E1、借用成功")
         remote_numa_list = set([])
@@ -63,3 +64,4 @@ class TestContainerOvercommitReturnFuc001(ContainerOvercommitBaseCase):
         exec_node = self.nodes[0] if self.nodes else None
         if exec_node:
             self.return_all_borrow(exec_node=exec_node, clear_account=True)
+        super().teardown_method()

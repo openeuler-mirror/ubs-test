@@ -44,7 +44,6 @@ class CrictlRuntime():
         if system.is_path_exist(node, file_path) and not force_overwrite:
             return
         with open(fp_local) as f:
-            content = open(fp_local).read()
             content = f.read()
         # 将文本输出到文件中
         folder = '/'.join(file_path.split('/')[:-1])

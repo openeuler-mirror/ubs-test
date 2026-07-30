@@ -131,6 +131,7 @@ class TestContainerOvercommitMigrateFuc001(ContainerOvercommitBaseCase):
             src_socket=self.socket[0],
             src_numa=self.src_numa,
         )
+        self.assertNotEqual(len(entry_list2), 0, "借用失败")
 
         self.logStep("E5、内存借用成功，内存上线至远端numa；")
         basic.wait_until(

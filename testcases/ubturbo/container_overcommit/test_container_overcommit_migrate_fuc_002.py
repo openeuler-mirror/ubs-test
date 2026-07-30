@@ -58,7 +58,7 @@ class TestContainerOvercommitMigrateFuc002(ContainerOvercommitBaseCase):
         stress_pids = []
         for i in range(1, 3):
             container_id = self.container_map[f"container{i}"].id
-            stress_value = "8G"
+            stress_value = "2G"
             stress_pids += self.stress_in_container(node1, container_id, stress_value, self.src_numa)
 
         self.logStep("E2、加压成功；")
@@ -83,7 +83,7 @@ class TestContainerOvercommitMigrateFuc002(ContainerOvercommitBaseCase):
         )
 
         self.logStep("S4、调用迁出接口，将所有容器的加压进程号作为参数传入，迁出至借用内存；")
-        self.migrate(exec_node=node1, entry_list=entry_list, pids=stress_pids, ratio=20)
+        self.migrate(exec_node=node1, entry_list=entry_list, pids=stress_pids, ratio=25)
 
         self.logStep("E4、迁出成功，1024M借用内存投入使用量大于800M；")
         basic.wait_until(

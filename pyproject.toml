@@ -133,7 +133,6 @@ addopts = [
     "--cov-report=xml",
     "--cov-fail-under=80",
     "-ra",
-    "-W ignore::SyntaxWarning",
 ]
 
 # ========================
