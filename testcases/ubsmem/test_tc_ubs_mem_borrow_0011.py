@@ -34,7 +34,7 @@ class TestTcUbsMemBorrow0011(UbsMemCase):
         E3.内存检查结果一致
         E4.内存归还成功
     Author:
-        yangdonglin 00919887
+        wanghaojie
     """
 
     def setup_method(self):
@@ -45,7 +45,7 @@ class TestTcUbsMemBorrow0011(UbsMemCase):
         self.logStep("P3.UBS-Memory服务加载正常")
         super().setup_method()
 
-    @pytest.mark.case_info(level='P2', type='Functional')
+    @pytest.mark.case_info(level='P0', type='Functional')
     def test_tc_ubs_mem_borrow_0011(self):
         size = 128 * 1024 * 1024
         self.logStep("S1.调用接口ubsmem_lease_malloc name 128*1024*1024 0 64")

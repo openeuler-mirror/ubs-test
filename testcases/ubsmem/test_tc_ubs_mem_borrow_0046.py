@@ -41,7 +41,7 @@ class TestTcUbsMemBorrow0046(UbsMemCase):
         E4.内存释放成功
         E5.共享域删除成功
     Author:
-        wanghaojie 60104182
+        wanghaojie
     """
 
     def setup_method(self):
@@ -53,7 +53,7 @@ class TestTcUbsMemBorrow0046(UbsMemCase):
         self.logStep("P4.UBS-Memory服务加载正常")
         super().setup_method()
 
-    @pytest.mark.case_info(level='P2', type='Functional')
+    @pytest.mark.case_info(level='P1', type='Functional')
     def test_tc_ubs_mem_borrow_0046(self):
         region_name = "TC_UBS_MEM_BORROW_0046"
         size = 1024 * 1024 * 1024

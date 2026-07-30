@@ -34,7 +34,7 @@ class TestTcUbsMemBorrowWithLoc0002(UbsMemCase):
         E3.内存从指定的numa进行借出
         E4.内存释放成功
     Author:
-        yangdonglin 00919887
+        wanghaojie
     """
 
     def setup_method(self):
@@ -47,7 +47,7 @@ class TestTcUbsMemBorrowWithLoc0002(UbsMemCase):
         self.logStep("P4.UBS-Memory服务加载正常")
         super().setup_method()
 
-    @pytest.mark.case_info(level='P2', type='Functional')
+    @pytest.mark.case_info(level='P1', type='Functional')
     def test_tc_ubs_mem_borrow_with_loc_0002(self):
         size = 1024 * 1024 * 1024
         self.logStep("S1.节点0执行sudo -u ubse ubsectl display topo -t cpu查询节点cpu拓扑")

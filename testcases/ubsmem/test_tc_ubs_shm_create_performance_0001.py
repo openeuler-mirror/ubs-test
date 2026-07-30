@@ -42,7 +42,7 @@ class TestTcUbsShmCreatePerformance0001(UbsMemCase):
         E4.查询共享内存创建时延符合要求
         E5.共享内存删除成功
     Author:
-        zhulinhao 30063494
+        wanghaojie
     """
 
     def setup_method(self):

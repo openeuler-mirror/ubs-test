@@ -39,7 +39,7 @@ class TestTcUbsShmCreate0010(UbsMemCase):
         E4.内存解除映射成功
         E5.共享内存删除成功
     Author:
-        penghaiqing 00842478
+        wanghaojie
     """
 
     def setup_method(self):
@@ -50,7 +50,7 @@ class TestTcUbsShmCreate0010(UbsMemCase):
         self.logStep("P3.UBS-Memory服务加载正常")
         super().setup_method()
 
-    @pytest.mark.case_info(level='P2', type='Functional')
+    @pytest.mark.case_info(level='P0', type='Functional')
     def test_tc_ubs_shm_create_0009(self):
         shm_name = "TC_UBS_SHM_CREATE_0009"
         size = 1024 * 1024 * 1024

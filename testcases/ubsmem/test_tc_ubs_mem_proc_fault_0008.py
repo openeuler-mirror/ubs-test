@@ -48,7 +48,7 @@ class TestTcUbsMemProcFault0008(UbsMemCase):
         E8.两次md5值一致
         E9.内存释放成功
     Author:
-        tanghongcheng 30062639
+        wanghaojie
     """
 
     def setup_method(self):
@@ -59,7 +59,7 @@ class TestTcUbsMemProcFault0008(UbsMemCase):
         self.logStep("P3.UBS-Memory服务加载正常")
         super().setup_method()
 
-    @pytest.mark.case_info(level='P3', type='Functional')
+    @pytest.mark.case_info(level='P2', type='Reliability')
     def test_tc_ubs_mem_proc_fault_0008(self):
         mem_size_1g = 1024 * 1024 * 1024
         self.logStep("S1.调用接口ubsmem_lease_malloc name 1024*1024*1024 0 64进行numa借用")

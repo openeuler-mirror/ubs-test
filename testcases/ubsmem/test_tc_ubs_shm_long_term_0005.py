@@ -65,7 +65,7 @@ class TestTcUbsShmLongTerm0005(UbsMemCase):
         E11.内存解除成功
         E12.共享内存删除成功
     Author:
-        wanghaojie 60117672
+        wanghaojie
     """
 
     def setup_method(self):

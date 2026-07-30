@@ -59,7 +59,7 @@ class TestTcUbsShmMapWithAddr0003(UbsMemCase):
         E12.共享内存解除成功
         E13.共享内存删除成功
     Author:
-        yangdonglin 00919887
+        wanghaojie
     """
 
     def setup_method(self):
@@ -70,7 +70,7 @@ class TestTcUbsShmMapWithAddr0003(UbsMemCase):
         self.logStep("P3.UBS-Memory服务加载正常")
         super().setup_method()
 
-    @pytest.mark.case_info(level='P3', type='Functional')
+    @pytest.mark.case_info(level='P1', type='Functional')
     def test_tc_ubs_shm_map_with_addr_0003(self):
         size = 1024 * 1024 * 1024
         shm_name = "TC_UBS_SHM_MAP_WITH_ADDR_0003"
