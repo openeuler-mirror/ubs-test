@@ -33,6 +33,8 @@ class TestTcSmapFuncFeatureSmapRemove001(SmapCase):
         self.logStep("1、OS正常运行")
 
         self.logStep("2、远端借用内存已上线")
+        self.remote_numa_list = self.hosts[0].get_remote_numa()
+        self.assertNotEqual(len(self.remote_numa_list), 0)
 
         self.logStep("3、SMAP驱动已正确加载")
 
@@ -41,8 +43,6 @@ class TestTcSmapFuncFeatureSmapRemove001(SmapCase):
         self.assertEqual(rc in (0, -1), True)
 
     def test_tc_smap_func_feature_smap_remove_001(self):
-        self.remote_numa_list = self.hosts[0].get_remote_numa()
-        self.assertNotEqual(len(self.remote_numa_list), 0)
         remote_numa = self.remote_numa_list[0]
         self.logStep("1、查看进程pid：ps -ef | grep redis")
         result = self.hosts[0].start_redis()

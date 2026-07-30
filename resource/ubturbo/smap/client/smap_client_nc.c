@@ -91,7 +91,7 @@ int32_t CLI_RegCmd(CLI_CMD_S * v_pstCmd) {
         current_client_fd = client_fd;
         v_pstCmd -> fnCmdDo(argc, args);
 
-        for (int i = 0; i < argc + 1; i++) {
+        for (int i = 0; i < argc; i++) {
             free(args[i]);
         }
         free(args);
