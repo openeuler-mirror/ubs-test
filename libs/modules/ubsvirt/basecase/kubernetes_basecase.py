@@ -799,7 +799,7 @@ class KubernetesBaseCase(UBSVirtBaseCase):
         返回值说明：
             List[str]: 命令执行结果
         """
-        server_cmd = f"ls -l /root/kubernetes/var/lib/kubelet/plugins/tmpdev/{cr_name}/{pod_name} | wc -l"
+        server_cmd = f"ls -l /var/lib/kubelet/plugins/tmpdev/{cr_name}/{pod_name} | wc -l"
         ssh_node = get_new_sshconnect(self.master)
         res = ssh_node.run({'command': [server_cmd], 'waitstr': '#'})
         if res.get("stdout"):
@@ -1061,7 +1061,7 @@ class KubernetesBaseCase(UBSVirtBaseCase):
         test_node_uid = self.master.run({'command': [uid_cmd], 'waitstr': '#'}).get('stdout').replace("root@#>", "")
 
         node = self.node_dict[node_name]
-        res = node.run({'command': ['cat /root/kubernetes/var/lib/kubelet/memory_manager_state']}).get(
+        res = node.run({'command': ['cat /var/lib/kubelet/memory_manager_state']}).get(
             "stdout").replace("root@#>", "")
         if container_name not in res:
             logger.info("can not find container in mem manager state")
@@ -1690,7 +1690,7 @@ class KubernetesBaseCase(UBSVirtBaseCase):
         uid_cmd = f"kubectl get pod -n {pod.name_space} {pod.pod_name} -o go-template='{{{{.metadata.uid}}}}'"
         test_node_uid = self.master.run({'command': [uid_cmd], 'waitstr': '#'}).get('stdout').replace("root@#>", "")
 
-        res = pod.node.run({'command': ['cat /root/kubernetes/var/lib/kubelet/memory_manager_state']}).get(
+        res = pod.node.run({'command': ['cat /var/lib/kubelet/memory_manager_state']}).get(
             "stdout").replace("root@#>", "")
         if pod.container_name not in res:
             logger.info("can not find container in mem manager state")
