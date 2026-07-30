@@ -12,6 +12,7 @@ from libs.core.basecase.hcom.hcom_basecase import inject_hcom_basecase_dependenc
 from libs.core.basecase.ubsio.dfc_basecase import (
     inject_dfc_basecase_dependencies,
 )
+from libs.core.basecase.ubturbo import inject_smap_basecase_dependencies
 from libs.core.basecase.ubturbo.at_basecase import inject_at_basecase_dependencies
 from libs.core.basecase.ubturbo.container_overcommit_basecase import (
     inject_container_overcommit_basecase_dependencies,
@@ -109,4 +110,5 @@ __all__ = [
     "inject_dfc_basecase_dependencies",
     "get_pytest_config",
     "pytest_addoption",
+    "inject_smap_basecase_dependencies"
 ]
