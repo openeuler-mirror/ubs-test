@@ -208,11 +208,11 @@ class SmapCli(SmapNodeExecutor):
         process_config = ProcessConfig(rc, out_len, [])
         matches = re.findall(
             r'pid: (\d+), type: (\d+), state: (\d+), ratio: (\d+), l1: (\d+), l2: (\d+), scanType: (\d+), '
-            r'scanTime: (\d+)', output)
+            r'scanTime: (\d+), migrateMode: (\d+), memSize: (\d+)', output)
         for match in matches:
             process_config.payload.append(ProcessConfigPayload(int(match[0]), int(match[1]), int(match[2]),
                                                                int(match[3]), int(match[4]), int(match[5]),
-                                                               int(match[6])))
+                                                               int(match[6]), int(match[7]), int(match[8]), int(match[9])))
         return process_config
 
     def smap_set_smap_run_mode(self, mode: int):

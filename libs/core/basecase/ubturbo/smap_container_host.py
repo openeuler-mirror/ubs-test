@@ -46,10 +46,6 @@ class ContainerNode(SmapNodeExecutor):
     def check_container_running_status(self) -> bool:
         return self._get_container_status() == ContainerStatus.RUNNING
 
-    def check_container_real_status(self) -> bool:
-        # 能进入虚拟机执行ip a命令
-        result = self.run("ip a")
-        return self._container_ip in self._get_stdout(result)
 
     def _get_container_status(self) -> ContainerStatus:
         output = self._host_node.run(f"docker inspect --format '{{{{ .State.Status }}}}' {self._name}")

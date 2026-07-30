@@ -96,6 +96,8 @@ class SmapCase(TestCase):
             if vm_remote_numa_map.get(vm_pid) is None:
                 continue
             vm_local_numa = vm_instance.get_unique_numa_node()
+            if vm_local_numa == -2:
+                continue
             self.logger.info(f"found vm:{vm_pid} local_numa:{vm_local_numa} remote_numa:{vm_remote_numa_map[vm_pid]}")
             for remote_numa in vm_remote_numa_map[vm_pid]:
                 self.cli[0].set_smap_remote_numa_info(vm_local_numa, remote_numa, 0)

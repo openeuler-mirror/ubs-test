@@ -83,7 +83,7 @@ class SmapNodeExecutor(NodeExecutor):
         if not match:
             self.logger.warn("Failed to get process memory")
             return -1
-        return match.group(1)
+        return int(match.group(1))
 
     def get_mem_total_size(self) -> int:
         # 返回MB
@@ -136,4 +136,6 @@ class SmapNodeExecutor(NodeExecutor):
         if self._get_rc(result) != 0:
             return []
         pid_str = self._get_stdout(result, 0, 1)
+        if not pid_str or not pid_str.strip():
+            return []
         return [int(pid) for pid in pid_str.split(" ")]

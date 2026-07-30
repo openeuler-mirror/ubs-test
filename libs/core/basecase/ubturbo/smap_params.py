@@ -175,12 +175,14 @@ class MigratePidNumaMsg:
 class ProcessConfigPayload:
     pid: int
     type: int
+    state: int
     ratio: int
     l1_node: int
     l2_node: int
     scan_type: int
     scan_time: int
-
+    migrate_mode: int
+    mem_size: int
 
 @dataclass
 @stringify_members
