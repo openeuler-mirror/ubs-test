@@ -1,6 +1,3 @@
-#! /bin/python3
-# -*- coding: utf-8 -*-
-# 版权所有 (c) 华为技术有限公司 2012-2025
 import re
 from libs.ubturbo.common import basic
 from libs.ubturbo.common.string_utils import STR_ENTER, get_digit_of_str
@@ -304,3 +301,19 @@ def get_cluster_cna2socket(node_list):
         cna2socket[int(cna1, 0)] = socket_ids[1]
     basic.logger.info(f"=====cna2socket: {cna2socket}=====")
     return cna2socket
+
+
+def get_cluster_eid2socket(node_list):
+    socket_ids = get_socket_ids(node_list[0])
+    eid2socket = {}
+    for node in node_list:
+        res0 = basic.run(node, 'cat /sys/devices/ub_bus_controller0/00001/eid')
+        res1 = basic.run(node, 'cat /sys/devices/ub_bus_controller1/00002/eid')
+        if res0.rc != 0 or res1.rc != 0:
+            raise Exception("读取环境EID失败")
+        eid0 = res0.stdout.strip()
+        eid1 = res1.stdout.strip()
+        eid2socket[int(eid0, 0)] = socket_ids[0]
+        eid2socket[int(eid1, 0)] = socket_ids[1]
+    basic.logger.info(f"=====eid2socket: {eid2socket}=====")
+    return eid2socket

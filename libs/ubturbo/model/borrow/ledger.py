@@ -1,6 +1,3 @@
-#! /bin/python3
-# -*- coding: utf-8 -*-
-# 版权所有 (c) 华为技术有限公司 2012-2025
 import json
 from collections import namedtuple
 from typing import Dict, List
@@ -16,6 +13,7 @@ OS_REMOTE_TEST_PATH = '/home/autotest/os'  # 执行环境父目录
 TEST_STUB_REMOTE_FILE_PATH = f'{OS_REMOTE_TEST_PATH}/test_stub/Tools'
 GET_BORROW_SDK_PATH = f'{TEST_STUB_REMOTE_FILE_PATH}/getAllBorrowInfo'
 GET_BORROW_CNA_PATH = f'{TEST_STUB_REMOTE_FILE_PATH}/getCna.sh'
+GET_BORROW_EID_PATH = f'{TEST_STUB_REMOTE_FILE_PATH}/getEid.sh'
 
 
 class Ledger:
@@ -31,7 +29,8 @@ class Ledger:
         try:
             sdk_exists = system.is_path_exist(node, GET_BORROW_SDK_PATH)
             cna_exists = system.is_path_exist(node, GET_BORROW_CNA_PATH)
-            if not (sdk_exists and cna_exists):
+            eid_exists = system.is_path_exist(node, GET_BORROW_EID_PATH)
+            if not (sdk_exists and cna_exists and eid_exists):
                 system.mkdir(node, TEST_STUB_REMOTE_FILE_PATH)
                 file_transport.send2remote(
                     node, f"{file_transport.THIS_PROJECT_PATH}/resource/ubsrmrs/TestStub/Tools/getAllBorrowInfo.c",
@@ -39,7 +38,11 @@ class Ledger:
                 file_transport.send2remote(
                     node, f"{file_transport.THIS_PROJECT_PATH}/resource/ubsrmrs/TestStub/Tools/getCna.sh",
                     TEST_STUB_REMOTE_FILE_PATH)
+                file_transport.send2remote(
+                    node, f"{file_transport.THIS_PROJECT_PATH}/resource/ubsrmrs/TestStub/Tools/getEid.sh",
+                    TEST_STUB_REMOTE_FILE_PATH)
                 basic.run(node, f"sed -i 's/\\r$//' {GET_BORROW_CNA_PATH}")
+                basic.run(node, f"sed -i 's/\\r$//' {GET_BORROW_EID_PATH}")
                 rc = basic.run(
                     node, f"gcc {GET_BORROW_SDK_PATH}.c -o {GET_BORROW_SDK_PATH} -I /usr/include/ubse -lubse-client").rc
                 if rc != 0:
