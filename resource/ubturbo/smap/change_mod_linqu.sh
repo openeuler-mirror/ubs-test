@@ -98,6 +98,12 @@ function mod_4k
 
     docker ps -a | grep -oP 'smap.*' | xargs -i docker rm -f {}
     docker_image_id=$(docker images | grep euler | awk '{print $3}')
+
+    if [ -z "${docker_image_id}" ]
+    then
+      echo "docker image not found"
+      reurn
+    fi
     docker run -itd \
       --name smap-container-1 \
       --hostname smap-container-1 \

@@ -54,25 +54,42 @@ int32_t CLI_RegCmd(CLI_CMD_S * v_pstCmd) {
         buffer[bytes_read] = '\0';
 
         char ** args = malloc(BUFFER_SIZE);
+        if (args == NULL) {
+            continue;
+        }
         int argc = 0;
         args[argc] = malloc(BUFFER_SIZE);
+        if (args[argc] == NULL) {
+            continue;
+        }
         int char_index = 0;
 
         for (int read_index = 0; read_index < bytes_read; read_index++) {
             if (buffer[read_index] == ' ' || buffer[read_index] == '\n') {
                 if (char_index > 0) {
                     args[argc][char_index] = '\0';
-                    argc++;
-                    args[argc] = malloc(BUFFER_SIZE);
                     char_index = 0;
+                    argc++;
+                    if (argc >= BUFFER_SIZE/sizeof(char*)) {
+                        break;
+                    }
+                    args[argc] = malloc(BUFFER_SIZE);
+                    if (args[argc] == NULL) {
+                        break;
+                    }
                 }
             } else {
-                args[argc][char_index++] = buffer[read_index];
+                if (char_index + 1 < BUFFER_SIZE) {
+                    args[argc][char_index++] = buffer[read_index];
+                }
             }
         }
-
+        if (char_index > 0) {
+            args[argc][char_index] = '\0';
+            argc++;
+        }
         current_client_fd = client_fd;
-        v_pstCmd -> fnCmdDo(argc + (char_index % 1), args);
+        v_pstCmd -> fnCmdDo(argc, args);
 
         for (int i = 0; i < argc + 1; i++) {
             free(args[i]);
@@ -94,7 +111,9 @@ void CLI_PrintBuf(const char *v_pchFormat, ...) {
     va_start(args, v_pchFormat);
     vsnprintf(buffer, sizeof(buffer), v_pchFormat, args);
     va_end(args);
-
+    if (current_client_fd == -1) {
+        return;
+    }
     int _ = write(current_client_fd, buffer, strlen(buffer));
 }
 

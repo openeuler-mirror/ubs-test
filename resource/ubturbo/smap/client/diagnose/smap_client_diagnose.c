@@ -560,7 +560,7 @@ static void SmapMigrateBackCall(int32_t argc, char *argv[])
         PA_START,
         PA_END,
     };
-    int ret = ConvertMultipleArgsToU64(argv, values, MIG_BACK_ARGC);
+    int ret = injectNullptr ? 0 : ConvertMultipleArgsToU64(argv, values, MIG_BACK_ARGC);
     if (ret) {
         return;
     }
@@ -613,7 +613,7 @@ static void SmapMigrateBackMemidCall(int32_t argc, char *argv[])
         DST_NID,
         MEMID,
     };
-    int ret = ConvertMultipleArgsToU64(argv, values, MIG_BACK_ARGC);
+    int ret = injectNullptr ? 0 : ConvertMultipleArgsToU64(argv, values, MIG_BACK_ARGC);
     if (ret) {
         return;
     }
@@ -699,7 +699,7 @@ static void SmapRemoveCall(int32_t argc, char *argv[])
 
     // 解析参数
     uint64_t values[argc];
-    int ret = ConvertMultipleArgsToU64(argv, values, argc);
+    int ret = injectNullptr ? 0 : ConvertMultipleArgsToU64(argv, values, argc);
     if (ret) {
         return;
     }
@@ -737,7 +737,7 @@ static void SmapRemoveMultiNumaCall(int32_t argc, char *argv[])
 
     // 解析参数
     uint64_t values[argc];
-    int ret = ConvertMultipleArgsToU64(argv, values, argc);
+    int ret = injectNullptr ? 0 : ConvertMultipleArgsToU64(argv, values, argc);
     if (ret) {
         return;
     }
@@ -774,7 +774,7 @@ static void SmapEnableNodeCall(int32_t argc, char *argv[])
         ENABLE,
         NID,
     };
-    int ret = ConvertMultipleArgsToU64(argv, values, SMAP_ENABLE_ARGC);
+    int ret = injectNullptr ? 0 : ConvertMultipleArgsToU64(argv, values, SMAP_ENABLE_ARGC);
     if (ret) {
         return;
     }
@@ -862,7 +862,7 @@ static void SmapQueryVmMemCall(int32_t argc, char *argv[])
         return;
     }
 
-    struct VmRatioMsg vrMsg;
+    struct VmRatioMsg vrMsg = { 0 };
     struct VmRatioMsg *msg = value == 0 ? NULL : &vrMsg;
     ret = SmapQueryVmMemRatio(msg);
     if (ret) {
@@ -885,7 +885,7 @@ static void SetSmapRemoteNumaInfoCall(int32_t argc, char *argv[])
     }
 
     uint64_t values[argc];
-    int ret = ConvertMultipleArgsToU64(argv, values, argc);
+    int ret = injectNullptr ? 0 : ConvertMultipleArgsToU64(argv, values, argc);
     if (ret) {
         return;
     }
@@ -963,12 +963,12 @@ static void SmapQueryVmFreqCall(int32_t argc, char *argv[])
         values[PID], ret, lenOut);
     if (!noPrint) {
         CLI_PrintBuf("the page-accessed freq of vm(pid:%d) is as follows:\n", values[PID]);
-        for (uint32_t i = 0; i < lenOut; i++) {
+        for (uint32_t i = 0; data != NULL && i < lenOut; i++) {
             CLI_PrintBuf("%u ", data[i]);
         }
         CLI_PrintBuf("\n");
     }
-    for (uint32_t i = rangeStart; i < rangeEnd; i++) {
+    for (uint32_t i = rangeStart; data != NULL && i < rangeEnd; i++) {
         nrFreq0 += (data[i] == 0 ? 1 : 0);
         hits += data[i];
     }
@@ -1436,7 +1436,7 @@ static void SmapQueryProcessConfigCall(int32_t argc, char *argv[])
     struct OldProcessPayload *result = NULL;
     int *outLen = NULL;
 
-    if (argc < SMAP_QUERY_PROCESS_CONFIG_ARGC) {
+    if (argc != SMAP_QUERY_PROCESS_CONFIG_ARGC) {
         CLI_PrintBuf("Input parameters failed, num: %d.\n", argc);
         CLI_PrintBuf(g_smapClientDiagCmd[CMD_SMAP_QUERY_PROCESS_CONFIG].description);
         return;
