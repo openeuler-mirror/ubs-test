@@ -123,7 +123,7 @@ def get_env_info(node, argument: str, default: str = None, use_cache: bool = Tru
 
 def get_env_type(node) -> str:
     """检测环境类型（HCCS、UB仿真、UB硬件）"""
-    return get_env_info(node, NAME_ENV_TYPE, default=HCCS)
+    return get_env_info(node, NAME_ENV_TYPE, default=UB_simulation)
 
 
 def get_file_server_ip(node) -> str:
