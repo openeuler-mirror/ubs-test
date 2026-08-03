@@ -10,8 +10,7 @@ from libs.ubturbo.common import basic, env
 
 
 @pytest.mark.smoke
-@pytest.mark.mempooling
-class TestMemoryPoolingMemoryrollback002(MempoolingBaseCase):
+class TestRmrsFragmentMemoryrollback002(MempoolingBaseCase):
     """
     CaseNumber:
         memory_pooling_memoryRollback_002
@@ -48,7 +47,7 @@ class TestMemoryPoolingMemoryrollback002(MempoolingBaseCase):
             mempooling_common.alloc_hugePage_with_check(self.nodemaster, 0, 8192)
 
     @pytest.mark.case_info(level='P1', type='Functional')
-    def test_memory_pooling_memoryrollback_002(self):
+    def test_rmrs_fragment_memoryrollback_002(self):
         """
         memory_pooling_memoryRollback_002
         """

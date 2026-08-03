@@ -1,7 +1,5 @@
 import time
-
 import pytest
-
 import libs.ubturbo.api.mempooling as mempooling_common
 import libs.ubturbo.api.mempooling_api as api
 from libs.core.basecase.ubturbo.mempooling_basecase import MempoolingBaseCase, mem_return
@@ -13,8 +11,7 @@ from libs.ubturbo.common.string_utils import STR_ENTER
 
 
 @pytest.mark.smoke
-@pytest.mark.mempooling
-class TestMemoryPoolingWhiteList001(MempoolingBaseCase):
+class TestRmrsFragmentWhiteList001(MempoolingBaseCase):
     """
     CaseNumber: 
         memory_pooling_white_list_001
@@ -52,7 +49,7 @@ class TestMemoryPoolingWhiteList001(MempoolingBaseCase):
         mempooling_common.alloc_hugePage(self.nodes[1], self.socket2numa[self.socket[0]][0], 5120)
 
     @pytest.mark.case_info(level='P2', type='Functional')
-    def test_memory_pooling_white_list_001(self):
+    def test_rmrs_fragment_white_list_001(self):
         """Legacy: procedure"""
         self.logStep("S1、修改两个节点的rackmanager.conf配置文件，新增两行：group=computer01,computer02 provider=computer01,S2、重启两个节点rack：systemctl restart scbus-daemon")
         self.hostnames = [

@@ -1,7 +1,5 @@
 import time
-
 import pytest
-
 import libs.ubturbo.api.mempooling as mempooling_common
 import libs.ubturbo.api.mempooling_api as api
 from libs.core.basecase.ubturbo.at_basecase import ATBaseCase
@@ -10,8 +8,7 @@ from libs.ubturbo.common import basic, env
 
 
 @pytest.mark.smoke
-@pytest.mark.mempooling
-class TestMemoryPoolingFirstReturnSuccess1(ATBaseCase):
+class TestRmrsFragmentFirstReturnSuccess1(ATBaseCase):
     """
     CaseNumber: 
         memory_pooling_first_return_success_1
@@ -65,7 +62,7 @@ class TestMemoryPoolingFirstReturnSuccess1(ATBaseCase):
             api.create_vm_object(self._nodeagent, 'B')
 
     @pytest.mark.case_info(level='P2', type='Functional')
-    def test_memory_pooling_first_return_success_1(self):
+    def test_rmrs_fragment_first_return_success_1(self):
         """Legacy: procedure"""
         self.logStep("1-创建虚机大页内存不足，调用第一层借用内存策略接口借用2228224KB内存")
         res_1 = api.function_borrow_strategy(self.nodeagent, 1, self.srcSocketId, 0, 2228224)

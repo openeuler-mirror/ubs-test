@@ -1,5 +1,4 @@
 import pytest
-
 import libs.ubturbo.api.mempooling as mempooling_common
 import libs.ubturbo.api.mempooling_api as api
 from libs.core.basecase.ubturbo.mempooling_basecase import MempoolingBaseCase
@@ -8,8 +7,7 @@ from libs.ubturbo.hooks import hook_mem_pooling
 
 
 @pytest.mark.smoke
-@pytest.mark.mempooling
-class TestMemorypoolingNodeResourceCollection001(MempoolingBaseCase):
+class TestRmrsFragmentNodeResourceCollection001(MempoolingBaseCase):
     """
     CaseNumber:
         memorypooling_node_resource_collection_001
@@ -53,7 +51,7 @@ class TestMemorypoolingNodeResourceCollection001(MempoolingBaseCase):
         mempooling_common.pre_test(self.nodemaster)
 
     @pytest.mark.case_info(level='P0', type='Functional')
-    def test_memorypooling_node_resource_collection_001(self):
+    def test_rmrs_fragment_node_resource_collection_001(self):
         """
         memorypooling_node_resource_collection_001
         """
