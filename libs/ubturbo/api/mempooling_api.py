@@ -328,7 +328,7 @@ def clear_env_temporary_vms(nodes):
         TempVirtualMachine.clear_all(node)
 
 
-def create_vm_object(node, vm_id, init_login=True, remote=False):
+def create_vm_object(node, vm_id, init_login=False, remote=False):
     """
     创建临时的虚机对象
     :param node:
@@ -353,7 +353,8 @@ def create_vm_object(node, vm_id, init_login=True, remote=False):
             template_img=f'/home/mempooling-test/img/openEuler-22.03-LTS-SP1-aarch64.qcow2',
             vm_name=f'mempooling-{vm_id}',
         ),
-        init_login=init_login
+        init_login=init_login,
+        console_login=True
     )
     if init_login:
         check_vm_function(vm)
@@ -365,8 +366,12 @@ def check_vm_function(vm):
     在主机端让虚机执行一次echo 123命令，检查虚机功能是否正常
     :param vm:虚机对象，可以通过lib/model/libvirt.py中的TempVirtualMachine类创建
     """
-    ret = vm.execute_without_login('echo 123').stdout.strip()[-3:]
-    if ret[-3:] != '123':
+    res = ''
+    if vm.console_ssh:
+        res = basic.run(vm.console_ssh, 'echo 123').stdout.strip()
+    else:
+        res = vm.execute_without_login('echo 123').stdout.strip()[-3:]
+    if res != '123':
         raise Exception('虚拟机功能不正常')
     basic.logger.info("虚机功能正常")
 
