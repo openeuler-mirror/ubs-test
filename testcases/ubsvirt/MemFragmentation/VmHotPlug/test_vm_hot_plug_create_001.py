@@ -1,12 +1,7 @@
 import time
-from pathlib import Path
 
-from libs.modules.ubsvirt.api import client
 from libs.modules.ubsvirt.basecase.vmhotplug_basecase import VMHotPlugBaseCase
-
-XML_BASE_PATH = Path(__file__).parent.parent.parent.parent.parent / "resource" / "ubsvirt" / "xml"
-import pytest
-
+from libs.modules.ubsvirt.api import client
 
 
 class TestVmHotPlugCreate001(VMHotPlugBaseCase):
@@ -41,8 +36,6 @@ class TestVmHotPlugCreate001(VMHotPlugBaseCase):
     """
 
     def setup_method(self):
-        
-        self.source_path = str(XML_BASE_PATH)
         self.filepath = "/root/hot_plug_test/hot_plug/xml"
 
         self.logStep("P1、Ubs Scheduler服务正常部署，正常使能")
@@ -56,18 +49,14 @@ class TestVmHotPlugCreate001(VMHotPlugBaseCase):
         self.logStep("P4、环境上存在4G虚机的xml，xml需要有guest numa 0和内存插槽slot 0")
 
     def teardown_method(self):
-        
         self.master.run({"command": ["hot_plug delete vm_01"], "timeout": 1800})
         self.master.run({"command": [f"rm -rf {self.filepath}/vm_01.xml"], "timeout": 1800})
         self.distribute_huge_page(self.master, 0, 0)
 
-    @pytest.mark.case_info(level='P0', type='Functional')
-    def test_vm_hot_plug_create_001(self):
-        
-
+    def test_vm_hot_plug_create_001(self, xml_base_path):
         self.logStep("S1、使用xml创建虚拟机vm_01")
         vm_created = self.create_vm_from_xml(
-            self.master, self.source_path, self.filepath, "test_vm_hot_plug_create_001_vm_01.xml"
+            self.master, str(xml_base_path), self.filepath, "test_vm_hot_plug_create_001_vm_01.xml"
         )
         self.assertTrue(vm_created, "vm created failed.")
 
