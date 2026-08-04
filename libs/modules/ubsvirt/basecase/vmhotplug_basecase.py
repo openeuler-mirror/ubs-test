@@ -8,6 +8,7 @@ import time
 
 from typing import Any, Dict, List, Optional
 from libs.modules.ubsvirt.basecase.ubsvirt_basecase import UBSVirtBaseCase
+import libs.modules.ubsvirt.common.file_common as file_aw
 from libs.modules.ubsvirt.api import client
 from libs.modules.ubsvirt.common import node_manager
 from libs.modules.ubsvirt.model.model import WrapperNode
@@ -42,6 +43,7 @@ def inject_vmhotplug_basecase_dependencies(
 
     # 初始化业务参数
     instance.node_list = instance._load_nodes()
+    instance._load_info()
     instance.node_dict = {}
     instance.is_Simulation = resource.get('global', {}).get('is_simulation', False)
     instance.resource_dict = {}
@@ -99,6 +101,18 @@ class VMHotPlugBaseCase(UBSVirtBaseCase):
         - agent: SSH node - 代理节点
         - controller: SSH node - 控制节点
     """
+
+    def _load_info(self):
+        """ 添加通用信息.
+        Returns:
+        添加通用信息
+        """
+
+        self.image_origin_dir = "/opt/install/tmp/openstack/images/"
+        self.image_base_dir = "/root/hot_plug_test/hot_plug/images/"
+        self.image_base_name = "openEuler-24.03-LTS-SP4-aarch64.qcow2"
+        self.image_base_path = self.image_base_dir + self.image_base_name
+        self.image_origin_path = self.image_origin_dir + self.image_base_name
 
     def get_numa_num(self, node: Any) -> int:
         """获取节点的NUMA数量.
@@ -604,3 +618,17 @@ class VMHotPlugBaseCase(UBSVirtBaseCase):
         rc = res.get("rc", -1) if isinstance(res, dict) else -1
         self.assertEqual(rc, 0, "登录虚拟机失败")
         return vm_ssh_node
+
+    def cp_image_to_node(self, node=None):
+        if node is None:
+            node = self.master
+
+        check_res = file_aw.check_file_exist(node, self.image_origin_path)
+        if not check_res:
+            node.run({"command": ["mkdir -p " + self.image_origin_dir]})
+        scp_ip = node.localIP if self.is_Simulation else node.ip
+        cmd = f'scp {self.image_origin_path} root@{scp_ip}:{self.image_origin_dir}'
+        self.controller.run({"command": [cmd], 'timeout': 600})
+        node.run({"command": ["mkdir -p " + self.image_base_dir]})
+        node.run({"command": [f"\\cp -f {self.image_origin_path} {self.image_base_path}"]})
+        return file_aw.check_file_exist(node, self.image_base_path)

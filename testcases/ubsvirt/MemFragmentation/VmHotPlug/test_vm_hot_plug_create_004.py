@@ -39,7 +39,9 @@ class TestVmHotPlugCreate004(VMHotPlugBaseCase):
 
     def setup_method(self):
         self.file_path = "/root/hot_plug_test/hot_plug/xml"
-        self.img_path = "/opt/install/tmp/openstack/images/"
+        image_res = self.cp_image_to_node()
+        self.assertTrue(image_res, 'prepare test image failed')
+        self.img_02_path = self.image_base_dir + 'openEuler-24.03-LTS-SP4-aarch64-1.qcow2'
 
         self.logStep("P1、Ubs Scheduler服务正常部署，正常使能")
 
@@ -56,13 +58,8 @@ class TestVmHotPlugCreate004(VMHotPlugBaseCase):
         self.master.run({"command": ["hot_plug delete vm_02"], "timeout": 1800})
         self.master.run({"command": [f"rm -rf {self.file_path}/vm_01.xml"]})
         self.master.run({"command": [f"rm -rf {self.file_path}/vm_02.xml"]})
-        self.master.run(
-            {
-                "command": [
-                    f"rm -rf {self.img_path}/openEuler-22.03-SP2-aarch64-everything-redis-Performance1.qcow2"
-                ]
-            }
-        )
+        self.master.run({"command": [f"rm -rf {self.image_base_path}"]})
+        self.master.run({"command": [f"rm -rf {self.img_02_path}"]})
         self.distribute_huge_page(self.master, 0, 0)
 
     def test_vm_hot_plug_create_004(self, xml_base_path):
@@ -71,14 +68,7 @@ class TestVmHotPlugCreate004(VMHotPlugBaseCase):
             self.master, str(xml_base_path), self.file_path, "test_vm_hot_plug_create_004_vm_01.xml"
         )
         self.assertTrue(vm1_created, "vm_01 created failed.")
-        self.master.run(
-            {
-                "command": [
-                    f"\\cp -f {self.img_path}/openEuler-22.03-SP2-aarch64-everything-redis-Performance.qcow2 "
-                    f"{self.img_path}/openEuler-22.03-SP2-aarch64-everything-redis-Performance1.qcow2"
-                ]
-            }
-        )
+        self.master.run({"command": [f"\\cp -f {self.image_base_path} {self.img_02_path}"]})
         vm2_created = self.create_vm_from_xml(
             self.master, str(xml_base_path), self.file_path, "test_vm_hot_plug_create_004_vm_02.xml"
         )

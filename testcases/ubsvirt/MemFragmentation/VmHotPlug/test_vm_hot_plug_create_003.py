@@ -37,6 +37,8 @@ class TestVmHotPlugCreate003(VMHotPlugBaseCase):
 
     def setup_method(self):
         self.filepath = "/root/hot_plug_test/hot_plug/xml"
+        image_res = self.cp_image_to_node()
+        self.assertTrue(image_res, 'prepare test image failed')
 
         self.logStep("P1、Ubs Scheduler服务正常部署，正常使能")
 
@@ -58,6 +60,7 @@ class TestVmHotPlugCreate003(VMHotPlugBaseCase):
     def teardown_method(self):
         self.master.run({"command": ["hot_plug delete vm_01"], "timeout": 1800})
         self.master.run({"command": [f"rm -rf {self.filepath}/vm_01.xml"], "timeout": 1800})
+        self.master.run({"command": [f"rm -rf {self.image_base_path}"]})
         self.distribute_huge_page(self.master, 0, 0)
         self.distribute_huge_page(self.master, 0, (self.numa_num - 1))
 
