@@ -42,9 +42,9 @@ class TestVmHotPlugCreate006(VMHotPlugBaseCase):
 
     def setup_method(self):
         self.filepath = "/root/hot_plug_test/hot_plug/xml"
+        self.img_02_path = self.image_base_dir + 'openEuler-24.03-LTS-SP4-aarch64-1.qcow2'
         image_res = self.cp_image_to_node()
         self.assertTrue(image_res, 'prepare test image failed')
-        self.img_02_path = self.image_base_dir + 'openEuler-24.03-LTS-SP4-aarch64-1.qcow2'
 
         self.logStep("P1、Ubs Scheduler服务正常部署，正常使能")
 

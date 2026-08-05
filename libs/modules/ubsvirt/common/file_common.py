@@ -132,9 +132,6 @@ def check_file_exist (node, file_path):
     :param file_path: 文件路径
     :return: True/False
     """
-    res = node.run ({'command': ["ll {0} | wc -l".format (file_path)]})
-    res = str (res.get ('stdout')) + str (res.get ('stderr'))
-    if re.search ('No such file or directory', res):
-        return False
-    else:
-        return True
+    res = node.run ({'command': ["test -f {0} && echo EXISTS || echo NOT_EXIST".format (file_path)]})
+    stdout = str (res.get ('stdout', ''))
+    return 'EXISTS' in stdout
