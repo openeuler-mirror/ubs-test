@@ -1,4 +1,5 @@
 import time
+import pytest
 
 from libs.modules.ubsvirt.basecase.vmhotplug_basecase import VMHotPlugBaseCase
 from libs.modules.ubsvirt.api import client
@@ -64,6 +65,7 @@ class TestVmHotPlugCreate004(VMHotPlugBaseCase):
         self.master.run({"command": [f"rm -rf {self.img_02_path}"]})
         self.distribute_huge_page(self.master, 0, 0)
 
+    @pytest.mark.case_info(level='P0', type='Functional')
     def test_vm_hot_plug_create_004(self, xml_base_path):
         self.logStep("S1、使用xml创建虚拟机vm_01，vm_02")
         vm1_created = self.create_vm_from_xml(
