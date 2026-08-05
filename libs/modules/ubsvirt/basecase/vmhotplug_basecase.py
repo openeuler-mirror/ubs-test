@@ -626,9 +626,9 @@ class VMHotPlugBaseCase(UBSVirtBaseCase):
         check_res = file_aw.check_file_exist(node, self.image_origin_path)
         if not check_res:
             node.run({"command": ["mkdir -p " + self.image_origin_dir]})
-        scp_ip = node.localIP if self.is_Simulation else node.ip
-        cmd = f'scp {self.image_origin_path} root@{scp_ip}:{self.image_origin_dir}'
-        self.controller.run({"command": [cmd], 'timeout': 600})
+            scp_ip = node.localIP if self.is_Simulation else node.ip
+            cmd = f'scp {self.image_origin_path} root@{scp_ip}:{self.image_origin_dir}'
+            self.controller.run({"command": [cmd], 'timeout': 600})
         node.run({"command": ["mkdir -p " + self.image_base_dir]})
         node.run({"command": [f"\\cp -f {self.image_origin_path} {self.image_base_path}"]})
         return file_aw.check_file_exist(node, self.image_base_path)

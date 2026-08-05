@@ -96,7 +96,8 @@ class TestVmHotPlugCreate001(VMHotPlugBaseCase):
 
         self.logStep("S6、使用stress-ng命令给虚机加压超过4G")
         client.vm_stree(vm_01_ssh, str(4096) + "M")
-        time.sleep(120)
+        time.sleep(20)
         self.logStep("E6、查看内存使用量超过4G")
-        vm_mem = client.get_memory(vm_01_ssh)
-        self.assertGreaterEqual(int(vm_mem["used"]), 4096, "vm used mem less than 4096MB.")
+        timeout = 600 if self.is_Simulation else 180
+        vm_mem_res = self.wait_vm_used_mem_match_expect(vm_01_ssh, "greater", 4096, timeout, 10)
+        self.assertTrue(vm_mem_res, "vm used mem less than 4096MB.")

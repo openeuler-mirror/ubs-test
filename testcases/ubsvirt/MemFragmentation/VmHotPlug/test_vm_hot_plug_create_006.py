@@ -119,5 +119,6 @@ class TestVmHotPlugCreate006(VMHotPlugBaseCase):
         time.sleep(20)
 
         self.logStep("E7、查看内存使用量超过4G")
-        vm_mem_res = self.wait_vm_used_mem_match_expect(vm_01_ssh, "greater", 4096, 180, 10)
+        timeout = 600 if self.is_Simulation else 180
+        vm_mem_res = self.wait_vm_used_mem_match_expect(vm_01_ssh, "greater", 4096, timeout, 10)
         self.assertTrue(vm_mem_res, "vm used mem not match expected 4096MB")
