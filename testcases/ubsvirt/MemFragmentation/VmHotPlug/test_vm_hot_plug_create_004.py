@@ -1,3 +1,5 @@
+import time
+
 from libs.modules.ubsvirt.basecase.vmhotplug_basecase import VMHotPlugBaseCase
 from libs.modules.ubsvirt.api import client
 
@@ -102,6 +104,7 @@ class TestVmHotPlugCreate004(VMHotPlugBaseCase):
         self.logStep("E3、内存热插成功")
 
         self.logStep("S4、查看虚机xml")
+        time.sleep(10)
         self.get_vm_xml_hot_plug_section(self.master, "vm_01", 0, 1048576)
 
         self.logStep("E4、xml中包含扩容的1G内存信息")
