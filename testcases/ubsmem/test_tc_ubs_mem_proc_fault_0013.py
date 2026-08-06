@@ -41,7 +41,7 @@ class TestTcUbsMemProcFault0013(UbsMemCase):
         E7.共享内存解除映射成功
         E8.共享内存删除成功
     Author:
-        yangdonglin 00919887
+        wanghaojie
     """
 
     def setup_method(self):
@@ -52,7 +52,7 @@ class TestTcUbsMemProcFault0013(UbsMemCase):
         self.logStep("P3.UBS-Memory服务加载正常")
         super().setup_method()
 
-    @pytest.mark.case_info(level='P3', type='Functional')
+    @pytest.mark.case_info(level='P2', type='Reliability')
     def test_tc_ubs_mem_proc_fault_0013(self):
         shm_name = "TC_UBS_MEM_PROC_FAULT_0013"
         size = 1024 * 1024 * 1024

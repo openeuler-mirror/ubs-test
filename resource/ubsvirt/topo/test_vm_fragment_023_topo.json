@@ -11,7 +11,7 @@
   }],
   "vms":[{
     "name": "Delete_VM_002_01",
-    "image": "openEuler-22.03-everything",
+    "image": "openEuler-24.03-LTS-SP4-aarch64",
     "ram": 8192,
     "cpu": 4,
     "node": "node1",

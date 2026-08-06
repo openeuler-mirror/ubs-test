@@ -143,6 +143,22 @@ cp -r hcom_perf /home/ubs-comm/hcom/perf_test
    ```
 2. 将镜像文件拷贝到该目录下，并将镜像名字修改为 `openEuler-22.03-LTS-SP1-aarch64.qcow2`
 
+### 执行 smap 测试用例前
+
+需要在执行节点上提前准备创建虚拟机的镜像文件和创建容器的镜像文件：
+
+1. 在每个执行节点上创建目录：
+   ```bash
+   mkdir -p /opt/install/package/
+   ```
+   将虚机镜像文件拷贝到该目录下，并将镜像名字修改为 `openEuler-24.03-LTS-SP4-aarch64.qcow2`
+
+2. 在每个执行节点上创建目录：
+   ```bash
+   mkdir -p /ko/smap/resources
+   ```
+   将docker镜像文件、redis-server、redis-benchmark、redis.conf拷贝到该目录下，镜像名称为 `openEuler-docker.aarch64.tar.xz`
+
 #### 执行 ubsvirt 测试用例前
 
 1. 需确保执行节点已安装部署 ubs-openstack 插件

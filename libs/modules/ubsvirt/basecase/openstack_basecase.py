@@ -823,7 +823,7 @@ class OpenStackBaseCase(UBSVirtBaseCase):
 
         self.controller.startService("openstack-nova-scheduler")
         for node in self.ubse_node_list:
-            node.startService("openstack-nova-compute")
+            node.startService("openstack-nova-compute",timeout=240)
 
         self.waitServiceStatus(self.controller, "openstack-nova-scheduler", 900)
         for node in self.ubse_node_list:

@@ -731,7 +731,7 @@ class Linux(NodeAdapter):
 
     # ==================== Service Operations ====================
 
-    def startService(self, name: str, timeout: int = 30) -> None:
+    def startService(self, name: str, timeout: int = 240) -> None:
         """Start service.
 
         Args:
@@ -748,7 +748,7 @@ class Linux(NodeAdapter):
         if result["rc"] != 0:
             raise Exception(f"Failed to start service {name}: {result['stderr']}")
 
-    def stopService(self, name: str, timeout: int = 30) -> None:
+    def stopService(self, name: str, timeout: int = 240) -> None:
         """Stop service.
 
         Args:

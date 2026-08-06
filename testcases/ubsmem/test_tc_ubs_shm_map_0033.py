@@ -52,7 +52,7 @@ class TestTcUbsShmMap0033(UbsMemCase):
         E9.共享内存删除成功
         E10.共享内存删除成功
     Author:
-        yangdonglin 00919887
+        wanghaojie
     """
 
     def setup_method(self):
@@ -63,7 +63,7 @@ class TestTcUbsShmMap0033(UbsMemCase):
         self.logStep("P3.UBS-Memory服务加载正常")
         super().setup_method()
 
-    @pytest.mark.case_info(level='P2', type='Functional')
+    @pytest.mark.case_info(level='P1', type='Functional')
     def test_tc_ubs_shm_map_0033(self):
         shm_name = "TC_UBS_SHM_MAP_0033"
         size = 128 * 1024 * 1024

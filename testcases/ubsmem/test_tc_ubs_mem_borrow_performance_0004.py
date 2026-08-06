@@ -41,7 +41,7 @@ class TestTcUbsMemBorrowPerformance0004(UbsMemCase):
         E3.查询内存借用时延符合要求
         E4.内存释放成功
     Author:
-        zhulinhao 30063494
+        wanghaojie
     """
 
     def setup_method(self):
