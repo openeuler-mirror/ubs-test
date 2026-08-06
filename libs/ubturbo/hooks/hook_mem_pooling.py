@@ -10,7 +10,10 @@ from libs.ubturbo.common import basic, file_transport
 from libs.ubturbo.api import numa, system
 
 WORK_PATH = "/home/mempooling-test/"
-PXE_PATH = "/qcow2_images/20260708//"
+WORK_IMAGE_PATH = WORK_PATH + 'img/openEuler-22.03-LTS-SP1-aarch64.qcow2'
+LOCAL_IMAGE_PATH = "/opt/install/package/openEuler-24.03-LTS-SP4-aarch64.qcow2"
+PXE_PATH = ":50001/fs/qcow2_images/20260708/"
+REMOTE_IMAGE_PATH = PXE_PATH + 'openEuler-24.03-LTS-SP4-aarch64.qcow2'
 
 
 def mk_work_dir(node, parent_dir, dest_folder_name_list):
@@ -22,10 +25,12 @@ def mk_work_dir(node, parent_dir, dest_folder_name_list):
 
 
 def download_qcow(node):
-    path = WORK_PATH + 'img/openEuler-22.03-LTS-SP1-aarch64.qcow2'
-    if not system.is_path_exist(node, path, is_folder=False):
+    if not system.is_path_exist(node, WORK_IMAGE_PATH, is_folder=False):
         system.mkdir(node, WORK_PATH + 'img')
-        system.cp(node, '/opt/install/package/openEuler-24.03-LTS-SP4-aarch64.qcow2', path)
+        if system.is_path_exist(node, LOCAL_IMAGE_PATH):
+            system.cp(node, LOCAL_IMAGE_PATH, WORK_IMAGE_PATH)
+        else:
+            file_transport.download_file(node, REMOTE_IMAGE_PATH, WORK_IMAGE_PATH)
 
 
 def check_and_start_lcne(nodes):
