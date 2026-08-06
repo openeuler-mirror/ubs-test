@@ -14,8 +14,7 @@ function __prepare_dependencies()
     vm_image_name=openEuler-24.03-LTS-SP4-aarch64.qcow2
     if [ ! -f "${SMAP_RESOURCE_HOME}/${vm_image_name}" ]
     then
-      scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-        root@controller:/opt/install/tmp/openstack/images/${vm_image_name} ${SMAP_RESOURCE_HOME}
+      cp /opt/install/package/${vm_image_name} ${SMAP_RESOURCE_HOME}
     fi
     virsh list --name | xargs -i virsh destroy {}
     __cp_resource ${SMAP_RESOURCE_HOME}/${vm_image_name} ${SMAP_CASE_WORKSPACE}/vm/img

@@ -62,6 +62,7 @@ int32_t CLI_RegCmd(CLI_CMD_S * v_pstCmd) {
         if (args[argc] == NULL) {
             continue;
         }
+        int slot_count = 1;
         int char_index = 0;
 
         for (int read_index = 0; read_index < bytes_read; read_index++) {
@@ -77,6 +78,7 @@ int32_t CLI_RegCmd(CLI_CMD_S * v_pstCmd) {
                     if (args[argc] == NULL) {
                         break;
                     }
+                    slot_count++;
                 }
             } else {
                 if (char_index + 1 < BUFFER_SIZE) {
@@ -91,7 +93,7 @@ int32_t CLI_RegCmd(CLI_CMD_S * v_pstCmd) {
         current_client_fd = client_fd;
         v_pstCmd -> fnCmdDo(argc, args);
 
-        for (int i = 0; i < argc + 1; i++) {
+        for (int i = 0; i < slot_count; i++) {
             free(args[i]);
         }
         free(args);
