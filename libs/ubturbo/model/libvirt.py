@@ -203,7 +203,7 @@ class VirtualMachine:
         wait_timeout = {env.UB_simulation: 30 * 60, }.get(self.env_type, 5 * 60)
         self.console_ssh.run({'command': [f'virsh console {self.vm_name}'], 'timeout': wait_timeout,
                               'waitstr': 'Escape character',
-                              'input': ['\r', 'login', 'root', 'Password', f'{DEFAULT_VM_PASSWORD}', '[>#]'] if auth else ['\r', '[>#]'],
+                              'input': ['\r', 'login', f'{self.vm_user}', 'Password', f'{self.vm_password}', '[>#]'] if auth else ['\r', '[>#]'],
                               'shnormal': True})
 
     def login(self, timeout=3) -> None:
