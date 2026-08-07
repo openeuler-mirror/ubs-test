@@ -108,7 +108,7 @@ class VMHotPlugBaseCase(UBSVirtBaseCase):
         添加通用信息
         """
 
-        self.image_origin_dir = "/opt/install/tmp/openstack/images/"
+        self.image_origin_dir = "/home/ubs-virt/images/"
         self.image_base_dir = "/root/hot_plug_test/hot_plug/images/"
         self.image_base_name = "openEuler-24.03-LTS-SP4-aarch64.qcow2"
         self.image_base_path = self.image_base_dir + self.image_base_name
