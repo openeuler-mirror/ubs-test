@@ -1183,3 +1183,40 @@ class MEM_Pooling_BaseCase(CMBaseCase):
                 }
             )
         return res
+
+    def mem_tool_exec_multi_cmds(self, node: Any, cmd_list: list[str], user: str = None) -> list[str]:
+        """
+            ubse_mem_app连续执行多条命令
+        Args:
+            node: 指定节点执行，
+            cmd_list: 命令列表,
+            user: 指定用户，默认为None，即当前用户
+        Returns:
+            返回各命令执行结果
+        Example:
+
+        """
+        res = []
+        if user:
+            node.run(
+                {
+                    "command": [f"sudo -u {user} python3 {self.C_PATH}/ubse_mem_app.py"],
+                    "waitstr": "ubse_mem_app>",
+                    "returnCode": False,
+                    "timeout": 1
+                }
+            )
+        else:
+            node.run(
+                {
+                    "command": [f"python3 {self.C_PATH}/ubse_mem_app.py"],
+                    "waitstr": "ubse_mem_app>",
+                    "returnCode": False,
+                    "timeout": 1
+                }
+            )
+        for cmd in cmd_list:
+            resp = node.run({"command": [cmd], "waitstr": "ubse_mem_app>", "returnCode": False, "timeout": 5})
+            res.append(str(resp.get('stdout', '')) + str(resp.get("stderr", '')))
+        node.run({"command": ["exit"]})
+        return res
