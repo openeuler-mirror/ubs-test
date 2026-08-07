@@ -67,7 +67,7 @@ class TestVmFragment023(OpenStackBaseCase):
         self.logStep("S2. 使用flavor_remote_memory_25创建5G虚机B")
         delete_VM_002_02 = VMResource(
             "Delete_VM_002_02",
-            "openEuler-22.03-everything",
+            "openEuler-24.03-LTS-SP4-aarch64",
             5120,
             "node1",
             False,

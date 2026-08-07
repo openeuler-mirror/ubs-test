@@ -67,7 +67,7 @@ class TestVirtualMsAgent010(OpenStackBaseCase):
         self.assertEqual(service_status, "running", "ubs-scheduler-agent service is not running")
 
         self.logStep("S2.node1匀一匀创建5G虚机")
-        vm_5g_01 = VMResource("vm_5g_01", "openEuler-22.03-everything", 5120, "node1",
+        vm_5g_01 = VMResource("vm_5g_01", "openEuler-24.03-LTS-SP4-aarch64", 5120, "node1",
                            False, 2, False, True, 25)
         self.create_server(vm_5g_01, "ERROR")
 
@@ -80,7 +80,7 @@ class TestVirtualMsAgent010(OpenStackBaseCase):
         exec_service(self.agent, "restart", "ubse")
         self.wait_ubse_status(self.master, self.wait_time, 30)
 
-        vm_5g_02 = VMResource("vm_5g_02", "openEuler-22.03-everything", 5120, "node1",
+        vm_5g_02 = VMResource("vm_5g_02", "openEuler-24.03-LTS-SP4-aarch64", 5120, "node1",
                            False, 2, False, True, 25)
         self.create_server(vm_5g_02, "ACTIVE")
 

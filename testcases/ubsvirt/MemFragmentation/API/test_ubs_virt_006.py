@@ -40,7 +40,7 @@ class TestUbsVirt006(OpenStackBaseCase):
     @pytest.mark.case_info(level='P2', type='Functional')
     def test_ubs_virt_006(self, get_topo_path):
         self.vm_list = self.prepare_topo(str(get_topo_path("test_ubs_virt_006")))
-        vm_02 = VMResource('vm_02', 'openEuler-22.03-everything', 1024, 'node1', False,
+        vm_02 = VMResource('vm_02', 'openEuler-24.03-LTS-SP4-aarch64', 1024, 'node1', False,
                            '2', '', 'true', '25')
         self.create_server(vm_02)
         server_detail = client.get_server_detail(self.controller, "vm_01")
