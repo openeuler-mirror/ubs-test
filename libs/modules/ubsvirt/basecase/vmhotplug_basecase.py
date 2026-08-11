@@ -107,9 +107,9 @@ class VMHotPlugBaseCase(UBSVirtBaseCase):
         Returns:
         添加通用信息
         """
-
+        self.filepath = "/home/ubs-virt/hot_plug_test/hot_plug/xml"
         self.image_origin_dir = "/home/ubs-virt/images/"
-        self.image_base_dir = "/root/hot_plug_test/hot_plug/images/"
+        self.image_base_dir = "/home/ubs-virt/hot_plug_test/hot_plug/images/"
         self.image_base_name = "openEuler-24.03-LTS-SP4-aarch64.qcow2"
         self.image_base_path = self.image_base_dir + self.image_base_name
         self.image_origin_path = self.image_origin_dir + self.image_base_name
@@ -482,6 +482,29 @@ class VMHotPlugBaseCase(UBSVirtBaseCase):
             f"hot plug failure, out put does not contain any of:{expected_msgs}",
         )
 
+    def check_vm_memory_in_section(self, vm_ssh, min_value: int, max_value: int, reserved_time=300):
+        """获取VM XML热插拔部分.
+
+        Args:
+            vm_ssh: VM
+            min_value: 最小值
+            max_value: 最大值
+            reserved_time：等待时间
+        """
+        flag = False
+        wait_time = 0
+        while wait_time < reserved_time:
+            vm_mem = client.get_memory(vm_ssh)
+            vm_mem_total = int(vm_mem["total"])
+            self.logInfo(f"内存大小为{vm_mem_total}M")
+            if min_value <= vm_mem_total <= max_value:
+                flag = True
+                break
+            else:
+                wait_time = wait_time + 15
+                time.sleep(15)
+        return flag
+
     def get_vm_xml_hot_plug_section(
         self, node: Any, vm_name: str, slot: int, mem_size: int
     ) -> None:
@@ -495,7 +518,7 @@ class VMHotPlugBaseCase(UBSVirtBaseCase):
         """
         res = None
         retry = 0
-        while not res and retry < 3:
+        while not res and retry < 5:
             res = node.run(
                 {
                     "command": [

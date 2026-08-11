@@ -37,7 +37,6 @@ class TestVmHotPlugCreate003(VMHotPlugBaseCase):
     """
 
     def setup_method(self):
-        self.filepath = "/root/hot_plug_test/hot_plug/xml"
         image_res = self.cp_image_to_node()
         self.assertTrue(image_res, 'prepare test image failed')
 
@@ -60,7 +59,7 @@ class TestVmHotPlugCreate003(VMHotPlugBaseCase):
 
     def teardown_method(self):
         self.master.run({"command": ["hot_plug delete vm_01"], "timeout": 1800})
-        self.master.run({"command": [f"rm -rf {self.filepath}/vm_01.xml"], "timeout": 1800})
+        self.master.run({"command": [f"rm -rf {self.filepath}/test_vm_hot_plug_create_003_vm_01.xml"], "timeout": 1800})
         self.master.run({"command": [f"rm -rf {self.image_base_path}"]})
         self.distribute_huge_page(self.master, 0, 0)
         self.distribute_huge_page(self.master, 0, (self.numa_num - 1))
@@ -77,13 +76,10 @@ class TestVmHotPlugCreate003(VMHotPlugBaseCase):
         vm_01_ssh = self._get_vm_ssh(self.master, "vm_01")
 
         self.logStep("S2、登录虚机查看内存")
-        vm_mem = client.get_memory(vm_01_ssh)
+        check_mem_res = self.check_vm_memory_in_section(vm_01_ssh, 7168, 8192)
 
         self.logStep("E2、内存可用大小大约为8G")
-        self.assertTrue(
-            7168 <= int(vm_mem["total"]) <= 8192,
-            f"vm_01 mem {vm_mem['total']} not in expected range",
-        )
+        self.assertTrue(check_mem_res,"vm_01 mem not in expected range")
 
         self.logStep("S3、使用命令对虚机热插2G内存，hot_plug add vm_01 -size 2 -gnode 0 -slot 0")
         self.hot_plug_mem(self.master, "vm_01", 2, 0, 0, 100)
@@ -91,19 +87,15 @@ class TestVmHotPlugCreate003(VMHotPlugBaseCase):
         self.logStep("E3、内存热插成功")
 
         self.logStep("S4、查看虚机xml")
-        time.sleep(10)
         self.get_vm_xml_hot_plug_section(self.master, "vm_01", 0, 2097152)
 
         self.logStep("E4、xml中包含扩容的1G内存信息")
 
         self.logStep("S5、查看虚机内存")
-        vm_mem = client.get_memory(vm_01_ssh)
+        check_mem_res2 = self.check_vm_memory_in_section(vm_01_ssh, 9120, 10240)
 
         self.logStep("E5、内存大小扩容到10G")
-        self.assertTrue(
-            9120 <= int(vm_mem["total"]) <= 10240,
-            f"vm_01 mem {vm_mem['total']} not in expected range",
-        )
+        self.assertTrue(check_mem_res2,"vm_01 mem not in expected range")
 
         self.logStep("S6、使用stress-ng命令给虚机加压超过8G")
         client.vm_stree(vm_01_ssh, str(8192) + "M")

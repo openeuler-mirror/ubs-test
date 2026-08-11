@@ -50,7 +50,7 @@
     <emulator>/usr/bin/qemu-kvm</emulator>
      <disk type="file" device="disk">
       <driver name="qemu" type="qcow2"  cache='none' io='native'/>
-      <source file="/root/hot_plug_test/hot_plug/images/openEuler-24.03-LTS-SP4-aarch64.qcow2" />
+      <source file="/home/ubs-virt/hot_plug_test/hot_plug/images/openEuler-24.03-LTS-SP4-aarch64.qcow2" />
       <target dev="sda" bus="scsi" />
       <address type="drive" controller="0" bus="0" target="0" unit="0" />
     </disk>
