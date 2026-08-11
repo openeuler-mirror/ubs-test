@@ -464,8 +464,10 @@ class OpenStackBaseCase(UBSVirtBaseCase):
 
     def create_server(self, vm: VMResource, expect_status='ACTIVE'):
         lock.acquire()
-        volume = self._create_volume(vm.image)
-        lock.release()
+        try:
+            volume = self._create_volume(vm.image)
+        finally:
+            lock.release()
         flavor = self._get_flavor(vm)
         if vm.enable_remote_memory == '' and vm.enable_remote_create == '':
             client.create_server_with_volume(self.controller, vm.name, flavor.name, volume.name,

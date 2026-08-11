@@ -57,7 +57,7 @@ class TestVmMemReturn005(OpenStackBaseCase):
 
         self.logStep("S2.基于Node1上远端内存创建虚机VM2")
         vm2 = VMResource(
-            "vm_02", "openEuler-22.03-everything", 4096, "node2", True, 6, False, "False", 0
+            "vm_02", "openEuler-24.03-LTS-SP4-aarch64", 4096, "node2", True, 6, False, "False", 0
         )
         try:
             self.create_server(vm2)

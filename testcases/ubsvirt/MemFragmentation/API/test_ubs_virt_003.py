@@ -43,7 +43,7 @@ class TestUbsVirt003(OpenStackBaseCase):
     @pytest.mark.case_info(level='P2', type='Functional')
     def test_ubs_virt_003(self, get_topo_path):
         self.vms = self.prepare_topo(str(get_topo_path("test_ubs_virt_003")))
-        vm_02 = VMResource('vm_02', 'openEuler-22.03-everything', 1024, 'node1', False,
+        vm_02 = VMResource('vm_02', 'openEuler-24.03-LTS-SP4-aarch64', 1024, 'node1', False,
                            '2', '', 'true', '25')
         self.create_server_only(vm_02)
         status_detail = self.wait_server_target_status('vm_02', {'status': 'BUILD'}, sleep_time=1)

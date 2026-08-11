@@ -75,7 +75,7 @@ class TestVmMigrate015(OpenStackBaseCase):
         self.logInfo("创建虚机")
         self.vm_list = self.prepare_topo(str(get_topo_path("test_vm_migrate_015")))
 
-        test_vm_migrate_015_02 = VMResource('test_vm_migrate_015_02', 'openEuler-22.03-everything',
+        test_vm_migrate_015_02 = VMResource('test_vm_migrate_015_02', 'openEuler-24.03-LTS-SP4-aarch64',
                                             4096, 'node1', True, 2)
         self.create_server(test_vm_migrate_015_02)
         self.vm_list.append(test_vm_migrate_015_02)

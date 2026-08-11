@@ -36,7 +36,7 @@ class TestVmMemBorrow001(OpenStackBaseCase):
         self.vms = self.prepare_topo(str(get_topo_path("test_test_vm_mem_borrow_001")))
 
         self.logStep("S1、登录虚拟机对虚拟机进行加压至95%，借用1G内存。")
-        self.add_stress_to_vm(self.vms[0], 92)
+        self.add_stress_to_vm(self.vms[0], 95)
         self.assertTrue(self.check_borrowed_numa_size("node1", 600, 1024 * 0.9), "the borrowed size is not 1024M")
 
         self.logStep("S2、删除虚机压力后，归还1G内存。")

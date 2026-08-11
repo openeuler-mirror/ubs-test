@@ -62,7 +62,7 @@ class TestVmFragment025(OpenStackBaseCase):
         self.vm_list = self.prepare_topo(str(get_topo_path("test_vm_fragment_025")))
         vm_2g = VMResource(
             "vm_2g",
-            "openEuler-22.03-everything",
+            "openEuler-24.03-LTS-SP4-aarch64",
             2048,
             "node1",
             False,

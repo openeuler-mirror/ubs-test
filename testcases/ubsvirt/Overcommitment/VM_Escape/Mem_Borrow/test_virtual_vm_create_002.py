@@ -19,6 +19,6 @@ class TestVirtualVmCreate002(OpenStackBaseCase):
         self.vms = self.prepare_topo(str(get_topo_path("test_virtual_vm_create_002")))
 
         self.logStep("S2、创建1U1G虚机失败")
-        vm1 = VMResource('vm_02', 'openEuler-22.03-everything', 1024, 'node1', False, 2)
+        vm1 = VMResource('vm_02', 'openEuler-24.03-LTS-SP4-aarch64', 1024, 'node1', False, 2)
         vm_status = self.create_server(vm1, expect_status="ERROR")
         assert vm_status == "ERROR", "超过超分比创建虚机成功"

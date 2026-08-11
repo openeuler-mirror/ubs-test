@@ -40,7 +40,7 @@ class TestVirtualVmCreate003(OpenStackBaseCase):
         self.logStep("E1、创建成功")
 
         self.logStep("S2、创建内存规格1G的虚机")
-        vm_1g = VMResource('vm_1g', 'openEuler-22.03-everything', 1024, 'node1',
+        vm_1g = VMResource('vm_1g', 'openEuler-24.03-LTS-SP4-aarch64', 1024, 'node1',
                            False, 1, False, True, 25,
                            True, 25)
         vm_status = self.create_server(vm_1g, expect_status="ERROR")
