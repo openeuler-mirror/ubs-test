@@ -1,11 +1,8 @@
-from pathlib import Path
-
-from libs.modules.ubsvirt.api import client
-from libs.modules.ubsvirt.basecase.vmhotplug_basecase import VMHotPlugBaseCase
-
-XML_BASE_PATH = Path(__file__).parent.parent.parent.parent.parent / "resource" / "ubsvirt" / "xml"
+import time
 import pytest
 
+from libs.modules.ubsvirt.basecase.vmhotplug_basecase import VMHotPlugBaseCase
+from libs.modules.ubsvirt.api import client
 
 
 class TestVmHotPlugCreate004(VMHotPlugBaseCase):
@@ -44,10 +41,9 @@ class TestVmHotPlugCreate004(VMHotPlugBaseCase):
     """
 
     def setup_method(self):
-        
-        self.source_path = str(XML_BASE_PATH)
-        self.file_path = "/root/hot_plug_test/hot_plug/xml"
-        self.img_path = "/opt/install/tmp/openstack/images/"
+        self.img_02_path = self.image_base_dir + 'openEuler-24.03-LTS-SP4-aarch64-1.qcow2'
+        image_res = self.cp_image_to_node()
+        self.assertTrue(image_res, 'prepare test image failed')
 
         self.logStep("P1、Ubs Scheduler服务正常部署，正常使能")
 
@@ -60,39 +56,24 @@ class TestVmHotPlugCreate004(VMHotPlugBaseCase):
         self.logStep("P4、环境上存在2个4G虚机的xml，xml需要有guest numa 0和内存插槽slot 0")
 
     def teardown_method(self):
-        
         self.master.run({"command": ["hot_plug delete vm_01"], "timeout": 1800})
         self.master.run({"command": ["hot_plug delete vm_02"], "timeout": 1800})
-        self.master.run({"command": [f"rm -rf {self.file_path}/vm_01.xml"]})
-        self.master.run({"command": [f"rm -rf {self.file_path}/vm_02.xml"]})
-        self.master.run(
-            {
-                "command": [
-                    f"rm -rf {self.img_path}/openEuler-22.03-SP2-aarch64-everything-redis-Performance1.qcow2"
-                ]
-            }
-        )
+        self.master.run({"command": [f"rm -rf {self.filepath}/test_vm_hot_plug_create_004_vm_01.xml"]})
+        self.master.run({"command": [f"rm -rf {self.filepath}/test_vm_hot_plug_create_004_vm_02.xml"]})
+        self.master.run({"command": [f"rm -rf {self.image_base_path}"]})
+        self.master.run({"command": [f"rm -rf {self.img_02_path}"]})
         self.distribute_huge_page(self.master, 0, 0)
 
     @pytest.mark.case_info(level='P0', type='Functional')
-    def test_vm_hot_plug_create_004(self):
-        
-
+    def test_vm_hot_plug_create_004(self, xml_base_path):
         self.logStep("S1、使用xml创建虚拟机vm_01，vm_02")
         vm1_created = self.create_vm_from_xml(
-            self.master, self.source_path, self.file_path, "test_vm_hot_plug_create_004_vm_01.xml"
+            self.master, str(xml_base_path), self.filepath, "test_vm_hot_plug_create_004_vm_01.xml"
         )
         self.assertTrue(vm1_created, "vm_01 created failed.")
-        self.master.run(
-            {
-                "command": [
-                    f"\\cp -f {self.img_path}/openEuler-22.03-SP2-aarch64-everything-redis-Performance.qcow2 "
-                    f"{self.img_path}/openEuler-22.03-SP2-aarch64-everything-redis-Performance1.qcow2"
-                ]
-            }
-        )
+        self.master.run({"command": [f"\\cp -f {self.image_base_path} {self.img_02_path}"]})
         vm2_created = self.create_vm_from_xml(
-            self.master, self.source_path, self.file_path, "test_vm_hot_plug_create_004_vm_02.xml"
+            self.master, str(xml_base_path), self.filepath, "test_vm_hot_plug_create_004_vm_02.xml"
         )
         self.assertTrue(vm2_created, "vm_02 created failed.")
 
@@ -102,18 +83,14 @@ class TestVmHotPlugCreate004(VMHotPlugBaseCase):
         vm_01_ssh = self._get_vm_ssh(self.master, "vm_01")
         vm_02_ssh = self._get_vm_ssh(self.master, "vm_02")
 
-        vm1_mem = client.get_memory(vm_01_ssh)
-        vm2_mem = client.get_memory(vm_02_ssh)
+        check_mem_01_res = self.check_vm_memory_in_section(vm_01_ssh, 3584, 4096)
+
+        check_mem_02_res = self.check_vm_memory_in_section(vm_02_ssh, 3584, 4096)
+
 
         self.logStep("E2、内存可用大小大约为4G")
-        self.assertTrue(
-            3584 <= int(vm1_mem["total"]) <= 4096,
-            f"vm_01 mem {vm1_mem['total']} not in expected range",
-        )
-        self.assertTrue(
-            3584 <= int(vm2_mem["total"]) <= 4096,
-            f"vm_02 mem {vm2_mem['total']} not in expected range",
-        )
+        self.assertTrue(check_mem_01_res,"vm_01 mem not in expected range")
+        self.assertTrue(check_mem_02_res,"vm_02 mem not in expected range")
 
         self.logStep(
             "S3、使用命令对虚机vm_01热插1G内存，hot_plug add vm_01 -size 1 -gnode 0 -slot 0"
@@ -124,18 +101,17 @@ class TestVmHotPlugCreate004(VMHotPlugBaseCase):
         self.logStep("E3、内存热插成功")
 
         self.logStep("S4、查看虚机xml")
+        time.sleep(10)
         self.get_vm_xml_hot_plug_section(self.master, "vm_01", 0, 1048576)
 
         self.logStep("E4、xml中包含扩容的1G内存信息")
 
         self.logStep("S5、查看虚机内存")
-        vm1_mem = client.get_memory(vm_01_ssh)
+        check_mem_01_res2 = self.check_vm_memory_in_section(vm_01_ssh, 4608, 5120)
+
 
         self.logStep("E5、内存大小扩容到5G")
-        self.assertTrue(
-            4608 <= int(vm1_mem["total"]) <= 5120,
-            f"vm_01 mem {vm1_mem['total']} not in expected range",
-        )
+        self.assertTrue(check_mem_01_res2,"vm_01 mem not in expected range")
 
         self.logStep(
             "S6、使用命令对虚机vm_02热插1G内存，hot_plug add vm_02 -size 1 -gnode 0 -slot 0"
@@ -150,10 +126,7 @@ class TestVmHotPlugCreate004(VMHotPlugBaseCase):
         self.logStep("E7、xml中包含扩容的1G内存信息")
 
         self.logStep("S8、查看虚机内存")
-        vm2_mem = client.get_memory(vm_02_ssh)
+        check_mem_02_res2 = self.check_vm_memory_in_section(vm_02_ssh, 4608, 5120)
 
         self.logStep("E8、内存大小扩容到5G")
-        self.assertTrue(
-            4608 <= int(vm2_mem["total"]) <= 5120,
-            f"vm_02 mem {vm2_mem['total']} not in expected range",
-        )
+        self.assertTrue(check_mem_02_res2,"vm_02 mem not in expected range")

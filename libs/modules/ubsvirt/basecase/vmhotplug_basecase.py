@@ -8,6 +8,7 @@ import time
 
 from typing import Any, Dict, List, Optional
 from libs.modules.ubsvirt.basecase.ubsvirt_basecase import UBSVirtBaseCase
+import libs.modules.ubsvirt.common.file_common as file_aw
 from libs.modules.ubsvirt.api import client
 from libs.modules.ubsvirt.common import node_manager
 from libs.modules.ubsvirt.model.model import WrapperNode
@@ -42,6 +43,7 @@ def inject_vmhotplug_basecase_dependencies(
 
     # 初始化业务参数
     instance.node_list = instance._load_nodes()
+    instance._load_info()
     instance.node_dict = {}
     instance.is_Simulation = resource.get('global', {}).get('is_simulation', False)
     instance.resource_dict = {}
@@ -99,6 +101,18 @@ class VMHotPlugBaseCase(UBSVirtBaseCase):
         - agent: SSH node - 代理节点
         - controller: SSH node - 控制节点
     """
+
+    def _load_info(self):
+        """ 添加通用信息.
+        Returns:
+        添加通用信息
+        """
+        self.filepath = "/home/ubs-virt/hot_plug_test/hot_plug/xml"
+        self.image_origin_dir = "/home/ubs-virt/images/"
+        self.image_base_dir = "/home/ubs-virt/hot_plug_test/hot_plug/images/"
+        self.image_base_name = "openEuler-24.03-LTS-SP4-aarch64.qcow2"
+        self.image_base_path = self.image_base_dir + self.image_base_name
+        self.image_origin_path = self.image_origin_dir + self.image_base_name
 
     def get_numa_num(self, node: Any) -> int:
         """获取节点的NUMA数量.
@@ -468,6 +482,29 @@ class VMHotPlugBaseCase(UBSVirtBaseCase):
             f"hot plug failure, out put does not contain any of:{expected_msgs}",
         )
 
+    def check_vm_memory_in_section(self, vm_ssh, min_value: int, max_value: int, reserved_time=300):
+        """获取VM XML热插拔部分.
+
+        Args:
+            vm_ssh: VM
+            min_value: 最小值
+            max_value: 最大值
+            reserved_time：等待时间
+        """
+        flag = False
+        wait_time = 0
+        while wait_time < reserved_time:
+            vm_mem = client.get_memory(vm_ssh)
+            vm_mem_total = int(vm_mem["total"])
+            self.logInfo(f"内存大小为{vm_mem_total}M")
+            if min_value <= vm_mem_total <= max_value:
+                flag = True
+                break
+            else:
+                wait_time = wait_time + 15
+                time.sleep(15)
+        return flag
+
     def get_vm_xml_hot_plug_section(
         self, node: Any, vm_name: str, slot: int, mem_size: int
     ) -> None:
@@ -481,7 +518,7 @@ class VMHotPlugBaseCase(UBSVirtBaseCase):
         """
         res = None
         retry = 0
-        while not res and retry < 3:
+        while not res and retry < 5:
             res = node.run(
                 {
                     "command": [
@@ -604,3 +641,17 @@ class VMHotPlugBaseCase(UBSVirtBaseCase):
         rc = res.get("rc", -1) if isinstance(res, dict) else -1
         self.assertEqual(rc, 0, "登录虚拟机失败")
         return vm_ssh_node
+
+    def cp_image_to_node(self, node=None):
+        if node is None:
+            node = self.master
+
+        check_res = file_aw.check_file_exist(node, self.image_origin_path)
+        if not check_res:
+            node.run({"command": ["mkdir -p " + self.image_origin_dir]})
+            scp_ip = node.localIP if self.is_Simulation else node.ip
+            cmd = f'scp {self.image_origin_path} root@{scp_ip}:{self.image_origin_dir}'
+            self.controller.run({"command": [cmd], 'timeout': 600})
+        node.run({"command": ["mkdir -p " + self.image_base_dir]})
+        node.run({"command": [f"\\cp -f {self.image_origin_path} {self.image_base_path}"]})
+        return file_aw.check_file_exist(node, self.image_base_path)

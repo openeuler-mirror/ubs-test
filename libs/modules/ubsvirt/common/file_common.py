@@ -123,3 +123,15 @@ def uncomment_config(node, config_path: str, key: str) -> bool:
         return False
     logger.info(f"取消注释配置成功，路径 ={config_path}, key={key}")
     return True
+
+
+def check_file_exist (node, file_path):
+    """
+    判断节点上文件是否存在
+    :param node: 节点
+    :param file_path: 文件路径
+    :return: True/False
+    """
+    res = node.run ({'command': ["test -f {0} && echo EXISTS || echo NOT_EXIST".format (file_path)]})
+    stdout = str (res.get ('stdout', ''))
+    return 'EXISTS' in stdout
