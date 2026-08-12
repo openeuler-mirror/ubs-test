@@ -36,8 +36,6 @@ class TestVmHotPlugCreate006(VMHotPlugBaseCase):
         E5、内存大小扩容到5G
         E6、借用>=1G的远端内存
         E7、查看内存使用量超过4G
-    Author:
-        chenglixiao 00961814
     """
 
     def setup_method(self):
