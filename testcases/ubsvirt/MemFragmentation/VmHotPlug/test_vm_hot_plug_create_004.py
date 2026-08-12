@@ -126,7 +126,7 @@ class TestVmHotPlugCreate004(VMHotPlugBaseCase):
         self.logStep("E7、xml中包含扩容的1G内存信息")
 
         self.logStep("S8、查看虚机内存")
-        check_mem_02_res2 = self.check_vm_memory_in_section(vm_01_ssh, 4608, 5120)
+        check_mem_02_res2 = self.check_vm_memory_in_section(vm_02_ssh, 4608, 5120)
 
         self.logStep("E8、内存大小扩容到5G")
         self.assertTrue(check_mem_02_res2,"vm_02 mem not in expected range")
