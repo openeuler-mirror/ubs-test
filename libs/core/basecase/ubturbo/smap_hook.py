@@ -21,6 +21,8 @@ class SmapHook(TestCase):
         self.hosts[0].upload_resource(self.resource_path)
         result = self.hosts[0].check_file_exists(f"{self.resource_path}/change_mod_linqu.sh")
         if result:
+            for nid in self.hosts[1].get_local_numa():
+                self.hosts[1].assign_huge_pages(nid, 2048, 8500)
             self.nodes[0].run({"command": [f"bash {self.resource_path}/change_mod_linqu.sh {self.page_type}"]})
         time.sleep(5)  # 加上等待时间 防止自动化过快导致进程还未启动
 
