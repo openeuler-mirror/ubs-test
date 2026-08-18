@@ -166,9 +166,9 @@ cp -r hcom_perf /home/ubs-comm/hcom/perf_test
 2. 需在执行节点上提前准备创建虚拟机的镜像文件，且镜像中需要安装stress-ng加压工具
    1. 在每个执行节点上创建目录：
       ```bash
-      mkdir -p /opt/install/tmp/openstack/images/
+      mkdir -p /home/ubs-virt/images/
       ```
-   2. 将镜像文件拷贝到该目录下，并将镜像名字修改为 `openEuler-22.03-SP2-aarch64-everything-redis-Performance.qcow2`
+   2. 将镜像文件拷贝到该目录下，并将镜像名字修改为 `openEuler-24.03-LTS-SP4-aarch64.qcow2`
 
 
 #### 执行 Vas虚拟机线性度测试用例前

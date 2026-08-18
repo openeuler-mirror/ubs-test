@@ -225,6 +225,27 @@ class OpenStackBaseCase(UBSVirtBaseCase):
                 time.sleep(15)
         return flag
 
+    def check_return_mem_by_node(self, node, reserved_time):
+        """
+        功能：检测借用的内存是否归还
+        参数：
+        node: 执行节点
+        reserved_time: 等待时间
+        """
+        flag = False
+        wait_time = 0
+        while wait_time < reserved_time:
+            numa_borrowed_size = self.get_node_borrowing_numa_by_node(node)
+            self.logInfo(f"借用了{numa_borrowed_size}M")
+            if numa_borrowed_size == 0:
+                self.logInfo("借用的内存成功归还")
+                flag = True
+                break
+            else:
+                wait_time = wait_time + 15
+                time.sleep(15)
+        return flag
+
     def wait_mem_match_expect(self, node, operate, value, timeout=300):
         start_time = time.time()
         percent = 0
@@ -350,6 +371,10 @@ class OpenStackBaseCase(UBSVirtBaseCase):
             return
         for server in servers:
             client.delete_server(self.controller, server['ID'])
+        for node in self.ubse_node_list:
+            return_mem_res =  self.check_return_mem_by_node(node, 300)
+            if not return_mem_res:
+                self.logger.info(f"{node.hostname}内存未归还成功")
 
     def add_stress_to_vm(self, vm: VMResource, percent: int) -> None:
         """Add memory stress to VM."""
@@ -436,7 +461,23 @@ class OpenStackBaseCase(UBSVirtBaseCase):
             match = re.search(r"Node\s+(\d+)", numa['name'])
             if match:
                 number = int(match.group(1))
-                if number >= self.numa_num and number <= 17:
+                if number >= self.numa_num:
+                    borrowing_mem += float(numa['MemTotal'])
+        return round(borrowing_mem, 2)
+
+    def get_node_borrowing_numa_by_node(self, node) -> float:
+        """
+        功能：获取节点的借用内存数量
+        参数：
+        node: 执行节点
+        """
+        numa_infos = client.get_numaInfo(node)
+        borrowing_mem = 0.0
+        for numa in numa_infos:
+            match = re.search(r"Node\s+(\d+)", numa['name'])
+            if match:
+                number = int(match.group(1))
+                if number >= self.numa_num:
                     borrowing_mem += float(numa['MemTotal'])
         return round(borrowing_mem, 2)
 
@@ -464,8 +505,10 @@ class OpenStackBaseCase(UBSVirtBaseCase):
 
     def create_server(self, vm: VMResource, expect_status='ACTIVE'):
         lock.acquire()
-        volume = self._create_volume(vm.image)
-        lock.release()
+        try:
+            volume = self._create_volume(vm.image)
+        finally:
+            lock.release()
         flavor = self._get_flavor(vm)
         if vm.enable_remote_memory == '' and vm.enable_remote_create == '':
             client.create_server_with_volume(self.controller, vm.name, flavor.name, volume.name,
