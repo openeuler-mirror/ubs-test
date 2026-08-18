@@ -165,7 +165,7 @@ class VirtualMachine:
             self.vm_name,
             timeout={  # 整体超时时间
                 env.UB_simulation: 30 * 60,
-            }.get(self.env_type, 60),
+            }.get(self.env_type, 3 * 60),
             sep={  # 检测间隔
                 env.UB_simulation: 30,
             }.get(self.env_type, 10),
