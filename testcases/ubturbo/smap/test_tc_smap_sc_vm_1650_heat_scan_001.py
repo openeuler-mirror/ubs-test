@@ -76,14 +76,12 @@ class TestTcSmapScVm1650HeatScan001(SmapCase):
 
         self.logStep("4、虚拟机里面启动redis-server")
         self.logStep("预期结果：4、redis启动成功")
-        vm_ip = self.hosts[0].vm_nodes[0].get_data_ip()
-        self.hosts[0].vm_nodes[0].update_redis_ip(vm_ip)
         result = self.hosts[0].vm_nodes[0].start_redis()
         self.assertEqual(result, True)
 
         self.logStep("5、虚拟机里面启动redis-benchmark访问远端内存")
         self.logStep("预期结果：5、benchmark启动成功")
-        result = self.hosts[0].vm_nodes[0].run_redis_benchmark(100000, 128, 2048, 16000, 2, vm_ip)
+        result = self.hosts[0].vm_nodes[0].run_redis_benchmark(100000, 128, 2048, 16000, 2, '127.0.0.1')
         self.assertEqual(result, True)
 
         self.logStep("6、执行smap set_smap_remote_numa_info src_nid dst_nid 0设置远端内存为0")

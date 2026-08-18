@@ -152,6 +152,7 @@ cp -r hcom_perf /home/ubs-comm/hcom/perf_test
    mkdir -p /opt/install/package/
    ```
    将虚机镜像文件拷贝到该目录下，并将镜像名字修改为 `openEuler-24.03-LTS-SP4-aarch64.qcow2`
+   虚机内需要安装 redis-server 和 redis-benchmark
 
 2. 在每个执行节点上创建目录：
    ```bash
