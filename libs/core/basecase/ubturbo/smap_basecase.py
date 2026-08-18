@@ -6,7 +6,7 @@ import time
 import pytest
 from typing import Any, Dict, List
 
-from libs import TestCase
+from libs.core import TestCase
 from libs.core.basecase.ubturbo.smap_params import EnableNodeMsg, RemoveMsg, MigrateOutMsg, MigrateOutPayload
 
 logger = logging.getLogger(__name__)
