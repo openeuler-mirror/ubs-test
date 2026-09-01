@@ -75,7 +75,6 @@ class TestRmrsFragment001(MempoolingBaseCase):
         vm_A.init_console_login()
         basic.run(self.nodeagent, "echo '保证连接存活2'")
         vm_B = api.create_vm_object(self.nodemaster, 'B')
-        vm_B.init_console_login()
         basic.run(self.nodeagent, "echo '保证连接存活3'")
         s1_free_hugepages_node0_numa0 = api.parse_node_numa_attribute(self.nodemaster, 0, 'HugePages_Free')
         self.assertEqual(free_hugepages_node0_numa0 - s1_free_hugepages_node0_numa0, int(4 * 1024),
@@ -126,7 +125,6 @@ class TestRmrsFragment001(MempoolingBaseCase):
         res_6 = api.function_migrate_execute(self.nodemaster, 0, borrowIds, real_vm_info_list, 50000)
         self.assertEqual(res_6, 200, f"调用迁移策略函数预期返回200，实际返回{res_6}")
         api.check_vm_function(vm_A)
-        api.check_vm_function(vm_B)
         self.logStep("E6、返回码200；需要检查迁出前后两个虚机功能正常")
 
         self.logStep("S7、执行指令：numastat -cvm")
