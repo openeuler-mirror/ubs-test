@@ -11,10 +11,10 @@
   </numatune>
   <vcpu placement="static">4</vcpu>
   <cputune>
-    <vcpupin vcpu="0" cpuset="0" />
-    <vcpupin vcpu="1" cpuset="1" />
-    <vcpupin vcpu="2" cpuset="2" />
-    <vcpupin vcpu="3" cpuset="3" />
+    <vcpupin vcpu="0" cpuset="4" />
+    <vcpupin vcpu="1" cpuset="5" />
+    <vcpupin vcpu="2" cpuset="6" />
+    <vcpupin vcpu="3" cpuset="7" />
     <emulatorpin cpuset="0-7" />
   </cputune>
   <os>
