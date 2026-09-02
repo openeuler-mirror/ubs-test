@@ -587,7 +587,7 @@ class MEM_Pooling_BaseCase(CMBaseCase):
         node.run(
             {
                 "command": ["python3 ubse_mem_app.py"],
-                "timeout": 1,
+                "timeout": timeout,
                 "waitstr": "ubse_mem_app>",
                 "returnCode": False,
             }
