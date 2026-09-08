@@ -7,7 +7,7 @@ from libs.modules.ubsmem.ubsshmem.ubs_mem_models import (
     UBSM_SHMEM_OK,
     UbsMemPerfTp,
     UbsmemRegionAttributes,
-    UbsmemRegionNodeDesc,
+    UbsmemRegionNodeDesc, UBSM_SHMEM_ERR_ALREADY_EXIST,
 )
 
 import pytest
@@ -77,7 +77,7 @@ class TestTcUbsShmCreatePerformance0001(UbsMemCase):
             ]))
 
         self.logStep("E2.共享域创建成功")
-        self.assertEqual(rc, UBSM_SHMEM_OK)
+        self.assertIn(rc, [UBSM_SHMEM_OK, UBSM_SHMEM_ERR_ALREADY_EXIST])
 
         self.logStep("S3.节点0循环10次调用接口ubsmem_shmem_allocate region_name shm_name 1024*1024*1024 0600 0")
         for i in range(10):

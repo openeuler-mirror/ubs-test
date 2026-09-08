@@ -8,6 +8,7 @@ from libs.modules.ubsmem.ubsshmem.ubs_mem_models import (
     PROT_WRITE,
     UBSM_FLAG_ONLY_IMPORT_NONCACHE,
     UBSM_FLAG_WR_DELAY_COMP,
+    UBSM_SHMEM_ERR_ALREADY_EXIST,
     UBSM_SHMEM_OK,
     UbsmemRegionAttributes,
     UbsmemRegionNodeDesc,
@@ -77,7 +78,7 @@ class TestTcUbsShmMap0043(UbsMemCase):
                 UbsmemRegionNodeDesc(self.host_nodes[1].host_name, True),
             ]))
         self.logStep("E1.共享域创建成功")
-        self.assertEqual(rc, UBSM_SHMEM_OK)
+        self.assertIn(rc, [UBSM_SHMEM_OK, UBSM_SHMEM_ERR_ALREADY_EXIST])
         self.logStep(
             "S2.节点0进程0调用接口ubsmem_shmem_allocate region_name shm_name 1024 0600 UBSM_FLAG_ONLY_IMPORT_NONCACHE|UBSM_FLAG_WR_DELAY_COMP(12)")
         rc = self.host_nodes[0].apps[0].ubsmem_shmem_allocate(

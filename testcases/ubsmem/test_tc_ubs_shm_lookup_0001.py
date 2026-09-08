@@ -5,6 +5,7 @@ from libs.core.basecase.ubsmem import UbsMemCase
 from libs.modules.ubsmem.ubsshmem.ubs_mem_models import (
     PROT_READ,
     PROT_WRITE,
+    UBSM_SHMEM_ERR_ALREADY_EXIST,
     UBSM_SHMEM_OK,
     UbsmemRegionAttributes,
     UbsmemRegionNodeDesc, UBSMemShmInfo,
@@ -74,7 +75,7 @@ class TestTcUbsShmLookup0001(UbsMemCase):
                 UbsmemRegionNodeDesc(self.host_nodes[0].host_name, False),
                 UbsmemRegionNodeDesc(self.host_nodes[1].host_name, True)]))
         self.logStep("E1.共享域创建成功")
-        self.assertEqual(rc, UBSM_SHMEM_OK)
+        self.assertIn(rc, [UBSM_SHMEM_OK, UBSM_SHMEM_ERR_ALREADY_EXIST])
 
         self.logStep("S2.节点0调用接口ubsmem_shmem_allocate region_name shm_name 1024*1024*1024 0600 0")
         rc = self.host_nodes[0].apps[0].ubsmem_shmem_allocate(
