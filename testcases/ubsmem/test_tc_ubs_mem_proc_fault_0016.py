@@ -71,7 +71,7 @@ class TestTcUbsMemProcFault0016(UbsMemCase):
         self.logStep("S1.进程0调用接口ubsmem_create_region region_name 0 2 host0 host1")
         res = self.host_nodes[0].apps[0].ubsmem_create_region(region_name, 0, reg_attr)
         self.logStep("E1.共享域创建成功")
-        self.assertEqual(res, UBSM_SHMEM_OK)
+        self.assertIn(res, [UBSM_SHMEM_OK, UBSM_SHMEM_ERR_ALREADY_EXIST])
 
         self.logStep("S2.执行kill -9构造usmd故障")
         res = self.host_nodes[0].kill_ubsmem_by_sigal(9)

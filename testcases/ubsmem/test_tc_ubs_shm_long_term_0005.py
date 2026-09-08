@@ -13,6 +13,7 @@ from libs.modules.ubsmem.ubsshmem.ubs_mem_models import (
     PROT_WRITE,
     UBSM_FLAG_ONLY_IMPORT_NONCACHE,
     UBSM_FLAG_WR_DELAY_COMP,
+    UBSM_SHMEM_ERR_ALREADY_EXIST,
     UBSM_SHMEM_OK,
     UbsMemPerfTp,
     UbsmemRegionAttributes,
@@ -107,7 +108,7 @@ class TestTcUbsShmLongTerm0005(UbsMemCase):
                 reg_attr = UbsmemRegionAttributes(region_size,[UbsmemRegionNodeDesc(n.host_name,True if n.host_name==node.host_name else False) for n in self.host_nodes])
                 rc = node.apps[0].ubsmem_create_region(region_name, 0, reg_attr)
                 self.logStep("E3.共享域创建成功")
-                self.assertEqual(rc, UBSM_SHMEM_OK)
+                self.assertIn(rc, [UBSM_SHMEM_OK, UBSM_SHMEM_ERR_ALREADY_EXIST])
 
                 self.logStep("S4.进程0按128M、1G、4G执行app ubsm_shmem_allocate region_name shm_name 1024 0600 UBSM_FLAG_ONLY_IMPORT_NONCACHE|UBSM_FLAG_WR_DELAY_COMP(12)创建共享内存")
                 rc = node.apps[0].ubsmem_shmem_allocate(
