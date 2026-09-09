@@ -1,4 +1,4 @@
-apiVersion: resource.ubsvirt.huawei.com/v1
+apiVersion: ubshm.openfuyao.cn/v1
 kind: ShareMemory
 metadata:
   name: sharememory

@@ -12,10 +12,10 @@ spec:
       - 4177
   hostPID: false  # 共享主机PID命名空间
   volumes:
-    - name: ubs-mem
+    - name: ubsm-sdk
       hostPath:
-        path: /usr/local/ubs_mem/
-        type: Directory
+        path: /usr/lib64/libubsm_sdk.so
+        type: File
     - name: mxm-agent-ipc-server
       hostPath:
         path: /run/memory/
@@ -80,8 +80,8 @@ spec:
           mountPath: /usr/lib64/libhcom.so.0.0.1
         - name: libhcom-so-0-0-1
           mountPath: /usr/lib64/libhcom.so.0
-        - name: ubs-mem
-          mountPath: /host/usr/local/ubs_mem/
+        - name: ubsm-sdk
+          mountPath: /usr/lib64/libubsm_sdk.so
         - name: mxm-agent-ipc-server
           mountPath: /run/matrix/memory/
         - name: ko
