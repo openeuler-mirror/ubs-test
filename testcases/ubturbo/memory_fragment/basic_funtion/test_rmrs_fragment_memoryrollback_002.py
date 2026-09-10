@@ -51,8 +51,8 @@ class TestRmrsFragmentMemoryrollback002(MempoolingBaseCase):
         """
         memory_pooling_memoryRollback_002
         """
-        self.srcSocketId = mempooling_common.get_socketid(self.nodeagent, 1)
-        self.destSocketId = mempooling_common.get_socketid(self.nodemaster, 1)
+        self.srcSocketId = mempooling_common.get_socketid(self.nodeagent, 0)
+        self.destSocketId = mempooling_common.get_socketid(self.nodemaster, 0)
         self.logStep("S1、给node1的numa1分12G大页，成功创建2个1U2G虚机")
         # 分配大页，起虚机
         mempooling_common.alloc_hugePage(self.nodeagent, 0, 6144)
@@ -61,8 +61,8 @@ class TestRmrsFragmentMemoryrollback002(MempoolingBaseCase):
 
         self.logStep(
             "S2、调用内存借用执行函数，借入方为node1的numa1,借出方为node0的numa1，借用256M+128M，打印并检查函数出参")
-        destParam = api.create_destparam([(0, int(self.destSocketId), 1, [1], [393216])])
-        borrow_param = api.BorrowExecuteInputParameter(srcnid=1, srcsocketid=self.srcSocketId, srcnumaid=1,
+        destParam = api.create_destparam([(0, int(self.destSocketId), 1, [0], [393216])])
+        borrow_param = api.BorrowExecuteInputParameter(srcnid=1, srcsocketid=self.srcSocketId, srcnumaid=0,
                                                        destparam=destParam)
         ret = api.function_borrow_execute(self.nodeagent, borrow_param)
         self.assertEqual(ret, 200, "node0调用内存借用执行函数失败")
