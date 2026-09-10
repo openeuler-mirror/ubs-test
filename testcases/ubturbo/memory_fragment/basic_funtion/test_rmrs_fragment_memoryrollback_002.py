@@ -61,8 +61,8 @@ class TestRmrsFragmentMemoryrollback002(MempoolingBaseCase):
 
         self.logStep(
             "S2、调用内存借用执行函数，借入方为node1的numa1,借出方为node0的numa1，借用256M+128M，打印并检查函数出参")
-        destParam = api.create_destparam([(0, int(self.destSocketId), 1, [0], [393216])])
-        borrow_param = api.BorrowExecuteInputParameter(srcnid=1, srcsocketid=self.srcSocketId, srcnumaid=0,
+        destParam = api.create_destparam([(0, int(self.destSocketId), 1, [1], [393216])])
+        borrow_param = api.BorrowExecuteInputParameter(srcnid=1, srcsocketid=self.srcSocketId, srcnumaid=1,
                                                        destparam=destParam)
         ret = api.function_borrow_execute(self.nodeagent, borrow_param)
         self.assertEqual(ret, 200, "node0调用内存借用执行函数失败")
