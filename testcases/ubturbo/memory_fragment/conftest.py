@@ -1,3 +1,5 @@
+import time
+
 import pytest
 
 from libs.core.basecase.ubturbo import MempoolingBaseCase
@@ -65,6 +67,7 @@ def mempooling_common_hook(resource_config: dict):
 
     basecase_executor.logStep("mempooling测试执行结束")
     basecase_executor.logStep("Hook_Mem_Pooling、恢复OBMM内存池")
+    time.sleep(3 * 60) # 部分用例后置也会有重启ubse操作， 等待3分钟再进行重启
     for node in nodes_list:
         rack_manager.shut_down_rack_manager(node)
     hook_mem_pooling.refill_obmm_mempool(node_list=nodes_list, size=1)
