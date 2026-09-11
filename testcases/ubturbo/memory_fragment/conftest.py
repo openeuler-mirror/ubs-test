@@ -66,7 +66,7 @@ def mempooling_common_hook(resource_config: dict):
     basecase_executor.logStep("mempooling测试执行结束")
     basecase_executor.logStep("Hook_Mem_Pooling、恢复OBMM内存池")
     for node in nodes_list:
-        rack_manager.shut_down_rack_manager(node, force=True)
+        rack_manager.shut_down_rack_manager(node)
     hook_mem_pooling.refill_obmm_mempool(node_list=nodes_list, size=1)
     rack_manager.restart_cluster_scbus(node_list=nodes_list)
     rack_manager.wait_master_consistent(node_list=nodes_list)
