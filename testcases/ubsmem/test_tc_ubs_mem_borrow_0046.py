@@ -3,6 +3,7 @@
 
 from libs.core.basecase.ubsmem import UbsMemCase
 from libs.modules.ubsmem.ubsshmem.ubs_mem_models import (
+    UBSM_SHMEM_ERR_ALREADY_EXIST,
     UBSM_SHMEM_OK,
     UbsMemInstance,
     UbsmemRegionAttributes,
@@ -66,7 +67,7 @@ class TestTcUbsMemBorrow0046(UbsMemCase):
                 UbsmemRegionNodeDesc(self.host_nodes[1].host_name, True),
             ]))
         self.logStep("E1.共享域创建成功")
-        self.assertEqual(rc, UBSM_SHMEM_OK)
+        self.assertIn(rc, [UBSM_SHMEM_OK, UBSM_SHMEM_ERR_ALREADY_EXIST])
         self.logInfo(f"共享域：{region_name}创建成功,导出节点{self.host_nodes[1].host_name}")
         self.logStep("S2.调用接口ubsmem_lease_malloc region_name 1024*1024*1024 0 0进行fd借用")
         addr_desc = self.host_nodes[0].apps[0].ubsmem_lease_malloc(

@@ -143,7 +143,7 @@ cp -r hcom_perf /home/ubs-comm/hcom/perf_test
    ```
 2. 将镜像文件拷贝到该目录下，并将镜像名字修改为 `openEuler-22.03-LTS-SP1-aarch64.qcow2`
 
-### 执行 smap 测试用例前
+#### 执行 smap 测试用例前
 
 需要在执行节点上提前准备创建虚拟机的镜像文件和创建容器的镜像文件：
 
@@ -152,6 +152,7 @@ cp -r hcom_perf /home/ubs-comm/hcom/perf_test
    mkdir -p /opt/install/package/
    ```
    将虚机镜像文件拷贝到该目录下，并将镜像名字修改为 `openEuler-24.03-LTS-SP4-aarch64.qcow2`
+   虚机内需要安装 redis-server 和 redis-benchmark
 
 2. 在每个执行节点上创建目录：
    ```bash

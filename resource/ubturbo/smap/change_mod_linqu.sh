@@ -65,11 +65,9 @@ function __prepare_remote_numa()
 
     for ((i=0; i<$((${#link_ids[@]})); i++))
     do
-        if [ "$(sudo -u ubse ubsectl display memory -t borrow_detail | grep -oP smap-test-$((i+1)) | wc -l)" -gt "0" ]
-        then
-          continue
-        fi
-        sudo -u ubse ubsectl create memory -t numa -l ${link_ids[i]} -s 8G -n smap-test-$((i+1))
+        while [ "$(sudo -u ubse ubsectl display memory -t borrow_detail | grep -oP smap-test-$((i+1)) | wc -l)" -lt "1" ]; do
+          sudo -u ubse ubsectl create memory -t numa -l ${link_ids[i]} -s 8G -n smap-test-$((i+1))
+        done
     done
 }
 

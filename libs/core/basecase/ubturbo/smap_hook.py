@@ -1,4 +1,5 @@
 import time
+from asyncio import timeout
 from typing import List
 
 from libs import TestCase
@@ -23,10 +24,10 @@ class SmapHook(TestCase):
         if result:
             for nid in self.hosts[1].get_local_numa():
                 self.hosts[1].assign_huge_pages(nid, 2048, 8500)
-            self.nodes[0].run({"command": [f"bash {self.resource_path}/change_mod_linqu.sh {self.page_type}"]})
+            self.hosts[0].run(f"bash -x {self.resource_path}/change_mod_linqu.sh {self.page_type}", timeout=1800)
         time.sleep(5)  # 加上等待时间 防止自动化过快导致进程还未启动
 
     def afterPostTestSet(self, **kwargs):
         self.hosts[0].run("pkill -9 smap")
         self.hosts[0].run(
-            "ubsectl display memory -t borrow_detail | grep -oP smap-test-[^\ ]+ | xargs -i sudo -u ubse ubsectl delete memory -t numa -n {}")
+            "ubsectl display memory -t borrow_detail | grep -oP smap-test-[^\ ]+ | xargs -i sudo -u ubse ubsectl delete memory -t numa -n {}", timeout=1800)

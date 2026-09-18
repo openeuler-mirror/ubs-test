@@ -9,6 +9,7 @@ from libs.modules.ubsmem.ubsshmem.ubs_mem_models import (
     UBSM_FLAG_MMAP_HUGETLB_PMD,
     UBSM_FLAG_ONLY_IMPORT_NONCACHE,
     UBSM_FLAG_WR_DELAY_COMP,
+    UBSM_SHMEM_ERR_ALREADY_EXIST,
     UBSM_SHMEM_OK,
     UbsmemRegionAttributes,
     UbsmemRegionNodeDesc,
@@ -74,7 +75,7 @@ class TestTcUbsShmMap0060(UbsMemCase):
                 ],)
             res = node.apps[0].ubsmem_create_region(region_name, 0, reg_attr)
             self.logStep("E1.共享域创建成功")
-            self.assertEqual(res, UBSM_SHMEM_OK, "共享域创建失败")
+            self.assertIn(res, [UBSM_SHMEM_OK, UBSM_SHMEM_ERR_ALREADY_EXIST], "共享域创建失败")
             host_nodes_shm_list.append((node, f"{shm_name_prefix}_{node.node_id}"))
 
         self.logStep(

@@ -80,14 +80,12 @@ class TestTcSmapScVmRepeatExec001(SmapCase):
         vm_size = self.hosts[0].vm_nodes[0].get_vm_mem_size()
         vm_mem_topo = self.hosts[0].vm_nodes[0].get_vm_mem_topo()
         self.logStep("2、启动redis服务")
-        vm_ip = self.hosts[0].vm_nodes[0].get_data_ip()
-        self.hosts[0].vm_nodes[0].update_redis_ip(vm_ip)
         result = self.hosts[0].vm_nodes[0].start_redis()
         self.logStep("预期结果：2、redis启动成功")
         self.assertEqual(result, True)
         self.logStep("3、使用redis-benchmark作为客户端模拟redis数据读写业务运行，构造32M业务数据访问，保证存在大量冷页，冷页数量超过2G"
                      "       执行redis-benchmark -t set,get -n 10000000 -r 16000 -c 128 -d 2048 --threads 2 -h 127.0.0.1 -p 6379")
-        result = self.hosts[0].vm_nodes[0].run_redis_benchmark(10000000, 128, 2048, 16000, 2, vm_ip)
+        result = self.hosts[0].vm_nodes[0].run_redis_benchmark(10000000, 128, 2048, 16000, 2, '127.0.0.1')
         self.logStep("预期结果：3、redis加压成功")
         self.assertEqual(result, True)
         for _ in range(2):
@@ -116,7 +114,7 @@ class TestTcSmapScVmRepeatExec001(SmapCase):
             self.logStep("7、迁回前检查redis进程状态")
             redis_pid = self.hosts[0].vm_nodes[0].get_process_id("redis-server")
             self.logStep("预期结果：7、虚拟机里面redis状态正常")
-            self.assertNotEqual(redis_pid, -1)
+            self.assertNotEqual(redis_pid, [])
             self.logStep("8、将虚拟机远端内存迁回本端"
                          "     8.1）获取远端内存的地址段"
                          "     8.2）执行smap set_smap_remote_numa_info 0 远端numa 0设置可迁出内存为0"
@@ -135,7 +133,7 @@ class TestTcSmapScVmRepeatExec001(SmapCase):
             self.logStep("10、检查虚拟机里面redis进程是否正常")
             redis_pid = self.hosts[0].vm_nodes[0].get_process_id("redis-server")
             self.logStep("预期结果：10、虚拟机里面redis状态正常")
-            self.assertNotEqual(redis_pid, -1)
+            self.assertNotEqual(redis_pid, [])
             self.logStep("11、执行 smap smap_enable 1 remote_numa_id 使能远端节点")
             rc = self.cli[0].smap_enable_node(EnableNodeMsg(1, self.remote_numa_list[0]))
             self.logStep("预期结果：11、远端节点使能成功")
@@ -144,7 +142,7 @@ class TestTcSmapScVmRepeatExec001(SmapCase):
             self.logStep("预期结果：12、重复执行成功")
         self.logStep("13、获取redis内存占用，检查redis是否占用内存")
         redis_pid = self.hosts[0].vm_nodes[0].get_process_id("redis-server")
-        self.assertNotEqual(redis_pid, -1)
+        self.assertNotEqual(redis_pid, [])
         mem_size = self.hosts[0].vm_nodes[0].get_proc_mem("redis-server")
         self.logStep("预期结果：13、redis有内存占用")
         self.assertNotEqual(mem_size, 0)

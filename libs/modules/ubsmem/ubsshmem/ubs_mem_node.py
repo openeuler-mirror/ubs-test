@@ -29,17 +29,16 @@ class UbsMemNode(NodeExecutor):
         self.log_path = f"{self._install_path}/log"
         self.stress_ng_path = f"{self._install_path}/bin/stress-ng"
         self._app_path = f"{self._install_path}/bin/{self.app_name}"
-        self._app_dependency = "UBSM_SDK_TRACE_ENABLE=1 MXM_CHANNEL_TIMEOUT=810 LD_LIBRARY_PATH=/usr/local/ubs_mem/lib/:$LD_LIBRARY_PATH prlimit --nofile=4096:4096"
+        self._app_dependency = "UBSM_SDK_TRACE_ENABLE=1 MXM_CHANNEL_TIMEOUT=810 prlimit --nofile=4096:4096"
         self.ubsm_service = "ubsmd.service"
-        self.ubsm_service_proc_name = "/usr/local/ubs_mem/bin/ubsmd"
+        self.ubsm_service_proc_name = "/usr/bin/ubsmd"
         self.ubsm_service_log = "/var/log/ubsm/ubsmd.log"
         self.ubsm_filter_log = f"{self._install_path}/bin/ubsmd_filter.log"
         self.app_filter_log = f"{self._install_path}/bin/app_filter.log"
         self.ubse_service = "ubse.service"
         self.ubsm_start_log = f"{self._install_path}/bin/ubsmd_start.log"
-        self.ubsmd_service_proc_name = "/usr/local/ubs_mem/bin/ubsmd"
         self.ubse_service_proc_name = "/usr/bin/ubse"
-        self.ubsmd_conf = "/usr/local/ubs_mem/config/ubsmd.conf"
+        self.ubsmd_conf = "/etc/ubs_mem/ubsmd.conf"
         self.ubse_conf = "/etc/ubse/ubse.conf"
         self.rack_uds_user_conf = "/etc/ubse/ubse_uds_user_verify.conf"
         self.rack_plugin_admission_conf = "/etc/ubse/ubse_plugin_admission.conf"
@@ -109,7 +108,7 @@ class UbsMemNode(NodeExecutor):
         return -1
 
     def get_ubsmd_pid(self) -> int:
-        pid_list = self.get_process_id(self.ubsmd_service_proc_name)
+        pid_list = self.get_process_id(self.ubsm_service_proc_name)
         return pid_list[0]
 
     def app_is_alive(self, count: int) -> bool:

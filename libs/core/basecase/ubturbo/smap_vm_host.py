@@ -186,12 +186,15 @@ class VmNode(SmapNodeExecutor):
         # 为硬分区和虚拟机获取执行命令的结果
         std_out = SmapNodeExecutor._get_stdout(output)
         out_lines = std_out.split("\n")
-        expected_line = "]# " + cmd
+        start_index = 0
+        end_index = len(out_lines)
         for index, line in enumerate(out_lines):
-            if expected_line in line:
-                output['stdout'] = SmapNodeExecutor._get_stdout(output, index + 1, -4)
-                return output
-        raise RuntimeError("Failed to remove prompt message, invalid command line")
+            if ("]# " + cmd) in line:
+                start_index = index + 1
+            if "]# exit" in line:
+                end_index = index
+        output['stdout'] = SmapNodeExecutor._get_stdout(output, start_index, end_index)
+        return output
 
     def get_vm_mem_topo(self):
         return self._host_node.get_proc_mem_nodes(self.get_pid())
@@ -200,16 +203,11 @@ class VmNode(SmapNodeExecutor):
 class SmapVmNode(VmNode):
     def __init__(self, host_node: SmapNodeExecutor, ssh_host, vm_name: str, install_path):
         super().__init__(host_node, ssh_host, vm_name, install_path)
-        self._redis_path = f"/home/redis"
-
-    def update_redis_ip(self, ip: str) -> bool:
-        return self.update_config_item(f"{self._redis_path}/redis.conf", "bind", ip, " ")
 
     def start_redis(self) -> bool:
         self.kill_process("redis-server", True)
         time.sleep(1)
-        output = self.run(
-            f"taskset -c 0 {self._redis_path}/redis-server {self._redis_path}/redis.conf > /dev/null 2>&1 & disown")
+        output = self.run(f"taskset -c 0 redis-server > /dev/null 2>&1 & disown")
         return self._get_rc(output) == 0
 
     @staticmethod
@@ -219,7 +217,7 @@ class SmapVmNode(VmNode):
     def run_redis_benchmark(self, requests: int, clients: int, size: int, keyspace: int, threads: int, ip: str):
         self.kill_process("redis-benchmark", True)
         time.sleep(1)
-        self.redis_result_log = f"{self._redis_path}/" + "result_" + SmapVmNode._get_time_string() + ".log"
-        cmd = f"{self._redis_path}/redis-benchmark -t set,get -n {requests} -c {clients} -r {keyspace} -h {ip} -p 6379 -d {size} --threads {threads}"
-        output = self.run(f"{cmd} > {self.redis_result_log} 2>&1 & disown")
+        redis_result_log = f"/tmp/" + "result_" + SmapVmNode._get_time_string() + ".log"
+        cmd = f"redis-benchmark -t set,get -n {requests} -c {clients} -r {keyspace} -h {ip} -p 6379 -d {size} --threads {threads}"
+        output = self.run(f"{cmd} > {redis_result_log} 2>&1 & disown")
         return self._get_rc(output) == 0

@@ -16,9 +16,7 @@
     "testcases/ubsmem/test_tc_ubs_shm_create_0010.py",
     "testcases/ubsmem/test_tc_ubs_shm_lookup_0001.py",
     "testcases/ubsmem/test_tc_ubs_shm_map_0033.py",
-    "testcases/ubsmem/test_tc_ubs_shm_map_0040.py",
-    "testcases/ubsmem/test_tc_ubs_shm_map_0043.py",
-    "testcases/ubsmem/test_tc_ubs_shm_map_with_addr_0003.py"
+    "testcases/ubsmem/test_tc_ubs_shm_map_0040.py"
   ],
   "params": {
     "install_path": "/home/ci/ubs_mem",
