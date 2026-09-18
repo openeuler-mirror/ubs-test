@@ -10,8 +10,7 @@ from libs.ubturbo.common import basic, env
 
 
 @pytest.mark.smoke
-@pytest.mark.mempooling
-class TestMemoryPoolingMemoryrollback002(MempoolingBaseCase):
+class TestRmrsFragmentMemoryrollback002(MempoolingBaseCase):
     """
     CaseNumber:
         memory_pooling_memoryRollback_002
@@ -48,12 +47,12 @@ class TestMemoryPoolingMemoryrollback002(MempoolingBaseCase):
             mempooling_common.alloc_hugePage_with_check(self.nodemaster, 0, 8192)
 
     @pytest.mark.case_info(level='P1', type='Functional')
-    def test_memory_pooling_memoryrollback_002(self):
+    def test_rmrs_fragment_memoryrollback_002(self):
         """
         memory_pooling_memoryRollback_002
         """
-        self.srcSocketId = mempooling_common.get_socketid(self.nodeagent, 1)
-        self.destSocketId = mempooling_common.get_socketid(self.nodemaster, 1)
+        self.srcSocketId = mempooling_common.get_socketid(self.nodeagent, 0)
+        self.destSocketId = mempooling_common.get_socketid(self.nodemaster, 0)
         self.logStep("S1、给node1的numa1分12G大页，成功创建2个1U2G虚机")
         # 分配大页，起虚机
         mempooling_common.alloc_hugePage(self.nodeagent, 0, 6144)

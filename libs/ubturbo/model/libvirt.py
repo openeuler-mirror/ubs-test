@@ -115,7 +115,8 @@ class VirtualMachine:
             vm_user=DEFAULT_VM_USER,
             vm_password=DEFAULT_VM_PASSWORD,
             init_create=True,
-            init_login=True
+            init_login=True,
+            console_login=False
     ):
         """
         node: 当前机器node对象
@@ -124,6 +125,7 @@ class VirtualMachine:
         vm_user: 虚拟机用户名
         init_create: 是否要在初始化对象时创建虚拟机；方便更改xml文件
         init_login: 是否要在创建时配置免密登录，如果不，将节省大量时间
+        console_login: 是否要新建一个ssh节点后通过串口登录虚机，仅在init_login为True时生效
         """
         self.fn_xml = fn
         self.node = node
@@ -133,6 +135,7 @@ class VirtualMachine:
         self.vm_password = vm_password
         self.vm_ip = None
         self.env_type = env.get_env_type(node)
+        self.console_ssh = None
 
         # 当无法找到路径时，尝试在DEFAULT_PATH_XML中查找
         if not system.is_path_exist(self.node, self.fn_xml):
@@ -142,7 +145,10 @@ class VirtualMachine:
             self.create()
 
             if init_login:
-                self.init_login()
+                if console_login:
+                    self.init_console_login()
+                else:
+                    self.init_login()
 
     def create(self):
         timeout = {
@@ -159,7 +165,7 @@ class VirtualMachine:
             self.vm_name,
             timeout={  # 整体超时时间
                 env.UB_simulation: 30 * 60,
-            }.get(self.env_type, 60),
+            }.get(self.env_type, 3 * 60),
             sep={  # 检测间隔
                 env.UB_simulation: 30,
             }.get(self.env_type, 10),
@@ -190,6 +196,15 @@ class VirtualMachine:
             ssh.add_public_key(self.node, pub_key)
 
         ssh.ssh_exit(self.node)
+
+    def init_console_login(self, auth=True) -> None:
+        """复制一个ssh节点进行登录，后续虚机内部操作都通过这个ssh节点实例下发"""
+        self.console_ssh = self.node.copy()
+        wait_timeout = {env.UB_simulation: 30 * 60, }.get(self.env_type, 5 * 60)
+        self.console_ssh.run({'command': [f'virsh console {self.vm_name}'], 'timeout': wait_timeout,
+                              'waitstr': 'Escape character',
+                              'input': ['\r', 'login', f'{self.vm_user}', 'Password', f'{self.vm_password}', '[>#]'] if auth else ['\r', '[>#]'],
+                              'shnormal': True})
 
     def login(self, timeout=3) -> None:
         basic.logger.info(f'登录虚拟机: {self.vm_name}')

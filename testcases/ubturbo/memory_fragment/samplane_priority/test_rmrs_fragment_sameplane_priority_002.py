@@ -4,22 +4,20 @@ import pytest
 
 import libs.ubturbo.api.mempooling as mempooling_common
 import libs.ubturbo.api.mempooling_api as api
-from libs.core.basecase.ubturbo.mempooling_basecase import MempoolingBaseCase
+from libs.core.basecase.ubturbo.mempooling_basecase import MempoolingBaseCase, mem_return
 
 
 @pytest.mark.smoke
-@pytest.mark.mempooling
-@pytest.mark.mempooling_sameplane_priority
-class TestRmrsFragmentSameplanePriority001(MempoolingBaseCase):
+class TestRmrsFragmentSameplanePriority002(MempoolingBaseCase):
     """
     CaseNumber: 
-        RMRS_Fragment_SamePlane_Priority_001
+        RMRS_Fragment_SamePlane_Priority_002
     RunLevel: 
         Level 2
     EnvType: 
         
     CaseName: 
-        RMRS碎片同平面优先级测试-优先同平面
+        RMRS碎片同平面优先级测试-优先同平面(顺序调整)
     PreCondition:
         P4.修改rmrs.fragment.mustSamePlane为false（优先同平面）
         P5.Node1的NUMA1分配10G大页内存，NUMA0不分配
@@ -44,20 +42,33 @@ class TestRmrsFragmentSameplanePriority001(MempoolingBaseCase):
         time.sleep(5)
 
     @pytest.mark.case_info(level='P2', type='Functional')
-    def test_rmrs_fragment_sameplane_priority_001(self):
+    def test_rmrs_fragment_sameplane_priority_002(self):
         """Legacy: procedure"""
-        self.logStep("S1、调用内存借用策略北向接口，参数为srcParam.srcNid=1,srcParam.srcSocketId=36,srcParam.srcNumaId=0,borrowSize=1048576；")
-        ret = api.function_borrow_strategy(self.nodemaster, 0, mempooling_common.get_socketid(self.nodemaster, 0), 0, 1048576)
+        self.logStep("调用内存借用执行北向接口，参数为srcParam.srcNid=1,srcParam.srcSocketId=36,srcParam.srcNumaId=0,destParam.destNid=2,destParam.destSocketId=216,destParam.destNumaNum=1,destParam.destNumaId=[1],destParam.memSize=[1048576]；")
+        payload = {
+            "srcParam": {
+                "srcNid": "1",
+                "srcSocketId": self.socket[0],
+                "srcNumaId": self.socket2numa[self.socket[0]][0]
+            },
+            "borrowSize": 1048576,
+            "destParam": [
+                {
+                    "destNid": "2",
+                    "destSocketId": self.socket[1],
+                    "destNumaNum": 1,
+                    "destNumaId": [self.socket2numa[self.socket[1]][0]],
+                    "memSize": [1048576]
+                }
+            ]
+        }
+        ret = api.function_borrow_execute(self.nodemaster, payload)
         self.logStep("E1、调用内存借用策略北向接口，参数为srcParam.srcNid=1,srcParam.srcSocketId=36,srcParam.srcNumaId=0,borrowSize=1048576；")
         self.assertEqual(ret, 200, f"内存借用策略接口预期返回200，实际返回{ret}")
-        borrow_strategy_response = api.parse_borrow_strategy_response(self.nodemaster, ret)
-        destNid = borrow_strategy_response["destParam"][0]["destNid"]
-        destSocketId = borrow_strategy_response["destParam"][0]["destSocketId"]
-        destNumaId = borrow_strategy_response["destParam"][0]["destNumaId"]
-        self.assertEqual(destNid, "2", f"借出节点nodeId预期为2，实际返回{destNid}")
-        realSocketId = mempooling_common.get_socketid(self.nodes[int(destNid[0]) - 1], int(destNumaId[0]))
-        self.assertEqual(destSocketId, int(realSocketId), f"借出节点nodeId预期为{realSocketId}，实际返回{destSocketId}")
+        presentnumaid = api.parse_presentnumaid_from_borrow_execute_response(self.nodemaster, ret)
+        self.assertEqual(self.get_numa_info_tuple(self.nodemaster, presentnumaid[0])[1], 1024, f"借用大小不符合预期")
 
     def teardown_method(self):
         """Legacy: postTestCase"""
-        super().postTestCase()
+        # todo: 优化内存归还
+        mem_return(self.nodes)

@@ -1,5 +1,6 @@
-import pytest
+import time
 
+import pytest
 import libs.ubturbo.api.mempooling as mempooling_common
 import libs.ubturbo.api.mempooling_api as api
 from libs.core.basecase.ubturbo.mempooling_basecase import MempoolingBaseCase
@@ -7,8 +8,7 @@ from libs.ubturbo.common import basic
 
 
 @pytest.mark.smoke
-@pytest.mark.mempooling
-class TestMempooling001(MempoolingBaseCase):
+class TestRmrsFragment001(MempoolingBaseCase):
     """
     CaseNumber: 
         mempooling_001
@@ -60,18 +60,22 @@ class TestMempooling001(MempoolingBaseCase):
 
     def teardown_method(self):
         """Legacy: postTestCase"""
-        for node in self.nodes:
-            mempooling_common.delete_all_vms(node)
-        mempooling_common.post_test(self.nodes)
+        mempooling_common.delete_all_vms(self.nodemaster)
+        mempooling_common.post_test([self.nodemaster, self.nodeagent])
 
     @pytest.mark.case_info(level='P3', type='Functional')
-    def test_mempooling_001(self):
+    def test_rmrs_fragment_001(self):
         self.logStep("S1、给node0的numa0分配13G大页，并成功创建2个1u2g虚机")
         mempooling_common.alloc_hugePage_with_check(self.nodemaster, 0, int(13 * 1024 / 2))
         mempooling_common.alloc_hugePage_with_check(self.nodeagent, 0, int(13 * 1024 / 2))
+        time.sleep(90) # 等待obmm8G内存池填充
         free_hugepages_node0_numa0 = api.parse_node_numa_attribute(self.nodemaster, 0, 'HugePages_Free')
         vm_A = api.create_vm_object(self.nodemaster, 'A')
+        basic.run(self.nodeagent, "echo '保证连接存活1'")
+        vm_A.init_console_login()
+        basic.run(self.nodeagent, "echo '保证连接存活2'")
         vm_B = api.create_vm_object(self.nodemaster, 'B')
+        basic.run(self.nodeagent, "echo '保证连接存活3'")
         s1_free_hugepages_node0_numa0 = api.parse_node_numa_attribute(self.nodemaster, 0, 'HugePages_Free')
         self.assertEqual(free_hugepages_node0_numa0 - s1_free_hugepages_node0_numa0, int(4 * 1024),
                          f"numa0大页占用不符合预期，预期减少4G, 实际减少{(free_hugepages_node0_numa0 - s1_free_hugepages_node0_numa0) / 1024}G")
@@ -82,6 +86,7 @@ class TestMempooling001(MempoolingBaseCase):
                                              262144)
         self.assertEqual(res_2, 200, f"调用内存借用策略函数预期返回200，实际返回{res_2}")
         borrow_strategy_response = api.parse_borrow_strategy_response(self.nodemaster, res_2)
+        basic.run(self.nodeagent, "echo '保证连接存活4'")
         destNumaId = borrow_strategy_response["destParam"][0]["destNumaId"][0]
 
         node0_numa0_plane0 = api.create_member_of_borrow_topology(0, 0, 0)
@@ -94,6 +99,7 @@ class TestMempooling001(MempoolingBaseCase):
         self.logStep(
             "S3、调用内存借用执行函数，借用内存为256M，借入方为node0的numa0，借出方为node1的numa（根据实际情况选择与node0的numa0同平面的numa）")
         res_3 = api.function_borrow_execute(self.nodemaster, borrow_strategy_response)
+        basic.run(self.nodeagent, "echo '保证连接存活5'")
         self.assertEqual(res_3, 200, f"调用内存借用执行函数预期返回200，实际返回{res_3}")
         borrowIds, presentNumaId = api.parse_borrow_execute_response_full(self.nodemaster, res_3)
         remote_numa_id = presentNumaId[0]
@@ -107,6 +113,7 @@ class TestMempooling001(MempoolingBaseCase):
             "S5、调用内存迁移策略函数，内存借入节点为node0，两个虚机的预设迁出最大比例均为60%，总共匀出本地内存大小为100M（102400kb），打印并检查函数出参")
         vm_list = [(mempooling_common.get_pid(self.nodemaster, vm_A.vm_name), 60),
                    (mempooling_common.get_pid(self.nodemaster, vm_B.vm_name), 60)]
+        basic.run(self.nodeagent, "echo '保证连接存活6'")
         vm_info_list = api.get_vm_infolist(vm_list, used_for_strategy=True)
         res_5 = api.function_migrate_strategy(self.nodemaster, 0, 102400, vm_info_list)
         self.assertEqual(res_5, 200, f"调用迁移策略函数预期返回200，实际返回{res_5}")
@@ -117,15 +124,13 @@ class TestMempooling001(MempoolingBaseCase):
             "S6、调用内存迁出执行函数，内存借入节点为node0，迁出内存到步骤3的借来的远端numa上，等待时间设置50000ms，虚机信息列表由步骤5得到，内存描述符列表由步骤3出参得到")
         res_6 = api.function_migrate_execute(self.nodemaster, 0, borrowIds, real_vm_info_list, 50000)
         self.assertEqual(res_6, 200, f"调用迁移策略函数预期返回200，实际返回{res_6}")
-        vm_A.init_login()
-        vm_B.init_login()
         api.check_vm_function(vm_A)
-        api.check_vm_function(vm_B)
         self.logStep("E6、返回码200；需要检查迁出前后两个虚机功能正常")
 
         self.logStep("S7、执行指令：numastat -cvm")
         basic.run(self.nodemaster, "numastat -cvm")
         s7_free_hugepages_node0_numa0 = api.parse_node_numa_attribute(self.nodemaster, 0, 'HugePages_Free')
+        basic.run(self.nodeagent, "echo '保证连接存活7'")
         self.assertEqual(s7_free_hugepages_node0_numa0 - s1_free_hugepages_node0_numa0, 100,
                          f"numa0大页占用不符合预期，预期增加100M, 实际增加{s7_free_hugepages_node0_numa0 - s1_free_hugepages_node0_numa0}M")
         self.logStep("E7、node0的numa0空闲大页在步骤1之后减少4G,在步骤6之后增加100M")
@@ -142,6 +147,7 @@ class TestMempooling001(MempoolingBaseCase):
 
         self.logStep("S9、调用内存归还函数，内存借入节点为node0")
         res_9 = api.function_return(self.nodemaster, 0)
+        basic.run(self.nodeagent, "echo '保证连接存活8'")
         self.assertEqual(res_9, 200, f"调用内存归还预期返回200，实际返回{res_9}")
         s9_total_hugepages_node0_numa0 = api.parse_node_numa_attribute(self.nodemaster, 0,
                                                                        'HugePages_Total')

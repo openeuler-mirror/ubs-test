@@ -466,6 +466,7 @@ class ContainerOvercommitBaseCase(ATBaseCase):
         """清理所有容器."""
         for node in self.nodes:
             basic.run(node, 'systemctl start containerd')
+            time.sleep(15) # 确保服务完全启动
             if crictl:
                 crictl.remove_all_containers(node)
                 crictl.remove_all_pods(node)

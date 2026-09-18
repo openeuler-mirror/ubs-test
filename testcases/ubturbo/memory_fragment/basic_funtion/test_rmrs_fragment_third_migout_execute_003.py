@@ -10,8 +10,7 @@ from libs.ubturbo.common import basic, env
 
 
 @pytest.mark.smoke
-@pytest.mark.mempooling
-class TestMemoryPoolingThirdMigoutExecute003(ATBaseCase):
+class TestRmrsFragmentThirdMigoutExecute003(ATBaseCase):
     """
     CaseNumber:
         memory_pooling_third_migout_execute_003
@@ -55,7 +54,7 @@ class TestMemoryPoolingThirdMigoutExecute003(ATBaseCase):
             mempooling_common.alloc_hugePage_with_check(self.nodemaster, 0, 8192)
 
     @pytest.mark.case_info(level='P0', type='Functional')
-    def test_memory_pooling_third_migout_execute_003(self):
+    def test_rmrs_fragment_third_migout_execute_003(self):
         """
         memory_pooling_third_migout_execute_003
         """

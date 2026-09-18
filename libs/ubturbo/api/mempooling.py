@@ -57,15 +57,14 @@ def upload_sh_files(node):
     file_transport.send2remote(node, MP_PATH + IMAGE_INIT_FILE, REMOTE_WORK_PATH)
     file_transport.send2remote(node, MP_PATH + BORROW_1024_FILE, REMOTE_WORK_PATH)
     # 消除不同系统行尾对shell文件的影响
-    basic.run(node, "yum install -y dos2unix")
     basic.run(node, f'cd {RACK_INSTALL_PATH}')
-    basic.run(node, f"dos2unix {RACK_RESTART_FILE}")
-    basic.run(node, f"dos2unix {UBSE_RESTART_FILE}")
-    basic.run(node, f"dos2unix {UBSE_CONF_FILE}")
+    basic.run(node, f"sed -i 's/\\r$//' {RACK_RESTART_FILE}")
+    basic.run(node, f"sed -i 's/\\r$//' {UBSE_RESTART_FILE}")
+    basic.run(node, f"sed -i 's/\\r$//' {UBSE_CONF_FILE}")
     basic.run(node, f'cd -')
     basic.run(node, f'cd {REMOTE_WORK_PATH}')
-    basic.run(node, f"dos2unix {IMAGE_INIT_FILE}")
-    basic.run(node, f"dos2unix {BORROW_1024_FILE}")
+    basic.run(node, f"sed -i 's/\\r$//' {IMAGE_INIT_FILE}")
+    basic.run(node, f"sed -i 's/\\r$//' {BORROW_1024_FILE}")
     basic.run(node, f'cd -')
     basic.logger.info(f"文件上传完毕")
 
@@ -470,9 +469,8 @@ def get_all_vm_names(node, show_all=True):
 def delete_all_vms(node):
     """删除所有运行中的虚拟机"""
     basic.logger.info('删除所有虚拟机')
-    for vm_name in get_all_vm_names(node):
-        vm_destroy(node, vm_name)
-        time.sleep(2)
+    libvirt.TempVirtualMachine.clear_all(node)
+    time.sleep(2)
 
 
 def clean_config_file(node):
@@ -508,8 +506,8 @@ def json2dict(node, jsonfile_path='/home/mempooling-test/response.json'):
 def return_mem(nodes):
     mem_return_node0 = f"python3 /home/mempooling-test/sdk/call_virt.py call_mem_return '1'"
     mem_return_node1 = f"python3 /home/mempooling-test/sdk/call_virt.py call_mem_return '2'"
-    basic.run(nodes[0], mem_return_node0, timeout=6000)
-    basic.run(nodes[1], mem_return_node1, timeout=6000)
+    basic.run(nodes[0], mem_return_node0, timeout=300)
+    basic.run(nodes[1], mem_return_node1, timeout=300)
 
 
 def parse_mem_mode_output(raw: str) -> Tuple[Optional[Dict[str, Any]], Optional[int]]:

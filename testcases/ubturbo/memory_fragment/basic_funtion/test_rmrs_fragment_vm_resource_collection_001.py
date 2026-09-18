@@ -10,8 +10,7 @@ from libs.ubturbo.common import basic
 
 
 @pytest.mark.smoke
-@pytest.mark.mempooling
-class TestMemorypoolingVmResourceCollection001(MempoolingBaseCase):
+class TestRmrsFragmentVmResourceCollection001(MempoolingBaseCase):
     """
     CaseNumber:
         memorypooling_vm_resource_collection_001
@@ -57,7 +56,7 @@ class TestMemorypoolingVmResourceCollection001(MempoolingBaseCase):
         mempooling_common.pre_test(self.nodemaster)
 
     @pytest.mark.case_info(level='P0', type='Functional')
-    def test_memorypooling_vm_resource_collection_001(self):
+    def test_rmrs_fragment_vm_resource_collection_001(self):
         self.logStep("S1、查看内存池大小, 环境配置为2numa, 内存池16g, 节点一numa0分配10g大页")
         ret1 = basic.run(self.nodemaster, "cat /sys/module/obmm/parameters/mempool_size").stdout.strip("\n")
         if ret1.endswith("G"):

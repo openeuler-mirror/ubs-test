@@ -9,8 +9,6 @@ from libs.ubturbo.common import basic
 
 
 @pytest.mark.smoke
-@pytest.mark.mempooling
-@pytest.mark.mempooling_sameplane_priority
 class TestRmrsFragmentSameplanePriority005(MempoolingBaseCase):
     """
     CaseNumber:
