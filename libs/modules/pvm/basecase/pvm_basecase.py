@@ -11,6 +11,7 @@ pvm 下的用例类继承 PvmBaseCase 后可直接使用：
 import os
 import re
 import tempfile
+import time
 from typing import Any, Dict, List, Tuple
 
 import paramiko
@@ -210,6 +211,9 @@ class PvmBaseCase(TestCase):
 
     # ===== L2 生命周期（统一由 handle_l2.sh 管理）=====
     L2_HANDLE_SCRIPT: str = "/home/handle_l2.sh"  # L2 生命周期管理脚本
+    L2_VMM: str = "/home/cube/cube-hypervisor"   # cube-hypervisor 可执行路径
+    L2_KERNEL: str = "/home/Image"                # L2 内核镜像
+    L2_ROOTFS: str = "/home/rootfs.cpio.gz"       # L2 根文件系统镜像
 
     def _handle_l2(self, action: str, instance: str = None,
                    timeout: int = 300) -> Tuple[int, str]:
@@ -246,8 +250,83 @@ class PvmBaseCase(TestCase):
         m = re.search(r'SUCCESS: (\d+\.\d+\.\d+\.\d+)', out)
         self.l2_ip = m.group(1) if m else None
         self.l2_started = True
-        self.logInfo(f"L2 已就绪（--start），IP: {self.l2_ip}")
+        if getattr(self, 'l2_vms', None) is None:
+            self.l2_vms = {}
+        self.l2_vms[instance] = self.l2_ip
+        self.logInfo(f"L2 已就绪（--start {instance}），IP: {self.l2_ip}")
         return self.l2_ip
+
+    def start_l2_vm_overspec(self, instance: str, memory: str = "8G",
+                             timeout: int = 300) -> str:
+        """以原始 cube-hypervisor CLI 方式启动一个指定内存规格的 L2 VM（超规格场景）。
+
+        与 start_l2_vm（走 handle_l2.sh + /home/vmcfg.json，内存固定）不同：
+        直接用 CLI 参数指定 --memory 等，便于创建内存超规格 VM。tap/桥/socket/MAC
+        准备复刻 handle_l2.sh --start 的逻辑，按实例号区分；cube-hypervisor 带 CLI
+        全量配置启动时 VM 直接 boot，无需 vm.create/vm.boot API。销毁仍可走
+        destroy_l2_vm（socket/tap 命名与 handle_l2.sh 一致）。
+
+        Args:
+            instance: 实例号 N（IP=192.168.249.(N+2)、tap{N}、/tmp/ch-{N}.sock）
+            memory:   内存规格，如 "8G"
+            timeout:   等 SSH 就绪的超时（秒）
+        """
+        n = int(instance)
+        l2_ip = f"192.168.249.{n + 2}"
+        tap = f"tap{instance}"
+        api_sock = f"/tmp/ch-{instance}.sock"
+        mac = "52:54:00:" + ":".join(f"{int(x):02x}" for x in l2_ip.split(".")[1:])
+
+        # bridge（幂等）+ per-instance tap，复刻 handle_l2.sh --start 的网络准备
+        rc, out = self.console_exec(
+            f'ip link show br-l2 >/dev/null 2>&1 || '
+            f'{{ ip link add br-l2 type bridge; '
+            f'ip addr add 192.168.249.1/24 dev br-l2; ip link set br-l2 up; }}; '
+            f'ip link del {tap} 2>/dev/null || true; '
+            f'ip tuntap add {tap} mode tap; '
+            f'ip link set {tap} master br-l2; '
+            f'ip link set {tap} up')
+        self.assertEqual(rc, 0, f"超规格 VM 准备 tap/{tap} 失败: {out[-300:]}")
+
+        # 清理残留 VMM，按 note 用 CLI 全量配置启动（--memory 显式指定）
+        self.console_exec(
+            f'pkill -9 -f "api-socket {api_sock}" 2>/dev/null; rm -f {api_sock}',
+            timeout=15)
+        rc, out = self.console_exec(
+            f'( setsid {self.L2_VMM} --api-socket {api_sock} '
+            f'--cpus boot=2 --memory size={memory} '
+            f'--kernel {self.L2_KERNEL} --initramfs {self.L2_ROOTFS} '
+            f'--cmdline "console=ttyAMA0 root=/dev/ram0 rdinit=/sbin/init '
+            f'rodata=off ip={l2_ip}" '
+            f'--serial pty --console off '
+            f'--net "tap={tap},mac={mac},num_queues=2,queue_size=256" '
+            f'> /tmp/ch-{instance}-stdout.log 2>&1 & )')
+        self.assertEqual(rc, 0, f"超规格 VM 启动 cube-hypervisor 失败: {out[-300:]}")
+
+        # 等 SSH 就绪（RDY=$? 避开 console 回显里字面值的干扰）
+        ready = False
+        deadline = time.time() + timeout
+        while time.time() < deadline:
+            _, out = self.console_exec(
+                f'ssh -o BatchMode=yes -o ConnectTimeout=2 -o StrictHostKeyChecking=no '
+                f'-o UserKnownHostsFile=/dev/null root@{l2_ip} true 2>/dev/null; '
+                f'echo RDY=$?', timeout=20)
+            m = re.search(r'RDY=(\d+)', out or '')
+            if m and m.group(1) == '0':
+                ready = True
+                break
+            time.sleep(2)
+        self.assertTrue(ready,
+                        f"超规格 VM({l2_ip}, {memory}) SSH 未就绪，"
+                        f"详见 /tmp/ch-{instance}-stdout.log")
+
+        self.l2_ip = l2_ip
+        self.l2_started = True
+        if getattr(self, 'l2_vms', None) is None:
+            self.l2_vms = {}
+        self.l2_vms[instance] = l2_ip
+        self.logInfo(f"超规格 L2 已就绪（instance={instance}, memory={memory}），IP: {l2_ip}")
+        return l2_ip
 
     def shutdown_l2_vm(self, instance: str, timeout: int = 120) -> str:
         """handle_l2.sh --shutdown：优雅关机，VM 保持 Created 状态（可再 --boot）。"""
@@ -314,17 +393,25 @@ class PvmBaseCase(TestCase):
         self.assertIn('DELETED:', out, f"--delete 未报告 DELETED，输出: {out[-500:]}")
         self.logInfo(f"L2 已删除（--delete {instance if instance is not None else 'all'}）")
 
-    def l2_ssh_exec(self, cmd: str, timeout: int = 60) -> Tuple[int, str]:
+    def l2_ssh_exec(self, cmd: str, timeout: int = 60,
+                    instance: str = None) -> Tuple[int, str]:
         """在 L1 内通过 ssh 到 L2 执行命令（脚本已打通 root 免密）。
 
         Args:
             cmd: 要在 L2 内执行的命令（单条，不含单引号；$ 变量在 L2 侧展开）
             timeout: 命令超时（秒）
+            instance: 多 VM 场景指定要登录的 L2 实例号/IP（需先 start_l2_vm 该实例）；
+                      不传则用最近一次 start_l2_vm 得到的 self.l2_ip（单 VM 兼容）
         """
-        self.assertTrue(getattr(self, 'l2_ip', None), "L2 尚未启动（先调用 start_l2_vm）")
+        if instance is not None:
+            ip = getattr(self, 'l2_vms', {}).get(instance)
+            self.assertTrue(ip, f"L2 实例 {instance} 尚未启动（先调用 start_l2_vm）")
+        else:
+            ip = getattr(self, 'l2_ip', None)
+            self.assertTrue(ip, "L2 尚未启动（先调用 start_l2_vm）")
         # 单引号包裹：避免 $ 变量/反引号在 L1 shell 提前展开
         ssh_cmd = (f'ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null '
-                   f'-o ConnectTimeout=5 root@{self.l2_ip} \'{cmd}\'')
+                   f'-o ConnectTimeout=5 root@{ip} \'{cmd}\'')
         return self.console_exec(ssh_cmd, timeout)
 
     def _instance_sock_name(self, arg: str) -> str:
@@ -342,6 +429,32 @@ class PvmBaseCase(TestCase):
         count = next((line.strip() for line in out.splitlines()
                       if line.strip().isdigit()), None)
         self.assertEqual(count, '0', f"实例 {name} 的 VMM 进程未退出，L2 可能仍在运行")
+
+    def kill_l2_vm(self, instance: str, timeout: int = 30) -> None:
+        """强杀指定实例的 L2 VMM 进程（模拟 VM 崩溃）。
+
+        与 destroy_l2_vm（handle_l2.sh --delete：vm.shutdown + 清 tap/socket）不同：
+        仅 pkill cube-hypervisor 进程，不做优雅关机、不删 tap/socket 文件，供
+        "VM 崩溃不影响其他 VM/L1"类 DFX 用例使用。socket/tap 仍由后续 destroy_l2_vm 清理。
+        """
+        name = self._instance_sock_name(str(instance))
+        sock_pat = f"api-socket /tmp/ch-{name}.sock"
+        rc, out = self.console_exec(f'pkill -9 -f "{sock_pat}"', timeout=timeout)
+        self.assertEqual(rc, 0,
+                         f"未找到 L2 实例 {instance} 的 VMM 进程（pkill 无匹配），可能未启动")
+        # SIGKILL 后内核回收进程需片刻，轮询确认真正退出
+        gone = False
+        for _ in range(10):
+            rc, out = self.console_exec(
+                f'ps -ef | grep "{sock_pat}" | grep -v grep | wc -l', timeout=10)
+            cnt = next((ln.strip() for ln in (out or '').splitlines()
+                        if ln.strip().isdigit()), None)
+            if cnt == '0':
+                gone = True
+                break
+            time.sleep(1)
+        self.assertTrue(gone, f"L2 实例 {instance} 的 VMM 强杀后仍未退出")
+        self.logInfo(f"L2 实例 {instance} 的 VMM 已被强杀（模拟崩溃）")
 
 
 @pytest.fixture(autouse=True)
