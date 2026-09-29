@@ -64,18 +64,53 @@ class TestPvmBasic02(PvmBaseCase):
         self.release_l1_console()
 
     def _parse_free_avail(self, out):
-        """从 `free -m` 输出解析 Mem 行 available 内存（MB）。
+        """从 `free -m` 输出解析可用内存（MB），用于内存泄漏判定。
 
-        util-linux free 的 Mem 行列为 total/used/free/shared/buff/cache/available，
-        取 available（parts[6]）；精简 busybox free 无 available 列时回退取 free。
+        优先取 util-linux free 的 available 列（最贴近“可分配”语义）；
+        精简 busybox / 旧版 util-linux 无 available 列时，取 `-/+ buffers/cache:`
+        行的 adjusted free（已扣除 buffers/cached，比 Mem 行 raw free 稳定，
+        不随内核缓存波动而误判泄漏）；都没有时回退 Mem 行 raw free。
+
+        注意：旧实现用 len(parts)>=7 判 available，但 busybox/旧版 free 带 cached
+        列时也是 7 段、parts[6] 实为 cached 而非 available，会取错列。
         """
-        for line in (out or '').splitlines():
+        lines = (out or '').splitlines()
+        # 1) 表头定位 available 列（仅 util-linux 新版有）
+        avail_col = None
+        for line in lines:
+            low = line.lower()
+            if 'available' in low and 'total' in low:
+                hdr = line.split()
+                if 'available' in hdr:
+                    avail_col = hdr.index('available')
+                break
+        # 2) Mem 行：有 available 列则取（Mem 行带 'Mem:' 前缀，列号 +1）
+        mem_parts = None
+        for line in lines:
             if line.strip().startswith('Mem:'):
-                parts = line.split()
-                if len(parts) >= 7:
-                    return int(parts[6])      # available
-                if len(parts) >= 4:
-                    return int(parts[3])      # free（回退）
+                mem_parts = line.split()
+                break
+        if mem_parts and avail_col is not None and len(mem_parts) > avail_col + 1:
+            try:
+                return int(mem_parts[avail_col + 1])
+            except ValueError:
+                pass
+        # 3) busybox/旧版回退：-/+ buffers/cache: 行的 adjusted free（最后一个数字）
+        for line in lines:
+            if line.strip().startswith('-/+ buffers/cache'):
+                nums = [p for p in line.split() if p.isdigit()]
+                if len(nums) >= 2:
+                    try:
+                        return int(nums[-1])
+                    except ValueError:
+                        pass
+                break
+        # 4) 最终回退：Mem 行 raw free（parts[3]）
+        if mem_parts and len(mem_parts) >= 4:
+            try:
+                return int(mem_parts[3])
+            except ValueError:
+                pass
         return None
 
     @pytest.mark.case_info(level='P2', type='Functional')
@@ -104,7 +139,7 @@ class TestPvmBasic02(PvmBaseCase):
             rc, out = self.console_exec(
                 f'rmmod {self.PVM_KO} 2>/dev/null; '
                 f'insmod {self.PVM_KO} && lsmod | grep -w kvm_pvm >/dev/null '
-                f'&& echo CYCLE_OK || echo CYCLE_FAIL', timeout=30)
+                f"&& echo CYCLE'_'OK || echo CYCLE'_'FAIL", timeout=30)
             if 'CYCLE_OK' in (out or ''):
                 if i % 10 == 0:
                     self.logInfo(f"已完成 {i}/{LOOP_COUNT} 轮 安装/卸载")

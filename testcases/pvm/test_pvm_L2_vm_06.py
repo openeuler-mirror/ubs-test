@@ -122,13 +122,13 @@ class TestPVML2Vm06(PvmBaseCase):
         self.logInfo("L2 本地 ping（127.0.0.1）功能正常")
 
         self.logStep("S4.dmesg查看内核日志")
-        rc, out = self.l2_ssh_exec('dmesg', timeout=30)
+        rc, out = self.l2_ssh_exec('dmesg | wc -l', timeout=30)
 
         self.logStep("E4.dmesg可正常查看内核日志")
         self.assertEqual(rc, 0, f"L2 内执行 dmesg 失败: {out[-300:]}")
-        self.assertTrue(len(out.strip()) > 0, "dmesg 无输出，内核日志为空")
-        self.logInfo(f"L2 dmesg 可正常查看，最近日志: "
-                     f"{out.strip().splitlines()[-1] if out else ''}")
+        n = next((int(ln) for ln in (out or '').splitlines() if ln.strip().isdigit()), 0)
+        self.assertGreater(n, 0, "dmesg 无输出，内核日志为空")
+        self.logInfo(f"L2 dmesg 可正常查看，共 {n} 行")
 
         self.logStep("S5.创建进程dd命令读写")
         # nohup + 重定向：避免 dd 继承 ssh 的 fd 致 ssh 阻塞至 dd 结束，可立即返回 PID
