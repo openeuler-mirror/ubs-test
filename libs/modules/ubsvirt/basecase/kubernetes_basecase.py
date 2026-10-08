@@ -1723,3 +1723,93 @@ class KubernetesBaseCase(UBSVirtBaseCase):
                 return time_field
         return ""
 
+    def _stdout(result) -> str:
+        return (result.get("stdout") or "").split("root@#>")[0].strip()
+
+    def run_master(self, command: str, timeout: int = 600, check: bool = True) -> str:
+        result = self.master.run({"command": [command], "timeout": timeout})
+        if check:
+            self.assertEqual(
+                result.get("rc"), 0, f"命令执行失败: {command}; stderr={result.get('stderr')}"
+            )
+        return self._stdout(result)
+
+    def locate_plugins(self) -> None:
+        controller = self.run_master(
+            "kubectl get pods -A --no-headers "
+            "-o custom-columns=NAMESPACE:.metadata.namespace,NAME:.metadata.name,"
+            "PHASE:.status.phase | "
+            "awk '$2 ~ /ssu.*controller|controller.*ssu/ && $3 == \"Running\" "
+            "{print $1 \"|\" $2; exit}'"
+        )
+        self.assertTrue(controller, "未找到Running状态的ssu-controller Pod")
+        controller_fields = controller.split("|", maxsplit=1)
+        self.assertEqual(len(controller_fields), 2, f"Controller Pod信息格式异常: {controller}")
+        self.controller_namespace = controller_fields[0]
+        node_pods = self.run_master(
+            f"kubectl get pods -n {self.controller_namespace} --no-headers "
+            "-o custom-columns=NAME:.metadata.name,PHASE:.status.phase | "
+             "awk '$1 ~ /ssu-csi-node/ && $2 == \"Running\" {print $1}'"
+        )
+        self.assertTrue(node_pods, "未找到Running状态的ssu-csi-node Pod")
+
+    def component_logs(self, pod_pattern: str, container_name: str) -> str:
+        return self.run_master(
+            "for pod in $(kubectl get pods "
+            f"-n {self.controller_namespace} --no-headers "
+            "-o custom-columns=NAME:.metadata.name,PHASE:.status.phase | "
+            f"awk '$1 ~ /{pod_pattern}/ && $2 == \"Running\" {{print $1}}'); do "
+            f"kubectl logs -n {self.controller_namespace} \"$pod\" -c {container_name} "
+            f"--since-time={self.log_start_time}; done",
+            timeout=300,
+        )
+
+    def assert_log_event(self, logs: str, event: str, volume_id: str) -> None:
+        matched = any(event in line and volume_id in line for line in logs.splitlines())
+        self.assertTrue(matched, f"未找到卷{volume_id}的日志: {event}")
+
+    def upload_yaml_files(self) -> None:
+        self.create_dir("master", self.remote_dir)
+        for yaml_name, destination in (
+            (self.pvc_yaml_name, self.remote_pvc_yaml),
+            (self.pod_yaml_name, self.remote_pod_yaml),
+        ):
+            self.upload_file(
+                "master",
+                {
+                    "source_file": f"{self.yaml_base_path}/{yaml_name}",
+                    "destination_file": destination,
+                },
+            )
+
+    def delete_resources(self, check: bool) -> None:
+        for yaml_path in (self.remote_pod_yaml, self.remote_pvc_yaml):
+            self.run_master(
+                f"kubectl delete -f {yaml_path} --ignore-not-found=true --wait=true --timeout=300s",
+                timeout=360,
+                check=check,
+            )
+
+    def bound_volume(self, pvc_name: str, expected_mode: str) -> tuple[str, str]:
+        self.run_master(
+            f"kubectl wait --for=jsonpath='{{.status.phase}}'=Bound "
+            f"--timeout=300s pvc/{pvc_name}",
+            timeout=360,
+        )
+        pvc_info = self.run_master(
+            f"kubectl get pvc {pvc_name} "
+            "-o jsonpath='{.spec.volumeName}|{.spec.resources.requests.storage}|"
+            "{.spec.volumeMode}'"
+        )
+        pvc_fields = pvc_info.split("|")
+        self.assertEqual(len(pvc_fields), 3, f"PVC信息格式异常: {pvc_info}")
+        self.assertEqual(pvc_fields[1], "3Gi", f"PVC {pvc_name}申请容量不正确")
+        self.assertEqual(pvc_fields[2], expected_mode, f"PVC {pvc_name}使用模式不正确")
+        pv_info = self.run_master(
+            f"kubectl get pv {pvc_fields[0]} "
+            "-o jsonpath='{.spec.csi.volumeHandle}|{.status.phase}'"
+        )
+        volume_id, phase = pv_info.split("|", maxsplit=1)
+        self.assertTrue(volume_id, f"PV {pvc_fields[0]}的volumeHandle为空")
+        self.assertEqual(phase, "Bound", f"PV {pvc_fields[0]}未处于Bound状态")
+        return pvc_fields[0], volume_id
