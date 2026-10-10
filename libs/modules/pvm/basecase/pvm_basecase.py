@@ -190,7 +190,7 @@ class PvmBaseCase(TestCase):
         finally:
             self.vm_ssh = None
 
-    def console_exec(self, cmd: str, timeout: int = 60) -> Tuple[int, str]:
+    def console_exec(self, cmd: str, timeout: int = 120) -> Tuple[int, str]:
         """在 L1 console 内执行命令并同步等待结束，返回 (rc, output)。
 
         直接使用 send()/recv() 而非框架 run()：run() 会把默认提示符
@@ -238,7 +238,7 @@ class PvmBaseCase(TestCase):
         self.assertIn(expect_tag, out,
                       f"{action} 未报告 {expect_tag}，输出: {out[-500:]}")
 
-    def start_l2_vm(self, instance: str, timeout: int = 300) -> str:
+    def start_l2_vm(self, instance: str, timeout: int = 120) -> str:
         """handle_l2.sh --start：创建 + 开机 + 等待 SSH 就绪，返回 L2 IP。
 
         Args:
@@ -256,8 +256,40 @@ class PvmBaseCase(TestCase):
         self.logInfo(f"L2 已就绪（--start {instance}），IP: {self.l2_ip}")
         return self.l2_ip
 
+    def start_l2_vm_pinned(self, instance: str, cpu_affinity: str,
+                           mem_host_node: str, timeout: int = 120) -> str:
+        """启动绑定 numa 的 L2 VM（cloud-hypervisor 原生 cpus.affinity + memory.zones）。
+
+        不用 numactl/taskset（部分 L1 镜像未装），改用 VmConfig 原生字段，通过 env 注入
+        到 handle_l2.sh 的 vmcfg 生成逻辑：
+            L2_CPU_AFFINITY  -> cfg["cpus"]["affinity"]   绑 vCPU 到 host CPU
+            L2_MEM_HOST_NODE -> cfg["memory"]["zones"]   把全部内存绑到某 host numa node
+        两个 env 都不设时等价于普通 start_l2_vm。
+
+        Args:
+            instance:       实例号 N（IP=192.168.249.(N+2)）
+            cpu_affinity:   "vcpu:hostcpu;..."，如 "0:0;1:1"（多 hostcpu 用逗号 "0:0,1"）
+                            cloud-hypervisor 跑在 L1，hostcpu 填 L1 的 vCPU 号(0..31)
+            mem_host_node:  绑内存到哪个 host numa node（L1 单 numa 时只能填 "0"）
+            timeout:        脚本执行超时（秒）
+        """
+        env = (f"L2_CPU_AFFINITY='{cpu_affinity}' "
+               f"L2_MEM_HOST_NODE='{mem_host_node}'")
+        rc, out = self.console_exec(
+            f'{env} bash {self.L2_HANDLE_SCRIPT} --start {instance}', timeout)
+        self._assert_handle_ok(rc, out, '--start(pinned)', 'SUCCESS:')
+        m = re.search(r'SUCCESS: (\d+\.\d+\.\d+\.\d+)', out)
+        self.l2_ip = m.group(1) if m else None
+        self.l2_started = True
+        if getattr(self, 'l2_vms', None) is None:
+            self.l2_vms = {}
+        self.l2_vms[instance] = self.l2_ip
+        self.logInfo(f"L2 已就绪（绑numa: cpu={cpu_affinity}, memnode={mem_host_node}），"
+                     f"IP: {self.l2_ip}")
+        return self.l2_ip
+
     def start_l2_vm_overspec(self, instance: str, memory: str = "8G",
-                             timeout: int = 300) -> str:
+                             timeout: int = 120) -> str:
         """以原始 cube-hypervisor CLI 方式启动一个指定内存规格的 L2 VM（超规格场景）。
 
         与 start_l2_vm（走 handle_l2.sh + /home/vmcfg.json，内存固定）不同：
@@ -345,13 +377,13 @@ class PvmBaseCase(TestCase):
         self.logInfo(f"L2 已开机（--boot）: {m.group(1) if m else out.strip()}")
         return m.group(1) if m else None
 
-    def pause_l2_vm(self, instance: str, timeout: int = 60) -> None:
+    def pause_l2_vm(self, instance: str, timeout: int = 120) -> None:
         """handle_l2.sh --pause：暂停 Running 虚机（快照前置动作）。"""
         rc, out = self._handle_l2('--pause', instance, timeout)
         self._assert_handle_ok(rc, out, '--pause', 'PAUSED:')
         self.logInfo(f"L2 已暂停（--pause {instance}）")
 
-    def resume_l2_vm(self, instance: str, timeout: int = 60) -> None:
+    def resume_l2_vm(self, instance: str, timeout: int = 120) -> None:
         """handle_l2.sh --resume：恢复 Paused 虚机继续运行。
 
         handle_l2_snap.sh 快照动作会把 VM 置为 Paused 且不自动恢复；
