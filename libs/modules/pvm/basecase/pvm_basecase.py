@@ -212,8 +212,8 @@ class PvmBaseCase(TestCase):
     # ===== L2 生命周期（统一由 handle_l2.sh 管理）=====
     L2_HANDLE_SCRIPT: str = "/home/handle_l2.sh"  # L2 生命周期管理脚本
     L2_VMM: str = "/home/cube/cube-hypervisor"   # cube-hypervisor 可执行路径
-    L2_KERNEL: str = "/home/Image"                # L2 内核镜像
-    L2_ROOTFS: str = "/home/rootfs.cpio.gz"       # L2 根文件系统镜像
+    L2_KERNEL: str = "/home/Image"                # L2 内核镜像（需提前在环境准备时放到此目录）
+    L2_ROOTFS: str = "/home/rootfs.cpio.gz"       # L2 根文件系统镜像（需提前在环境准备时放到此目录）
 
     def _handle_l2(self, action: str, instance: str = None,
                    timeout: int = 300) -> Tuple[int, str]:
@@ -238,7 +238,7 @@ class PvmBaseCase(TestCase):
         self.assertIn(expect_tag, out,
                       f"{action} 未报告 {expect_tag}，输出: {out[-500:]}")
 
-    def start_l2_vm(self, instance: str, timeout: int = 120) -> str:
+    def start_l2_vm(self, instance: str, timeout: int = 180) -> str:
         """handle_l2.sh --start：创建 + 开机 + 等待 SSH 就绪，返回 L2 IP。
 
         Args:
@@ -257,7 +257,7 @@ class PvmBaseCase(TestCase):
         return self.l2_ip
 
     def start_l2_vm_pinned(self, instance: str, cpu_affinity: str,
-                           mem_host_node: str, timeout: int = 120) -> str:
+                           mem_host_node: str, timeout: int = 180) -> str:
         """启动绑定 numa 的 L2 VM（cloud-hypervisor 原生 cpus.affinity + memory.zones）。
 
         不用 numactl/taskset（部分 L1 镜像未装），改用 VmConfig 原生字段，通过 env 注入

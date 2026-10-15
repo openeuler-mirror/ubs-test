@@ -190,6 +190,7 @@ mnode = os.environ.get("L2_MEM_HOST_NODE")     # "0"  把全部内存绑到这�
 if mnode not in (None, ""):
     mem = cfg.setdefault("memory", {})
     mem["zones"] = [{"id": "zone0", "size": mem["size"], "host_numa_node": int(mnode)}]
+    mem["size"] = 0
 json.dump(cfg, sys.stdout)
 PYEOF
 

@@ -108,7 +108,7 @@ class TestPVML2Vm08(PvmBaseCase):
                     if re.search(err_pat, ln, re.I)]
 
         # S1: 启动绑 numa 的 L2（cloud-hypervisor 原生 cpus.affinity + memory.zones）
-        self.logStep("S1.在L1虚拟机中启动L2虚拟机（L2虚拟机需要为绑定特定numa的虚拟机）")
+        self.logStep("S1.在L1虚拟机中启动L2虚拟机（L2虚拟机需要为绑定特定numa的虚拟机，cpu与内存均绑定整个numa资源）")
         self.start_l2_vm_pinned(L2_INSTANCE, L2_PIN_CPUS, L2_PIN_NODE)
 
         self.logStep("E1.可以成功启动L2虚拟机，内核加载成功，日志记录相关信息")
