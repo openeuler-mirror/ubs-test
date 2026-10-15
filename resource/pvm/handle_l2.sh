@@ -173,12 +173,24 @@ case "$CMD" in
     # per-instance vmcfg (inject IP via cmdline, unique MAC)
     VMTMP=/tmp/vmcfg-$N.json
     python3 - "$TAP" "$L2_IP" <<'PYEOF' > "$VMTMP"
-import json, sys
+import json, sys, os
 tap, l2ip = sys.argv[1], sys.argv[2]
 cfg = json.load(open("/home/vmcfg.json"))
 cfg["payload"]["cmdline"] += f" ip={l2ip}"
 cfg["net"][0]["tap"] = tap
 cfg["net"][0]["mac"] = "52:54:00:" + ":".join(f"{int(x):02x}" for x in l2ip.split(".")[1:])
+# numa/cpu 绑定（cloud-hypervisor 原生 cpus.affinity + memory.zones；env 不设=不绑=现状）
+aff = os.environ.get("L2_CPU_AFFINITY")        # 形如 "0:0;1:1"  vcpu:hostcpu(对)；多 hostcpu 用逗号
+if aff:
+    cfg.setdefault("cpus", {})["affinity"] = [
+        {"vcpu": int(p.split(":")[0]),
+         "host_cpus": [int(x) for x in p.split(":")[1].split(",")]}
+        for p in aff.split(";") if ":" in p]
+mnode = os.environ.get("L2_MEM_HOST_NODE")     # "0"  把全部内存绑到这个 host numa node
+if mnode not in (None, ""):
+    mem = cfg.setdefault("memory", {})
+    mem["zones"] = [{"id": "zone0", "size": mem["size"], "host_numa_node": int(mnode)}]
+    mem["size"] = 0
 json.dump(cfg, sys.stdout)
 PYEOF
 
