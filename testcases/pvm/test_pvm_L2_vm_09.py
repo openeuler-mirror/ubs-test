@@ -404,6 +404,7 @@ class TestPVML2Vm09(PvmBaseCase):
                          if ln.strip().isdigit()), None)
         self.assertEqual(leftover, '0',
                          f"测试结束仍残留 cube-hypervisor 进程: {(out or '')[-300:]}")
+
         self.logStep("E8.删除虚拟机成功")
         self.l2_started = False
         self.l2_vms.clear()
