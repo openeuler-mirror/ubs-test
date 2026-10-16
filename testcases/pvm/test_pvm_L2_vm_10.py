@@ -19,6 +19,7 @@ L2_OVERCOMMIT_INSTANCES = ("0", "1", "2", "3", "4")  # 超规格：5 个 L2（�
 L1_MEM_FLOOR_MB = 512                     # L1 压测期间可用内存下限（MB），低于此判定 L1 被打爆
 DD_LATENCY_CEIL = 20                      # VM2 dd 延迟上限（秒），超过判定 IO 隔离异常
 CPU_ISOLATION_RATIO = 0.6                 # VM2 并发 vs 基线 bogo ops/s 比下限，低于判定 CPU 被抢
+CPU_SHARING_RATIO = 0.7                   # 同 CPU 共享时 VM2 性能应显著下降（低于基线 70%）
 
 
 class TestPVML2Vm10(PvmBaseCase):
@@ -412,6 +413,60 @@ class TestPVML2Vm10(PvmBaseCase):
         errs = dmesg_errors(self.console_exec, baseline_cpu_l1)
         self.assertEqual(len(errs), 0,
                          f"CPU 隔离测试期间 L1 内核日志出现报错: {errs[:20]}")
+        # 销毁 2 个绑核 VM
+        for inst in ("0", "1"):
+            self.destroy_l2_vm(inst)
+        self.l2_vms.clear()
+
+        # ── S6b: CPU 共享（同 CPU）——反向验证绑核确实生效 ──
+        self.logStep("S6b.CPU共享：VM1/VM2绑相同CPU段，VM1跑CPU压，"
+                     "验证VM2性能被抢（绑核反向验证）")
+        # 起回 2 个绑核 L2（VM1→L1 vCPU 0,1；VM2 也→L1 vCPU 0,1；相同 CPU）
+        self.start_l2_vm_pinned("0", "0:0;1:1", "")
+        self.start_l2_vm_pinned("1", "0:0;1:1", "")
+        vm1_ip, vm2_ip = self.l2_vms["0"], self.l2_vms["1"]
+
+        # 基线：VM2 单独跑（VM1 空闲）
+        rc, out = self.l2_ssh_exec(
+            'stress-ng --cpu 1 --timeout 10 --metrics-brief 2>&1',
+            instance="1", timeout=30)
+        self.assertEqual(rc, 0, f"VM2 基线 CPU 测试失败: {out[-300:]}")
+        m = re.search(
+            r'stress-ng:\s+metr.*cpu\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)',
+            out or '', re.I)
+        bogo_base_share = float(m.group(5)) if m else 0
+        self.assertGreater(bogo_base_share, 0,
+                           f"无法解析 VM2 基线 bogo ops: {out[-300:]}")
+        # 并发：VM1 后台重 CPU 压 + VM2 同样 10s CPU 压
+        self.console_exec(
+            f"( ssh {ssh_opts} root@{vm1_ip} 'stress-ng --cpu 4 --timeout 20' "
+            f"> /tmp/s6b_vm1_cpu.log 2>&1 & )")
+        time.sleep(2)
+        rc, out = self.l2_ssh_exec(
+            'stress-ng --cpu 1 --timeout 10 --metrics-brief 2>&1',
+            instance="1", timeout=30)
+        self.assertEqual(rc, 0, f"VM2 并发 CPU 测试失败: {out[-300:]}")
+        m = re.search(
+            r'stress-ng:\s+metr.*cpu\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)',
+            out or '', re.I)
+        bogo_conc_share = float(m.group(5)) if m else 0
+        self.assertGreater(bogo_conc_share, 0,
+                           f"无法解析 VM2 并发 bogo ops: {out[-300:]}")
+        # 验证：同 CPU 共享时 VM2 性能应显著下降（低于基线 70%）
+        # 如果绑核没生效（vCPU 没被真正 pin 住），VM2 能用其他 CPU → ratio ≈ 1.0
+        # 绑核生效时 VM2 被迫和 VM1 抢同一 CPU → ratio < 0.7
+        ratio_share = bogo_conc_share / bogo_base_share if bogo_base_share > 0 else 0
+        self.assertLess(
+            ratio_share, CPU_SHARING_RATIO,
+            f"VM2 同 CPU 共享时 bogo ops/s {bogo_conc_share:.0f} vs 基线 "
+            f"{bogo_base_share:.0f} (ratio={ratio_share:.2f})，"
+            f"未低于 {CPU_SHARING_RATIO}（绑核可能未生效，VM2 用了别的 CPU）")
+        self.logInfo(f"S6b: VM2 同 CPU 基线 {bogo_base_share:.0f}, "
+                     f"并发 {bogo_conc_share:.0f} "
+                     f"(ratio={ratio_share:.2f}), "
+                     f"性能显著下降 → 绑核确实生效")
+        self.assertTrue(self._wait_vm_proc_done("0", "stress-ng", 60),
+                        "VM1 CPU stress 未在预期时间内结束")
         # 销毁 2 个绑核 VM
         for inst in ("0", "1"):
             self.destroy_l2_vm(inst)
