@@ -63,7 +63,7 @@ class UbsMemNode(NodeExecutor):
     def start_apps(self, count: int):
         self.clear_all_app()
         start_cmd = f"do {self._app_dependency} setpriv --reuid {self.app_uid} --regid {self.app_gid} --groups $(id -g ubsmd) {self._app_path} -p $i -l {self.log_path}/mem_test_$i.log"
-        self.run(f"for i in {{{self._app_ids[0]}..{self._app_ids[0] + count}}}; {start_cmd} > {self.log_path}/http_$i.log 2>&1 & disown; done")
+        self.run(f"for i in {{{self._app_ids[0]}..{self._app_ids[0] + count - 1}}}; {start_cmd} > {self.log_path}/http_$i.log 2>&1 & disown; done")
         self.sleep(3)
 
     def start_app_by_index(self, app_index: int):
