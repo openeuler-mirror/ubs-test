@@ -29,7 +29,7 @@ LARGE_MEM = "16G"
 
 
 class TestPVML2Vm11(PvmBaseCase):
-    """验证PVM内存超分比1:9.6场景下多L2混合规格创建与自动回收
+    """验证PVM内存超分比1:9.6场景下多L2虚拟机混合规格创建与自动回收
 
     CaseNumber:
         test_pvm_L2_vm_11
@@ -38,7 +38,7 @@ class TestPVML2Vm11(PvmBaseCase):
     EnvType:
 
     CaseName:
-        验证PVM内存超分比1:9.6场景下多L2混合规格创建与自动回收
+        验证PVM内存超分比1:9.6场景下多L2虚拟机混合规格创建与自动回收
     PreCondition:
         P1.完成L1虚拟机的安装部署，功能正常
         P2.在L1虚拟机中安装PVM的ko文件
