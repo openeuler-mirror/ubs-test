@@ -1814,3 +1814,47 @@ class KubernetesBaseCase(UBSVirtBaseCase):
         self.assertTrue(volume_id, f"PV {pvc_fields[0]}的volumeHandle为空")
         self.assertEqual(phase, "Bound", f"PV {pvc_fields[0]}未处于Bound状态")
         return pvc_fields[0], volume_id
+
+    def find_target_node(self, pod_name: str, namespace: str = None):
+        """找到Pod部署的节点SSH连接
+
+        参数说明：
+            pod_name: Pod名称
+            namespace: 命名空间（默认使用self.controller_namespace）
+
+        返回值说明：
+            SSH连接对象
+        """
+        ns = namespace or self.controller_namespace
+        pod_node = self.run_master(
+            f"kubectl get pod -n {ns} {pod_name} "
+            f"-o jsonpath='{{.spec.nodeName}}'"
+        )
+        self.assertTrue(pod_node, f"未获取到Pod {pod_name} 的节点信息")
+        master_hostname = self.run_master("hostname")
+        if pod_node == master_hostname:
+            return self.master
+        node_ip = self.run_master(
+            f"kubectl get node {pod_node} "
+            f"-o jsonpath='{{.status.addresses[?(@.type==\"InternalIP\")].address}}'"
+        )
+        for node in self.nodes:
+            if node.ip == node_ip or node.localIP == node_ip:
+                return node
+        self.assertTrue(False, f"未找到节点 {pod_node} (IP: {node_ip}) 的SSH连接")
+
+    def run_on_node(self, node, command: str, timeout: int = 600) -> str:
+        """在指定节点上执行命令
+
+        参数说明：
+            node: SSH连接对象
+            command: 要执行的命令
+            timeout: 超时时间（秒）
+
+        返回值说明：
+            str: 命令输出
+        """
+        if node is self.master:
+            return self.run_master(command, check=False)
+        result = node.run({"command": [command], "timeout": timeout})
+        return self._stdout(result)

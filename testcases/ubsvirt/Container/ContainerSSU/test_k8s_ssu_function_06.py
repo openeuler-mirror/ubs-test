@@ -98,7 +98,7 @@ class TestK8sSsuFunction06(KubernetesBaseCase):
         )
         controller_logs = self.component_logs("ssu-controller", "ssu-controller")
         size_error_pattern = re.compile(
-            r"requested size \S+ smaller than minimun 1073741824 bytes",
+            r"requested size \S+ bytes is smaller than minimum 1073741824 bytes",
             re.IGNORECASE,
         )
         self.assertTrue(
@@ -106,7 +106,7 @@ class TestK8sSsuFunction06(KubernetesBaseCase):
                 size_error_pattern.search(line)
                 for line in controller_logs.splitlines()
             ),
-            "未找到卷容量下限报错日志: requested size smaller than minimun 1073741824 bytes",
+            "未找到卷容量下限报错日志: requested size is smaller than minimum 1073741824 bytes",
         )
 
         self.logStep("S2.创建1个PVC，声明所需卷的size大小为1G，为文件系统使用模式")

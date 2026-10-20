@@ -113,21 +113,19 @@ class TestK8sSsuFunction05(KubernetesBaseCase):
 
         self.logStep("S2.在相同节点创建2个相同的namespace业务容器，yaml声明引用创建的一个pvc")
         self.run_master(
-            f"kubectl apply -f {self.remote_pod_yaml} -l ssu-test-phase=sharing"
+            f"kubectl apply -f {self.remote_pod_yaml} -l ssu-test-phase=same-node"
         )
-        ready_pods = " ".join(
-            f"pod/{pod}" for pod in (*self.same_node_pods, self.cross_node_pod)
-        )
+        ready_pods = " ".join(f"pod/{pod}" for pod in self.same_node_pods)
         self.run_master(
-            f"kubectl wait --for=condition=Ready --timeout=300s {ready_pods}",
-            timeout=360,
+            f"kubectl wait --for=condition=Ready --timeout=100s {ready_pods}",
+            timeout=120,
         )
 
         self.logStep("E1.ssu-controller调用ubse创建卷成功")
         self.run_master(
             f"kubectl wait --for=jsonpath='{{.status.phase}}'=Bound "
-            f"--timeout=300s pvc/{self.pvc_name}",
-            timeout=360,
+            f"--timeout=100s pvc/{self.pvc_name}",
+            timeout=120,
         )
         pvc_info = self.run_master(
             f"kubectl get pvc {self.pvc_name} "
@@ -165,6 +163,13 @@ class TestK8sSsuFunction05(KubernetesBaseCase):
 
         self.logStep(
             "S3.再在其他节点创建1个相同的namespace容器，yaml声明引用之前容器创建使用的一个pvc"
+        )
+        self.run_master(
+            f"kubectl apply -f {self.remote_pod_yaml} -l ssu-test-phase=cross-node"
+        )
+        self.run_master(
+            f"kubectl wait --for=condition=Ready --timeout=100s pod/{self.cross_node_pod}",
+            timeout=120,
         )
         self._assert_different_node(self.same_node_pods[0], self.cross_node_pod)
 
@@ -204,7 +209,12 @@ class TestK8sSsuFunction05(KubernetesBaseCase):
             timeout=360,
         )
         self.run_master(
-            f"kubectl delete -f {self.remote_pod_yaml} -l ssu-test-phase=sharing "
+            f"kubectl delete -f {self.remote_pod_yaml} -l ssu-test-phase=cross-node "
+            "--wait=true --timeout=300s",
+            timeout=360,
+        )
+        self.run_master(
+            f"kubectl delete -f {self.remote_pod_yaml} -l ssu-test-phase=same-node "
             "--wait=true --timeout=300s",
             timeout=360,
         )

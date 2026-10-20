@@ -41,19 +41,15 @@ class TestSsuPlugin02(KubernetesBaseCase):
         self.log_start_time = ""
         self.controller_pod_name = ""
         self.controller_container = "ssu-controller"
+        self.target_node = None
 
     def _find_controller_pid(self) -> str:
-        ps_output = self.run_master(
-            f"kubectl exec -n {self.controller_namespace} {self.controller_pod_name} "
-            f"-c {self.controller_container} -- ps -ef",
-            check=False,
+        ps_output = self.run_on_node(
+            self.target_node,
+            "ps -ef | grep ssu-csi | grep controller | grep -v grep | head -1",
         )
-        for line in ps_output.splitlines():
-            if "ssu-csi" in line and "controller" in line and "grep" not in line:
-                fields = line.split()
-                if len(fields) >= 2:
-                    return fields[1]
-        return ""
+        fields = ps_output.split()
+        return fields[1] if len(fields) >= 2 else ""
 
     def _get_restart_count(self) -> str:
         return self.run_master(
@@ -103,17 +99,13 @@ class TestSsuPlugin02(KubernetesBaseCase):
         self.controller_pod_name = pod_lines[0].split()[0]
 
         self.logStep("S2.查看ssu-controller组件进程pid，kill掉进程")
+        self.target_node = self.find_target_node(self.controller_pod_name)
         pid1 = self._find_controller_pid()
         self.assertTrue(pid1, "未找到ssu-controller进程")
         restart_count_1 = self._get_restart_count()
         self.logInfo(f"kill前: PID={pid1}, restartCount={restart_count_1}")
 
-        self.run_master(
-            f"kubectl exec -n {self.controller_namespace} {self.controller_pod_name} "
-            f"-c {self.controller_container} -- kill -9 {pid1}",
-            check=False,
-            timeout=30,
-        )
+        self.run_on_node(self.target_node, f"kill -9 {pid1}")
 
         restart_count_2 = restart_count_1
         for _ in range(12):

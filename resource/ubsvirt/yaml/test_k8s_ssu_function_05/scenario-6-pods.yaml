@@ -3,7 +3,7 @@ kind: Pod
 metadata:
   name: ssu-s5-block-1
   labels:
-    ssu-test-phase: sharing
+    ssu-test-phase: same-node
     ssu-test-anchor: block-same-node
 spec:
   tolerations:
@@ -27,7 +27,7 @@ kind: Pod
 metadata:
   name: ssu-s5-block-2
   labels:
-    ssu-test-phase: sharing
+    ssu-test-phase: same-node
 spec:
   affinity:
     podAffinity:
@@ -57,7 +57,7 @@ kind: Pod
 metadata:
   name: ssu-s5-block-3
   labels:
-    ssu-test-phase: sharing
+    ssu-test-phase: cross-node
 spec:
   affinity:
     podAntiAffinity:
