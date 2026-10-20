@@ -43,18 +43,23 @@ class TestSsuPlugin01(KubernetesBaseCase):
         self.node_container = "ssu-csi-node"
 
     def _find_csi_pid(self) -> str:
-        pid_output = self.run_master(
+        ps_output = self.run_master(
             f"kubectl exec -n {self.controller_namespace} {self.node_pod_name} "
-            f"-c {self.node_container} -- sh -c '"
-            "ps -eo pid=,comm= | grep ssu-csi | grep -v grep | head -1'",
+            f"-c {self.node_container} -- ps -ef",
             check=False,
         )
-        return pid_output.strip().split()[0] if pid_output.strip() else ""
+        for line in ps_output.splitlines():
+            if "ssu-csi" in line and "node" in line and "grep" not in line:
+                fields = line.split()
+                if len(fields) >= 2:
+                    return fields[1]
+        return ""
 
     def _get_restart_count(self) -> str:
         return self.run_master(
             f"kubectl get pod -n {self.controller_namespace} {self.node_pod_name} "
-            f"-o jsonpath='{{.status.containerStatuses[0].restartCount}}'"
+            f"-o jsonpath='{{.status.containerStatuses"
+            f"[?(@.name==\"{self.node_container}\")].restartCount}}'"
         )
 
     def setup_method(self) -> None:
@@ -102,6 +107,7 @@ class TestSsuPlugin01(KubernetesBaseCase):
             f"kubectl exec -n {self.controller_namespace} {self.node_pod_name} "
             f"-c {self.node_container} -- kill -9 {pid1}",
             check=False,
+            timeout=30,
         )
 
         restart_count_2 = restart_count_1

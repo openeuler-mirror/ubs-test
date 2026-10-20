@@ -1,10 +1,19 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: ub-ssu-csi-s5
+provisioner: csi.unifiedbus.com
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+allowVolumeExpansion: false
+---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: ssu-s5-undersize-filesystem-pvc
 spec:
   accessModes: [ReadWriteOnce]
-  storageClassName: ub-ssu-csi
+  storageClassName: ub-ssu-csi-s5
   volumeMode: Filesystem
   resources:
     requests:
@@ -16,7 +25,7 @@ metadata:
   name: ssu-s5-minimum-filesystem-pvc
 spec:
   accessModes: [ReadWriteOnce]
-  storageClassName: ub-ssu-csi
+  storageClassName: ub-ssu-csi-s5
   volumeMode: Filesystem
   resources:
     requests:

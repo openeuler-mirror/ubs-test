@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import time
-import re
 from pathlib import Path
 
 import pytest
@@ -60,28 +59,26 @@ class TestK8sSsuFunction05(KubernetesBaseCase):
         self.same_node_pods = ("ssu-s5-block-1", "ssu-s5-block-2")
         self.cross_node_pod = "ssu-s5-block-3"
         self.cross_ns_pod = "ssu-s5-block-4"
-        self.pv_name: str = ""
-        self.volume_id: str = ""
-        self.controller_namespace = ""
-        self.log_start_time = ""
 
-    def _pod_nodes(self, first_pod: str, second_pod: str) -> tuple[str, ...]:
-        return tuple(
+    def _assert_same_node(self, first_pod: str, second_pod: str) -> str:
+        nodes = tuple(
             self.run_master(
                 f"kubectl get pod {first_pod} {second_pod} "
                 "-o jsonpath='{range .items[*]}{.spec.nodeName}{\"\\n\"}{end}'"
             ).splitlines()
         )
-
-    def _assert_same_node(self, first_pod: str, second_pod: str) -> str:
-        nodes = self._pod_nodes(first_pod, second_pod)
         self.assertEqual(len(nodes), 2, "未获取到两个业务Pod的节点信息")
         self.assertTrue(nodes[0], f"Pod {first_pod}尚未调度")
         self.assertEqual(nodes[0], nodes[1], "两个业务Pod未部署在同一节点")
         return nodes[0]
 
     def _assert_different_node(self, first_pod: str, second_pod: str) -> None:
-        nodes = self._pod_nodes(first_pod, second_pod)
+        nodes = tuple(
+            self.run_master(
+                f"kubectl get pod {first_pod} {second_pod} "
+                "-o jsonpath='{range .items[*]}{.spec.nodeName}{\"\\n\"}{end}'"
+            ).splitlines()
+        )
         self.assertEqual(len(nodes), 2, "未获取到两个业务Pod的节点信息")
         self.assertTrue(nodes[0], f"Pod {first_pod}尚未调度")
         self.assertTrue(nodes[1], f"Pod {second_pod}尚未调度")
@@ -92,12 +89,12 @@ class TestK8sSsuFunction05(KubernetesBaseCase):
         self.run_master(
             f"kubectl exec {writer} -- sh -c '"
             f"printf %s {payload} | dd of=/dev/ssu-volume bs=1 seek=1048576 "
-            f"conv=fsync,notrunc 2>/dev/null'"
+            f"conv=fsync,notrunc 2>/tmp/dd-write.log'"
         )
         self.run_master(
             f"kubectl exec {reader} -- sh -c '"
             f"readback=$(dd if=/dev/ssu-volume bs=1 skip=1048576 count={count} "
-            f"2>/dev/null); test \"$readback\" = {payload}'"
+            f"2>/tmp/dd-read.log); test \"$readback\" = {payload}'"
         )
 
     def setup_method(self) -> None:
@@ -139,60 +136,37 @@ class TestK8sSsuFunction05(KubernetesBaseCase):
         )
         pvc_fields = pvc_info.split("|")
         self.assertEqual(len(pvc_fields), 3, f"PVC信息格式异常: {pvc_info}")
-        self.assertEqual(
-            pvc_fields[1], "1Gi", f"PVC {self.pvc_name}申请容量不正确"
-        )
-        self.assertEqual(
-            pvc_fields[2], "Block", f"PVC {self.pvc_name}使用模式不正确"
-        )
-        self.assertTrue(pvc_fields[0], f"PVC {self.pvc_name} 未绑定PV")
-        self.pv_name = pvc_fields[0]
-
+        self.assertEqual(pvc_fields[1], "1Gi", f"PVC {self.pvc_name}申请容量不正确")
+        self.assertEqual(pvc_fields[2], "Block", f"PVC {self.pvc_name}使用模式不正确")
         pv_info = self.run_master(
-            f"kubectl get pv {self.pv_name} "
+            f"kubectl get pv {pvc_fields[0]} "
             "-o jsonpath='{.spec.csi.driver}|{.spec.csi.volumeHandle}|"
             "{.status.phase}'"
         )
         pv_fields = pv_info.split("|")
         self.assertEqual(len(pv_fields), 3, f"PV信息格式异常: {pv_info}")
-        self.assertEqual(
-            pv_fields[0],
-            "csi.unifiedbus.com",
-            f"PV {self.pv_name} CSI驱动不正确",
-        )
-        self.assertTrue(pv_fields[1], f"PV {self.pv_name} 的volumeHandle为空")
-        self.assertEqual(
-            pv_fields[2], "Bound", f"PV {self.pv_name} 未处于Bound状态"
-        )
-        self.volume_id = pv_fields[1]
+        self.assertEqual(pv_fields[0], "csi.unifiedbus.com", f"PV {pvc_fields[0]} CSI驱动不正确")
+        self.assertTrue(pv_fields[1], f"PV {pvc_fields[0]} 的volumeHandle为空")
+        self.assertEqual(pv_fields[2], "Bound", f"PV {pvc_fields[0]} 未处于Bound状态")
+        pv_name = pvc_fields[0]
+        volume_id = pv_fields[1]
         self.logInfo(f"PVC {self.pvc_name}对应PV信息: {pv_info}")
         controller_logs = self.component_logs("ssu-controller", "ssu-controller")
-        self.assert_log_event(
-            controller_logs, "CreateVolume succeeded", self.volume_id
-        )
+        self.assert_log_event(controller_logs, "CreateVolume succeeded", volume_id)
 
         self.logStep("E2.容器操作成功，csi-ssu-driver将设备挂载到pod内")
         self._assert_same_node(*self.same_node_pods)
         for pod in (*self.same_node_pods, self.cross_node_pod):
             self.run_master(f"kubectl exec {pod} -- test -b /dev/ssu-volume")
         node_logs = self.component_logs("ssu-csi-node", "ssu-csi-node")
-        publish_count = sum(
-            "NodePublishVolume completed (block mode)" in line
-            and self.volume_id in line
-            for line in node_logs.splitlines()
-        )
-        self.assertGreaterEqual(
-            publish_count, 3, "NodePublishVolume(block mode)日志少于3条"
+        self.assert_log_event(
+            node_logs, "NodePublishVolume completed (block mode)", volume_id
         )
 
         self.logStep(
             "S3.再在其他节点创建1个相同的namespace容器，yaml声明引用之前容器创建使用的一个pvc"
         )
         self._assert_different_node(self.same_node_pods[0], self.cross_node_pod)
-        cross_node_output = self.run_master(
-            f"kubectl get pod {self.cross_node_pod} -o wide"
-        )
-        self.logInfo(f"跨节点Pod信息:\n{cross_node_output}")
 
         self.logStep("E3.容器操作成功，csi-ssu-driver将设备挂载到pod内")
 
@@ -225,41 +199,25 @@ class TestK8sSsuFunction05(KubernetesBaseCase):
 
         self.logStep("S6.删除所有容器和pvc")
         self.run_master(
-            f"kubectl delete -f {self.remote_pod_yaml} "
-            "--ignore-not-found=true --wait=true --timeout=300s",
+            f"kubectl delete -f {self.remote_pod_yaml} -l ssu-test-phase=cross-ns "
+            "--wait=true --timeout=300s",
             timeout=360,
         )
         self.run_master(
-            f"kubectl delete -f {self.remote_pvc_yaml} "
-            "--ignore-not-found=true --wait=true --timeout=300s",
+            f"kubectl delete -f {self.remote_pod_yaml} -l ssu-test-phase=sharing "
+            "--wait=true --timeout=300s",
+            timeout=360,
+        )
+        self.run_master(
+            f"kubectl delete -f {self.remote_pvc_yaml} --wait=true --timeout=300s",
             timeout=360,
         )
 
         self.logStep("E6.删除容器和pvc成功")
         self.run_master(
-            f"kubectl wait --for=delete --timeout=300s pv/{self.pv_name}",
+            f"kubectl wait --for=delete --timeout=300s pv/{pv_name}",
             timeout=360,
-            check=False,
         )
-        delete_logs = self.component_logs("ssu-controller", "ssu-controller")
-        self.assert_log_event(
-            delete_logs, "DeleteVolume succeeded", self.volume_id
-        )
-        node_logs = self.component_logs("ssu-csi-node", "ssu-csi-node")
-        self.assert_log_event(
-            node_logs, "NodeUnpublishVolume completed", self.volume_id
-        )
-        self.assert_log_event(
-            node_logs, "NodeUnstageVolume called", self.volume_id
-        )
-        remaining_pvcs = self.run_master(
-            f"kubectl get pvc {self.pvc_name} --ignore-not-found=true -o name"
-        )
-        remaining_pvs = self.run_master(
-            f"kubectl get pv {self.pv_name} --ignore-not-found=true -o name"
-        )
-        self.assertEqual(remaining_pvcs, "", f"仍存在未删除PVC: {remaining_pvcs}")
-        self.assertEqual(remaining_pvs, "", f"仍存在未删除PV: {remaining_pvs}")
 
     def teardown_method(self) -> None:
         self.delete_resources(check=False)

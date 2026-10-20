@@ -1723,6 +1723,7 @@ class KubernetesBaseCase(UBSVirtBaseCase):
                 return time_field
         return ""
 
+    @staticmethod
     def _stdout(result) -> str:
         return (result.get("stdout") or "").split("root@#>")[0].strip()
 
