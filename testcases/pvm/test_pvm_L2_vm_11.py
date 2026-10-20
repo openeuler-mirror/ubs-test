@@ -269,3 +269,4 @@ class TestPVML2Vm11(PvmBaseCase):
         self.l2_started = False
         self.l2_vms.clear()
         self.logInfo("全部 L2 虚拟机已删除，超分测试完成")
+
