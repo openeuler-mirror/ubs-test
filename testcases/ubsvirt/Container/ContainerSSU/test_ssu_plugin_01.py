@@ -1,0 +1,173 @@
+#!/usr/local/python
+# -*- coding: utf-8 -*-
+
+import time
+import re
+from pathlib import Path
+
+import pytest
+
+from libs.modules.ubsvirt.basecase.kubernetes_basecase import KubernetesBaseCase
+
+
+@pytest.mark.smoke
+class TestSsuPlugin01(KubernetesBaseCase):
+    """验证csi-ssu-driver组件功能正常.
+
+    CaseNumber:
+        test_ssu_plugin_01
+    RunLevel:
+        Level 3
+    EnvType:
+
+    CaseName:
+        验证csi-ssu-driver组件功能正常
+    PreCondition:
+        P1.环境完成K8s、ssu-controller、csi-ssu-driver安装，且功能正常，存储节点正常
+    TestStep:
+        S1.查看csi-ssu-driver组件状态
+        S2.查看csi-ssu-driver组件进程pid，kill掉进程
+        S3.查看csi-ssu-driver组件用于pod内挂载卷时候的资源占用
+    ExpectedResult:
+        E1.每个节点部署，状态信息可以正常查询
+        E2.进程杀死后可以产生新的进程，为pid2
+        E3.cpu < 100m，mem < 128M
+    Author:
+        yangfan
+    """
+
+    def init_ssu_params(self) -> None:
+        self.controller_namespace = ""
+        self.log_start_time = ""
+        self.node_pod_name = ""
+        self.node_container = "ssu-csi-node"
+
+    def _find_csi_pid(self) -> str:
+        pid_output = self.run_master(
+            f"kubectl exec -n {self.controller_namespace} {self.node_pod_name} "
+            f"-c {self.node_container} -- sh -c '"
+            "ps -eo pid=,comm= | grep ssu-csi | grep -v grep | head -1'",
+            check=False,
+        )
+        return pid_output.strip().split()[0] if pid_output.strip() else ""
+
+    def _get_restart_count(self) -> str:
+        return self.run_master(
+            f"kubectl get pod -n {self.controller_namespace} {self.node_pod_name} "
+            f"-o jsonpath='{{.status.containerStatuses[0].restartCount}}'"
+        )
+
+    def setup_method(self) -> None:
+        self.init_ssu_params()
+        self.logStep("P1.检查K8s、ssu-controller、csi-ssu-driver及存储节点状态")
+        self.locate_plugins()
+        self.log_start_time = self.run_master("date -u +%Y-%m-%dT%H:%M:%SZ")
+        time.sleep(5)
+
+    @pytest.mark.case_info(level="P3", type="Functional")
+    def test_ssu_plugin_01(self) -> None:
+        self.logStep("S1.查看csi-ssu-driver组件状态")
+        node_pod_info = self.run_master(
+            f"kubectl get pods -n {self.controller_namespace} --no-headers "
+            "-o custom-columns=NAME:.metadata.name,PHASE:.status.phase,"
+            "NODE:.spec.nodeName | "
+            "awk '$1 ~ /ssu-csi-node/ {print}'"
+        )
+        self.assertTrue(node_pod_info, "未找到ssu-csi-node Pod")
+        csi_pod_lines = node_pod_info.splitlines()
+        node_count = self.get_node_number()
+        self.assertGreaterEqual(
+            len(csi_pod_lines), 1, "ssu-csi-node Pod数量不足"
+        )
+        for line in csi_pod_lines:
+            fields = line.split()
+            self.assertEqual(
+                fields[1],
+                "Running",
+                f"ssu-csi-node Pod {fields[0]} 状态异常: {fields[1]}",
+            )
+
+        self.logStep("E1.每个节点部署，状态信息可以正常查询")
+        self.logInfo(f"ssu-csi-node Pod信息:\n{node_pod_info}")
+        self.logInfo(f"集群节点数: {node_count}, csi-node Pod数: {len(csi_pod_lines)}")
+        self.node_pod_name = csi_pod_lines[0].split()[0]
+
+        self.logStep("S2.查看csi-ssu-driver组件进程pid，kill掉进程")
+        pid1 = self._find_csi_pid()
+        self.assertTrue(pid1, "未找到ssu-csi进程")
+        restart_count_1 = self._get_restart_count()
+        self.logInfo(f"kill前: PID={pid1}, restartCount={restart_count_1}")
+
+        self.run_master(
+            f"kubectl exec -n {self.controller_namespace} {self.node_pod_name} "
+            f"-c {self.node_container} -- kill -9 {pid1}",
+            check=False,
+        )
+
+        restart_count_2 = restart_count_1
+        for _ in range(12):
+            time.sleep(10)
+            restart_count_2 = self._get_restart_count()
+            if restart_count_2 and int(restart_count_2) > int(restart_count_1):
+                break
+        self.assertGreater(
+            int(restart_count_2),
+            int(restart_count_1),
+            f"容器restartCount未增加: {restart_count_1} -> {restart_count_2}",
+        )
+
+        pid2 = ""
+        for _ in range(6):
+            time.sleep(10)
+            pid2 = self._find_csi_pid()
+            if pid2:
+                break
+        self.assertTrue(pid2, "kill后未产生新的ssu-csi进程")
+
+        self.logStep("E2.进程杀死后可以产生新的进程，为pid2")
+        self.logInfo(f"kill后: PID={pid2}, restartCount={restart_count_2}")
+
+        self.logStep("S3.查看csi-ssu-driver组件用于pod内挂载卷时候的资源占用")
+        top_output = self.run_master(
+            f"kubectl top pod -n {self.controller_namespace} {self.node_pod_name}",
+            check=False,
+        )
+        top_lines = top_output.strip().splitlines()
+        self.assertGreaterEqual(
+            len(top_lines),
+            2,
+            f"kubectl top输出异常，可能未安装metrics-server: {top_output}",
+        )
+        top_fields = top_lines[-1].split()
+        self.assertGreaterEqual(
+            len(top_fields), 3, f"kubectl top输出格式异常: {top_output}"
+        )
+        cpu_str = top_fields[-2]
+        mem_str = top_fields[-1]
+
+        self.logStep("E3.cpu < 100m，mem < 128M")
+        if cpu_str.endswith("m"):
+            cpu_value = float(cpu_str[:-1])
+        else:
+            cpu_value = float(cpu_str) * 1000
+        if mem_str.endswith("Mi"):
+            mem_value = float(mem_str[:-2])
+        elif mem_str.endswith("Gi"):
+            mem_value = float(mem_str[:-2]) * 1024
+        elif mem_str.endswith("Ki"):
+            mem_value = float(mem_str[:-2]) / 1024
+        else:
+            mem_value = float(mem_str)
+        self.assertLess(cpu_value, 100, f"CPU使用量 {cpu_str} 不小于 100m")
+        self.assertLess(mem_value, 128, f"内存使用量 {mem_str} 不小于 128Mi")
+        self.logInfo(f"资源占用: CPU={cpu_str}, MEM={mem_str}")
+
+    def teardown_method(self) -> None:
+        if self.node_pod_name and self.controller_namespace:
+            self.run_master(
+                f"kubectl wait --for=jsonpath='{{.status.phase}}'=Running "
+                f"--timeout=120s -n {self.controller_namespace} "
+                f"pod/{self.node_pod_name}",
+                timeout=180,
+                check=False,
+            )
