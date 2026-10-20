@@ -9,6 +9,9 @@
    注意：快照动作会把VM置为Paused且不自动恢复，需 handle_l2.sh --resume 后才能继续操作L2
 '''
 
+import re
+import time
+
 import pytest
 
 from libs.modules.pvm.basecase.pvm_basecase import PvmBaseCase
@@ -38,14 +41,16 @@ class TestPVML2Vm04(PvmBaseCase):
         S3.root目录touch文件test1，保存增量快照
 		S4.删除L2虚拟机，使用全量快照恢复虚拟机
 		S5.使用增量快照恢复虚拟机
-		S6.删除L2虚拟机
+		S6.快照恢复后时钟验证：记录恢复前后guest时间，验证时间不倒退不冻结、定时器恢复正常
+		S7.删除L2虚拟机
     ExpectedResult:
         E1.可以成功启动L2虚拟机，内核加载成功，日志记录相关信息
         E2.全量快照保存成功
         E3.文件创建成功，增量快照保存正常
 		E4.删除虚拟机后恢复的虚拟机root目录没有test1文件
 		E5.再次使用增量快照恢复的虚拟机root目录有test1文件
-		E6.删除虚拟机成功
+		E6.快照恢复后guest时间正常前进（不倒退/不冻结），定时器继续运行
+		E7.删除虚拟机成功
     Author:
         handongkang
     """
@@ -163,11 +168,65 @@ class TestPVML2Vm04(PvmBaseCase):
         self.assertEqual(rc, 0, f"增量快照恢复后 {self.TEST_FILE} 应存在但未找到: {out[-300:]}")
         self.logInfo(f"增量快照恢复成功，{self.TEST_FILE} 存在，符合预期")
 
-        # ===== S6.删除L2虚拟机 =====
-        self.logStep("S6.删除L2虚拟机")
+        # ===== S6.快照恢复后时钟验证 =====
+        self.logStep("S6.快照恢复后时钟验证：记录恢复前后guest时间，"
+                     "验证时间不倒退不冻结、定时器恢复正常")
+        # 记录恢复后 guest 当前时间戳（秒）
+        rc, out = self.l2_ssh_exec('date +%s')
+        self.assertEqual(rc, 0, f"获取 guest 时间戳失败: {out[-300:]}")
+        guest_time_after_restore = next(
+            (int(ln.strip()) for ln in (out or '').splitlines()
+             if ln.strip().isdigit()), 0)
+        self.assertGreater(guest_time_after_restore, 0,
+                           f"无法解析 guest 时间戳: {out[-300:]}")
+        # 在 guest 内启动一个后台 sleep（验证定时器恢复后是否正常推进）
+        rc, out = self.l2_ssh_exec('sleep 10 & echo $!')
+        self.assertEqual(rc, 0, f"启动 sleep 失败: {out[-300:]}")
+        # 回显里 PID 是中间的纯数字行（123），不是首行（ssh 命令回显）也不是尾行（CMDEXEC_DONE_0）
+        sleep_pid = next(
+            (ln.strip() for ln in (out or '').splitlines()
+             if ln.strip().isdigit() and ln.strip() != '0'), '')
+        self.assertTrue(sleep_pid.isdigit(), f"未获取到 sleep PID: {out[-300:]}")
+        # 等 12s（sleep 10 应该已完成）
+        time.sleep(12)
+        # 记录此时 guest 时间戳（应该比恢复后前进 ~12s）
+        rc, out = self.l2_ssh_exec('date +%s')
+        self.assertEqual(rc, 0, f"获取 guest 时间戳失败: {out[-300:]}")
+        guest_time_after_wait = next(
+            (int(ln.strip()) for ln in (out or '').splitlines()
+             if ln.strip().isdigit()), 0)
+        # 验证：时间正常前进（不冻结）
+        time_diff = guest_time_after_wait - guest_time_after_restore
+        self.assertGreater(time_diff, 5,
+                          f"恢复后 guest 时间仅前进 {time_diff}s（疑似时钟冻结）"
+                          f"（恢复后={guest_time_after_restore}, "
+                          f"等待后={guest_time_after_wait}）")
+        # 验证：时间没倒退
+        self.assertGreaterEqual(guest_time_after_wait, guest_time_after_restore,
+                                f"guest 时间倒退（恢复后={guest_time_after_restore}, "
+                                f"等待后={guest_time_after_wait}）")
+        # 验证：sleep 进程已完成（定时器恢复正常推进）
+        rc, out = self.l2_ssh_exec(f'kill -0 {sleep_pid} 2>/dev/null && '
+                                    f'echo RUNNING || echo DONE')
+        # 回显里 marker 行是 CMDEXEC_DONE_0，命令回显行含 RUNNING/DONE 字面量，
+        # 只取恰好等于 RUNNING 或 DONE 的行
+        done_check = next(
+            (ln.strip() for ln in (out or '').splitlines()
+             if ln.strip() in ('RUNNING', 'DONE')), '')
+        self.assertEqual(done_check, 'DONE',
+                        f"恢复后 sleep {sleep_pid} 未在预期时间内完成"
+                        f"（定时器可能未恢复）: {out[-300:]}")
+
+        self.logStep("E6.快照恢复后guest时间正常前进（不倒退/不冻结），定时器继续运行")
+        self.logInfo(f"S6: 时钟验证通过（恢复后={guest_time_after_restore}, "
+                     f"等待后={guest_time_after_wait}, 前进 {time_diff}s, "
+                     f"sleep 已完成=定时器正常）")
+
+        # ===== S7.删除L2虚拟机 =====
+        self.logStep("S7.删除L2虚拟机")
         self.destroy_l2_vm(L2_INSTANCE)
         self.l2_started = False
 
-        self.logStep("E6.删除虚拟机成功")
+        self.logStep("E7.删除虚拟机成功")
         self.verify_l2_destroyed(L2_INSTANCE)
         self.logInfo("L2 已删除，VMM 进程退出")
