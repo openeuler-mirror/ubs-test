@@ -183,7 +183,7 @@ class TestK8sSsuFunction06(KubernetesBaseCase):
     def delete_resources(self, check: bool) -> None:
         self.run_master(
             f"kubectl delete -f {self.remote_yaml} "
-            "--ignore-not-found=true --wait=true --timeout=300s",
-            timeout=360,
+            "--ignore-not-found=true --wait=true --timeout=150s",
+            timeout=180,
             check=check,
         )

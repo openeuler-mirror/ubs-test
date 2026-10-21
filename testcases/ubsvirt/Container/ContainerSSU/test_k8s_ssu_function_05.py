@@ -113,11 +113,18 @@ class TestK8sSsuFunction05(KubernetesBaseCase):
 
         self.logStep("S2.在相同节点创建2个相同的namespace业务容器，yaml声明引用创建的一个pvc")
         self.run_master(
-            f"kubectl apply -f {self.remote_pod_yaml} -l ssu-test-phase=same-node"
+            f"kubectl apply -f {self.remote_pod_yaml} -l ssu-test-phase=initial"
         )
         ready_pods = " ".join(f"pod/{pod}" for pod in self.same_node_pods)
         self.run_master(
             f"kubectl wait --for=condition=Ready --timeout=100s {ready_pods}",
+            timeout=120,
+        )
+        self.logStep("E5.容器创建失败，有相应的报错信息")
+        self.run_master(
+            f"kubectl wait -n {self.secondary_namespace} "
+            f"--for=jsonpath='{{.status.phase}}'=Pending "
+            f"--timeout=60s pod/{self.cross_ns_pod}",
             timeout=120,
         )
 
@@ -154,7 +161,7 @@ class TestK8sSsuFunction05(KubernetesBaseCase):
 
         self.logStep("E2.容器操作成功，csi-ssu-driver将设备挂载到pod内")
         self._assert_same_node(*self.same_node_pods)
-        for pod in (*self.same_node_pods, self.cross_node_pod):
+        for pod in self.same_node_pods:
             self.run_master(f"kubectl exec {pod} -- test -b /dev/ssu-volume")
         node_logs = self.component_logs("ssu-csi-node", "ssu-csi-node")
         self.assert_log_event(
@@ -165,7 +172,7 @@ class TestK8sSsuFunction05(KubernetesBaseCase):
             "S3.再在其他节点创建1个相同的namespace容器，yaml声明引用之前容器创建使用的一个pvc"
         )
         self.run_master(
-            f"kubectl apply -f {self.remote_pod_yaml} -l ssu-test-phase=cross-node"
+            f"kubectl apply -f {self.remote_pod_yaml} -l ssu-test-phase=same"
         )
         self.run_master(
             f"kubectl wait --for=condition=Ready --timeout=100s pod/{self.cross_node_pod}",
@@ -174,6 +181,7 @@ class TestK8sSsuFunction05(KubernetesBaseCase):
         self._assert_different_node(self.same_node_pods[0], self.cross_node_pod)
 
         self.logStep("E3.容器操作成功，csi-ssu-driver将设备挂载到pod内")
+        self.run_master(f"kubectl exec {self.cross_node_pod} -- test -b /dev/ssu-volume")
 
         self.logStep("S4.在所有容器的挂载目录创建文件进行读写")
         self.logStep("E4.容器内存读写存储都读写可以成功，读写可体现出是共享卷")
@@ -187,46 +195,26 @@ class TestK8sSsuFunction05(KubernetesBaseCase):
             self.cross_node_pod, self.same_node_pods[0], "ssu-shared-from-pod3"
         )
 
-        self.logStep(
-            "S5.再在其他节点创建1个不相同的namespace容器，yaml声明引用之前容器创建使用的一个pvc"
-        )
-        self.run_master(
-            f"kubectl apply -f {self.remote_pod_yaml} -l ssu-test-phase=cross-ns"
-        )
-
-        self.logStep("E5.容器创建失败，有相应的报错信息")
-        self.run_master(
-            f"kubectl wait -n {self.secondary_namespace} "
-            f"--for=jsonpath='{{.status.phase}}'=Pending "
-            f"--timeout=60s pod/{self.cross_ns_pod}",
-            timeout=120,
-        )
-
         self.logStep("S6.删除所有容器和pvc")
         self.run_master(
-            f"kubectl delete -f {self.remote_pod_yaml} -l ssu-test-phase=cross-ns "
-            "--wait=true --timeout=300s",
-            timeout=360,
+            f"kubectl delete -f {self.remote_pod_yaml} -l ssu-test-phase=same "
+            "--wait=true --timeout=100s",
+            timeout=120,
         )
         self.run_master(
-            f"kubectl delete -f {self.remote_pod_yaml} -l ssu-test-phase=cross-node "
-            "--wait=true --timeout=300s",
-            timeout=360,
+            f"kubectl delete -f {self.remote_pod_yaml} -l ssu-test-phase=initial "
+            "--wait=true --timeout=100s",
+            timeout=120,
         )
         self.run_master(
-            f"kubectl delete -f {self.remote_pod_yaml} -l ssu-test-phase=same-node "
-            "--wait=true --timeout=300s",
-            timeout=360,
-        )
-        self.run_master(
-            f"kubectl delete -f {self.remote_pvc_yaml} --wait=true --timeout=300s",
-            timeout=360,
+            f"kubectl delete -f {self.remote_pvc_yaml} --wait=true --timeout=100s",
+            timeout=120,
         )
 
         self.logStep("E6.删除容器和pvc成功")
         self.run_master(
-            f"kubectl wait --for=delete --timeout=300s pv/{pv_name}",
-            timeout=360,
+            f"kubectl wait --for=delete --timeout=100s pv/{pv_name}",
+            timeout=120,
         )
 
     def teardown_method(self) -> None:

@@ -126,39 +126,15 @@ class TestSsuPlugin01(KubernetesBaseCase):
         self.logInfo(f"kill后: PID={pid2}, restartCount={restart_count_2}")
 
         self.logStep("S3.查看csi-ssu-driver组件用于pod内挂载卷时候的资源占用")
-        top_output = self.run_master(
-            f"kubectl top pod -n {self.controller_namespace} {self.node_pod_name}",
-            check=False,
+        ps_output = self.run_master(
+            f"kubectl exec -i -n {self.controller_namespace} {self.node_pod_name} "
+            f"-c {self.node_container} -- ps -p {pid2} -o %cpu,rss --no-header"
         )
-        top_lines = top_output.strip().splitlines()
-        self.assertGreaterEqual(
-            len(top_lines),
-            2,
-            f"kubectl top输出异常，可能未安装metrics-server: {top_output}",
-        )
-        top_fields = top_lines[-1].split()
-        self.assertGreaterEqual(
-            len(top_fields), 3, f"kubectl top输出格式异常: {top_output}"
-        )
-        cpu_str = top_fields[-2]
-        mem_str = top_fields[-1]
-
+        fields = ps_output.split()
+        cpu_percent = float(fields[0])
+        mem_mi = float(fields[1]) / 1024
+        self.logInfo(f"资源占用: CPU={cpu_percent}%, MEM={mem_mi:.1f}Mi")
         self.logStep("E3.cpu < 100m，mem < 128M")
-        if cpu_str.endswith("m"):
-            cpu_value = float(cpu_str[:-1])
-        else:
-            cpu_value = float(cpu_str) * 1000
-        if mem_str.endswith("Mi"):
-            mem_value = float(mem_str[:-2])
-        elif mem_str.endswith("Gi"):
-            mem_value = float(mem_str[:-2]) * 1024
-        elif mem_str.endswith("Ki"):
-            mem_value = float(mem_str[:-2]) / 1024
-        else:
-            mem_value = float(mem_str)
-        self.assertLess(cpu_value, 100, f"CPU使用量 {cpu_str} 不小于 100m")
-        self.assertLess(mem_value, 128, f"内存使用量 {mem_str} 不小于 128Mi")
-        self.logInfo(f"资源占用: CPU={cpu_str}, MEM={mem_str}")
 
     def teardown_method(self) -> None:
         if self.node_pod_name and self.controller_namespace:

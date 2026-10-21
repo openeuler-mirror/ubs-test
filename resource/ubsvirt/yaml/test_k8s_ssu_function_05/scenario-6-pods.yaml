@@ -3,9 +3,10 @@ kind: Pod
 metadata:
   name: ssu-s5-block-1
   labels:
-    ssu-test-phase: same-node
-    ssu-test-anchor: block-same-node
+    ssu-test-phase: initial
 spec:
+  nodeSelector:
+    kubernetes.io/hostname: master
   tolerations:
     - operator: Exists
       effect: NoSchedule
@@ -27,15 +28,10 @@ kind: Pod
 metadata:
   name: ssu-s5-block-2
   labels:
-    ssu-test-phase: same-node
+    ssu-test-phase: initial
 spec:
-  affinity:
-    podAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        - labelSelector:
-            matchLabels:
-              ssu-test-anchor: block-same-node
-          topologyKey: kubernetes.io/hostname
+  nodeSelector:
+    kubernetes.io/hostname: master
   tolerations:
     - operator: Exists
       effect: NoSchedule
@@ -57,15 +53,10 @@ kind: Pod
 metadata:
   name: ssu-s5-block-3
   labels:
-    ssu-test-phase: cross-node
+    ssu-test-phase: same
 spec:
-  affinity:
-    podAntiAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        - labelSelector:
-            matchLabels:
-              ssu-test-anchor: block-same-node
-          topologyKey: kubernetes.io/hostname
+  nodeSelector:
+    kubernetes.io/hostname: worker1
   tolerations:
     - operator: Exists
       effect: NoSchedule
@@ -88,16 +79,10 @@ metadata:
   name: ssu-s5-block-4
   namespace: ssu-s5-secondary
   labels:
-    ssu-test-phase: cross-ns
+    ssu-test-phase: initial
 spec:
-  affinity:
-    podAntiAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        - labelSelector:
-            matchLabels:
-              ssu-test-anchor: block-same-node
-          namespaces: [default]
-          topologyKey: kubernetes.io/hostname
+  nodeSelector:
+    kubernetes.io/hostname: worker1
   tolerations:
     - operator: Exists
       effect: NoSchedule
