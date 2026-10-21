@@ -87,6 +87,11 @@ class TestK8sSsuFunction05(KubernetesBaseCase):
 
     def _assert_shared_block(self, writer: str, reader: str, payload: str) -> None:
         expected_sha = hashlib.sha256(payload.ljust(4096).encode()).hexdigest()
+
+        # 跨节点读写需要加参数让写的节点落盘，读的节点绕过缓存读取ssu数据
+        # conv = fsync 用于把master的缓存刷到磁盘，但是没法通知worker1缓存过期。
+        # iflag = direct是读的时候跳过缓存，直接从磁盘读，所以能读到Pod1写入的真实数据。
+
         write_output = self.run_master(
             f"kubectl exec {writer} -- sh -c '"
             f"printf \"%-4096s\" {payload} | dd of=/dev/ssu-volume bs=4096 count=1 seek=256 "
