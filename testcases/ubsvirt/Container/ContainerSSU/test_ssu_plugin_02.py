@@ -131,9 +131,12 @@ class TestSsuPlugin02(KubernetesBaseCase):
         self.logInfo(f"kill后: PID={pid2}, restartCount={restart_count_2}")
 
         self.logStep("S3.查看ssu-controller组件创建卷时候的资源占用")
-        ps_output = self.run_master(
-            f"kubectl exec -i -n {self.controller_namespace} {self.controller_pod_name} "
-            f"-c {self.controller_container} -- ps -p {pid2} -o %cpu,rss --no-header"
+        time.sleep(5)
+        pid2 = self._find_controller_pid()
+        self.assertTrue(pid2, "未找到重启后的ssu-controller进程")
+        ps_output = self.run_on_node(
+            self.target_node,
+            f"ps -p {pid2} -o %cpu,rss --no-header",
         )
         fields = ps_output.split()
         cpu_percent = float(fields[0])

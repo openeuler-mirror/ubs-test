@@ -120,13 +120,6 @@ class TestK8sSsuFunction05(KubernetesBaseCase):
             f"kubectl wait --for=condition=Ready --timeout=100s {ready_pods}",
             timeout=120,
         )
-        self.logStep("E5.容器创建失败，有相应的报错信息")
-        self.run_master(
-            f"kubectl wait -n {self.secondary_namespace} "
-            f"--for=jsonpath='{{.status.phase}}'=Pending "
-            f"--timeout=60s pod/{self.cross_ns_pod}",
-            timeout=120,
-        )
 
         self.logStep("E1.ssu-controller调用ubse创建卷成功")
         self.run_master(
@@ -193,6 +186,17 @@ class TestK8sSsuFunction05(KubernetesBaseCase):
         )
         self._assert_shared_block(
             self.cross_node_pod, self.same_node_pods[0], "ssu-shared-from-pod3"
+        )
+
+        self.logStep(
+            "S5.再在其他节点创建1个不相同的namespace容器，yaml声明引用之前容器创建使用的一个pvc"
+        )
+        self.logStep("E5.容器创建失败，有相应的报错信息")
+        self.run_master(
+            f"kubectl wait -n {self.secondary_namespace} "
+            f"--for=jsonpath='{{.status.phase}}'=Pending "
+            f"--timeout=60s pod/{self.cross_ns_pod}",
+            timeout=120,
         )
 
         self.logStep("S6.删除所有容器和pvc")
