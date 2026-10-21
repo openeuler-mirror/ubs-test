@@ -1,6 +1,7 @@
 #!/usr/local/python
 # -*- coding: utf-8 -*-
 
+import hashlib
 import time
 from pathlib import Path
 
@@ -85,16 +86,26 @@ class TestK8sSsuFunction05(KubernetesBaseCase):
         self.assertNotEqual(nodes[0], nodes[1], "两个业务Pod应部署在不同节点")
 
     def _assert_shared_block(self, writer: str, reader: str, payload: str) -> None:
-        count = len(payload)
-        self.run_master(
+        expected_sha = hashlib.sha256(payload.ljust(4096).encode()).hexdigest()
+        write_output = self.run_master(
             f"kubectl exec {writer} -- sh -c '"
-            f"printf %s {payload} | dd of=/dev/ssu-volume bs=1 seek=1048576 "
-            f"conv=fsync,notrunc 2>/tmp/dd-write.log'"
+            f"printf \"%-4096s\" {payload} | dd of=/dev/ssu-volume bs=4096 count=1 seek=256 "
+            f"oflag=direct conv=fsync,notrunc 2>/tmp/dd-write.log; cat /tmp/dd-write.log'"
         )
-        self.run_master(
+        read_output = self.run_master(
             f"kubectl exec {reader} -- sh -c '"
-            f"readback=$(dd if=/dev/ssu-volume bs=1 skip=1048576 count={count} "
-            f"2>/tmp/dd-read.log); test \"$readback\" = {payload}'"
+            f"dd if=/dev/ssu-volume bs=4096 count=1 skip=256 iflag=direct "
+            f"2>/tmp/dd-read.log | sha256sum; cat /tmp/dd-read.log'"
+        )
+        actual_sha = read_output.split()[0] if read_output.split() else ""
+        self.logInfo(f"write_log: {write_output}")
+        self.logInfo(f"read_log: {read_output}")
+        self.logInfo(f"校验: writer={writer}, reader={reader}, expected={expected_sha}, actual={actual_sha}")
+        self.assertEqual(
+            actual_sha,
+            expected_sha,
+            f"数据校验失败: writer={writer}, reader={reader}, "
+            f"expected={expected_sha}, actual={actual_sha}",
         )
 
     def setup_method(self) -> None:
@@ -182,10 +193,10 @@ class TestK8sSsuFunction05(KubernetesBaseCase):
             self.same_node_pods[0], self.same_node_pods[1], "ssu-shared-from-pod1"
         )
         self._assert_shared_block(
-            self.same_node_pods[0], self.cross_node_pod, "ssu-shared-from-pod1"
+            self.same_node_pods[0], self.cross_node_pod, "ssu-shared-pod1-to-pod3"
         )
         self._assert_shared_block(
-            self.cross_node_pod, self.same_node_pods[0], "ssu-shared-from-pod3"
+            self.cross_node_pod, self.same_node_pods[0], "ssu-shared-pod3-to-pod1"
         )
 
         self.logStep(
