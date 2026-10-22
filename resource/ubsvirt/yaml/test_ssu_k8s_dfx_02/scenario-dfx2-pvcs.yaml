@@ -4,7 +4,7 @@ metadata:
   name: ub-ssu-csi-dfx2-linear
 provisioner: csi.unifiedbus.com
 reclaimPolicy: Delete
-volumeBindingMode: WaitForFirstConsumer
+volumeBindingMode: Immediate
 allowVolumeExpansion: false
 parameters:
   allocStrategy: "1"
@@ -15,7 +15,7 @@ metadata:
   name: ub-ssu-csi-dfx2-striped
 provisioner: csi.unifiedbus.com
 reclaimPolicy: Delete
-volumeBindingMode: WaitForFirstConsumer
+volumeBindingMode: Immediate
 allowVolumeExpansion: false
 parameters:
   allocStrategy: "0"

@@ -49,11 +49,11 @@ class TestSsuPlugin03(KubernetesBaseCase):
         return fields[1] if len(fields) >= 2 else ""
 
     def _get_restart_count(self) -> str:
-        return self.run_master(
+        result = self.run_master(
             f"kubectl get pod -n {self.helper_namespace} {self.helper_pod_name} "
-            f"-o jsonpath='{{.status.containerStatuses"
-            f"[?(@.name==\"{self.helper_container}\")].restartCount}}'"
+            f"-o jsonpath='{{.status.containerStatuses[*].restartCount}}'"
         )
+        return result.split()[0] if result.split() else ""
 
     def setup_method(self) -> None:
         self.init_ssu_params()
