@@ -1753,6 +1753,17 @@ class KubernetesBaseCase(UBSVirtBaseCase):
              "awk '$1 ~ /ssu-csi-node/ && $2 == \"Running\" {print $1}'"
         )
         self.assertTrue(node_pods, "未找到Running状态的ssu-csi-node Pod")
+        helper = self.run_master(
+            "kubectl get pods -A --no-headers "
+            "-o custom-columns=NAMESPACE:.metadata.namespace,NAME:.metadata.name,"
+            "PHASE:.status.phase | "
+            "awk '$2 ~ /ubse-helper/ && $3 == \"Running\" "
+            "{print $1 \"|\" $2; exit}'"
+        )
+        self.assertTrue(helper, "未找到Running状态的ubse-helper Pod")
+        helper_fields = helper.split("|", maxsplit=1)
+        self.assertEqual(len(helper_fields), 2, f"ubse-helper Pod信息格式异常: {helper}")
+        self.helper_namespace = helper_fields[0]
 
     def component_logs(self, pod_pattern: str, container_name: str) -> str:
         return self.run_master(

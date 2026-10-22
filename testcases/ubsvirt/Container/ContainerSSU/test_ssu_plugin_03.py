@@ -34,7 +34,7 @@ class TestSsuPlugin03(KubernetesBaseCase):
     """
 
     def init_ssu_params(self) -> None:
-        self.controller_namespace = ""
+        self.helper_namespace = ""
         self.log_start_time = ""
         self.helper_pod_name = ""
         self.helper_container = "ubse-helper"
@@ -50,7 +50,7 @@ class TestSsuPlugin03(KubernetesBaseCase):
 
     def _get_restart_count(self) -> str:
         return self.run_master(
-            f"kubectl get pod -n {self.controller_namespace} {self.helper_pod_name} "
+            f"kubectl get pod -n {self.helper_namespace} {self.helper_pod_name} "
             f"-o jsonpath='{{.status.containerStatuses"
             f"[?(@.name==\"{self.helper_container}\")].restartCount}}'"
         )
@@ -62,11 +62,11 @@ class TestSsuPlugin03(KubernetesBaseCase):
         self.log_start_time = self.run_master("date -u +%Y-%m-%dT%H:%M:%SZ")
         time.sleep(5)
 
-    @pytest.mark.case_info(level="P3", type="Functional")
+    @pytest.mark.case_info(level="P2", type="Functional")
     def test_ssu_plugin_03(self) -> None:
         self.logStep("S1.查看ubse-helper组件状态")
         helper_pod_info = self.run_master(
-            f"kubectl get pods -n {self.controller_namespace} --no-headers "
+            f"kubectl get pods -n {self.helper_namespace} --no-headers "
             "-o custom-columns=NAME:.metadata.name,PHASE:.status.phase,"
             "NODE:.spec.nodeName | "
             "awk '$1 ~ /ubse-helper/ {print}'"
@@ -91,7 +91,9 @@ class TestSsuPlugin03(KubernetesBaseCase):
         self.helper_pod_name = helper_pod_lines[0].split()[0]
 
         self.logStep("S2.查看ubse-helper组件进程pid，kill掉进程")
-        self.target_node = self.find_target_node(self.helper_pod_name)
+        self.target_node = self.find_target_node(
+            self.helper_pod_name, namespace=self.helper_namespace
+        )
         pid1 = self._find_helper_pid()
         self.assertTrue(pid1, "未找到ubse-helper进程")
         restart_count_1 = self._get_restart_count()
@@ -137,10 +139,10 @@ class TestSsuPlugin03(KubernetesBaseCase):
         self.logStep("E3.cpu < 500m，mem < 512M")
 
     def teardown_method(self) -> None:
-        if self.helper_pod_name and self.controller_namespace:
+        if self.helper_pod_name and self.helper_namespace:
             self.run_master(
                 f"kubectl wait --for=jsonpath='{{.status.phase}}'=Running "
-                f"--timeout=120s -n {self.controller_namespace} "
+                f"--timeout=120s -n {self.helper_namespace} "
                 f"pod/{self.helper_pod_name}",
                 timeout=180,
                 check=False,

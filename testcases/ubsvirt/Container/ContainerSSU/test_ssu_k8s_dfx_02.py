@@ -78,17 +78,11 @@ class TestSsuK8sDfx02(KubernetesBaseCase):
         for node in self.nodes:
             self.run_on_node(node, "systemctl restart containerd")
         time.sleep(15)
-        all_nodes = self.run_master(
-            "kubectl get nodes -o jsonpath='{.items[*].metadata.name}'"
-        ).split()
-        ready_nodes = " ".join(f"node/{n}" for n in all_nodes)
-        self.run_master(
-            f"kubectl wait --for=condition=Ready --timeout=300s {ready_nodes}",
-            timeout=360,
-        )
 
         self.logStep("E1.进程重启成功")
-        self.logInfo(f"重启containerd后节点状态: {all_nodes}")
+        for node in self.nodes:
+            status = self.run_on_node(node, "systemctl is-active containerd")
+            self.assertEqual(status.strip(), "active", "containerd重启失败")
 
         self.logStep("S2.创建1个逻辑卷PVC A和组逻辑卷PVC B，A声明所需卷的size大小为1G，nsnum为1；另一个B声明所需卷的size大小为3G，nsnum为3")
         self.run_master(f"kubectl apply -f {self.remote_pvc_yaml}")

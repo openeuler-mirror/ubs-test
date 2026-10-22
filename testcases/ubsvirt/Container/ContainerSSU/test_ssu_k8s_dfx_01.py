@@ -152,8 +152,8 @@ class TestSsuK8sDfx01(KubernetesBaseCase):
 
         self.logStep("S3.尝试删除创建卷的yaml")
         self.run_master(
-            f"kubectl delete -f {self.remote_pvc_yaml} --wait=true --timeout=60s",
-            timeout=90,
+            f"kubectl delete -f {self.remote_pvc_yaml} --wait=true --timeout=30s",
+            timeout=50,
             check=False,
         )
 
