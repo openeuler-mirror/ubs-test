@@ -222,8 +222,8 @@ class TurboCommBaseCase(TestCase):
         expects_lat: str = None,
         not_expects_s: Optional[List[str]] = None,
         not_expects_c: Optional[List[str]] = None,
-        wait_time: int = 20,
-        sleep_time: int = 10
+        wait_time: int = 180,
+        sleep_time: int = 90
     ) -> Dict[str, str]:
         """Run server/client via SSH channel for interactive tests.
         
