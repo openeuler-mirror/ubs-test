@@ -223,7 +223,7 @@ class TurboCommBaseCase(TestCase):
         not_expects_s: Optional[List[str]] = None,
         not_expects_c: Optional[List[str]] = None,
         wait_time: int = 90,
-        sleep_time: int = 60
+        sleep_time: int = 90
     ) -> Dict[str, str]:
         """Run server/client via SSH channel for interactive tests.
         
@@ -255,7 +255,7 @@ class TurboCommBaseCase(TestCase):
         self.logStep(f"Starting server process on {server.localIP}")
         self.logDebug(f"server command: {cmd_s}")
         executor.submit(send_cmd_list, ch_s, cmd_s, time1=wait_time, inputs=inputs_s, time2=5)
-        time.sleep(10)
+        time.sleep(60)
         
         # Start client
         self.logStep(f"Starting client process on {client.localIP}")
