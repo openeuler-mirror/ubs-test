@@ -2,9 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import time
-import re
-from pathlib import Path
-
 import pytest
 
 from libs.modules.ubsvirt.basecase.kubernetes_basecase import KubernetesBaseCase

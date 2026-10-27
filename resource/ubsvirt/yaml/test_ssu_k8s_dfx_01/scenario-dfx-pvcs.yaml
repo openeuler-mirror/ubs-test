@@ -1,0 +1,51 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: ub-ssu-csi-dfx-linear
+provisioner: csi.unifiedbus.com
+reclaimPolicy: Delete
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: false
+parameters:
+  allocStrategy: "1"
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: ub-ssu-csi-dfx-striped
+provisioner: csi.unifiedbus.com
+reclaimPolicy: Delete
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: false
+parameters:
+  allocStrategy: "0"
+  raidLevel: "0"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ssu-dfx-linear-pvc
+  annotations:
+    csi.unifiedbus.com/nsnum: "1"
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: ub-ssu-csi-dfx-linear
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ssu-dfx-striped-pvc
+  annotations:
+    csi.unifiedbus.com/nsnum: "3"
+    csi.unifiedbus.com/chunksize: "64"
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: ub-ssu-csi-dfx-striped
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 3Gi
