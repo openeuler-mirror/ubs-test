@@ -255,7 +255,7 @@ class TurboCommBaseCase(TestCase):
         self.logStep(f"Starting server process on {server.localIP}")
         self.logDebug(f"server command: {cmd_s}")
         executor.submit(send_cmd_list, ch_s, cmd_s, time1=wait_time, inputs=inputs_s, time2=5)
-        time.sleep(70)
+        time.sleep(80)
         
         # Start client
         self.logStep(f"Starting client process on {client.localIP}")
@@ -294,6 +294,15 @@ class TurboCommBaseCase(TestCase):
                 update_if_not_fail(result_dataset, "server", "pass")
             else:
                 update_if_not_fail(result_dataset, "server", "fail")
+
+        has_real_error = any(
+            "ERROR" in line and "Trying to connect to" not in line
+            for line in res_c.splitlines()
+        )
+        if has_real_error:
+            update_if_not_fail(result_dataset, "client", "fail")
+        else:
+            update_if_not_fail(result_dataset, "client", "pass")
 
         if not_expects_c is not None:
             if verify_not(res_c, not_expects_c):
