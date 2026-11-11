@@ -4,8 +4,8 @@ project(ubs-mem-test VERSION 1.0.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(UBS_MEM_INCLUDE_DIR "/usr/local/ubs_mem/include")
-set(UBS_MEM_LIB_DIR "/usr/local/ubs_mem/lib")
+set(UBS_MEM_INCLUDE_DIR "/usr/include/ubs_mem/")
+set(UBS_MEM_LIB_DIR "/usr/lib64/")
 
 add_executable(ubs_mem_test
     src/main.cpp
