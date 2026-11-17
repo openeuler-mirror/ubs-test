@@ -30,7 +30,8 @@ lib_path = '/usr/lib64/libubse-client.so'
 lib_mem_tool_path = '/usr/lib64/libmem_tool_client.so'
 
 # 定义C函数原型
-UBS_MEM_MAX_NAME_LENGTH = 48
+UBS_MEM_MAX_NAME_LENGTH = 64
+UBS_MEM_NAME_BUFFER_SIZE = (UBS_MEM_MAX_NAME_LENGTH + 1)
 UBSE_MAX_MEMID_NUM = 2048
 HOST_NAME_MAX = 64
 UBS_MEM_MAX_SLOT_NUM = 16
@@ -88,7 +89,7 @@ class UbsTopoNodeT(ctypes.Structure):
         ("numa_ids", (ctypes.c_uint32 * UBS_TOPO_NUMA_NUM) * UBS_TOPO_SOCKET_NUM),
         ("ips", UbsTopoIpAddressT * UBS_TOPO_IPADDR_NUM),
         ("host_name", ctypes.c_char * HOST_NAME_MAX),
-        ("super_pod_id", ctypes.c_uint16)
+        ('super_pod_id', ctypes.c_uint16)
     ]
 
     def __str__(self):
@@ -104,7 +105,7 @@ class UbsTopoNodeT(ctypes.Structure):
             f"  numa ids={numa_list}\n"
             f"  ips={ip_list}\n"
             f"  host name={host}\n"
-            f"  super pod id={self.super_pod_id}\n"
+            f"  super_pod_id={self.super_pod_id}\n"
             f")"
         )
 
@@ -161,7 +162,8 @@ class UbsMemStateT(ctypes.c_uint32):
     UBSE_EXIST = 3  # 创建成功
     UBSE_ERR_ONLY_IMPORT = 4  # 只存在借入
     UBSE_ERR_WAIT_UNEXPORT = 5  # 等待unexport执行，对账会执行，可以手动删除
-    UBSE_END = 6  # 类型转换边界值, 不表示任何内存状态
+    UBSE_ERR_ABNORMAL = 6
+    UBSE_END = 7  # 类型转换边界值, 不表示任何内存状态
 
     @staticmethod
     def to_string(mem_state):
@@ -175,6 +177,7 @@ class UbsMemStateT(ctypes.c_uint32):
             UbsMemStateT.UBSE_EXIST: "UBSE_EXIST",
             UbsMemStateT.UBSE_ERR_ONLY_IMPORT: "UBSE_ERR_ONLY_IMPORT",
             UbsMemStateT.UBSE_ERR_WAIT_UNEXPORT: "UBSE_ERR_WAIT_UNEXPORT",
+            UbsMemStateT.UBSE_ERR_ABNORMAL: "UBSE_ERR_ABNORMAL",
             UbsMemStateT.UBSE_END: "UBSE_END",
         }
         return state_map.get(mem_state.value, "UNKNOWN")
@@ -229,7 +232,7 @@ class UbsMemNumastatT(ctypes.Structure):
 
 class UbsMemFdDescT(ctypes.Structure):
     _fields_ = [
-        ("name", ctypes.c_char * UBS_MEM_MAX_NAME_LENGTH),
+        ("name", ctypes.c_char * UBS_MEM_NAME_BUFFER_SIZE),
         ("memid_cnt", ctypes.c_uint32),
         ("memids", ctypes.c_uint64 * UBSE_MAX_MEMID_NUM),
         ("mem_size", ctypes.c_uint64),
@@ -256,7 +259,7 @@ class UbsMemFdDescT(ctypes.Structure):
 
 class UbsMemNumaDescT(ctypes.Structure):
     _fields_ = [
-        ("name", ctypes.c_char * (UBS_MEM_MAX_NAME_LENGTH)),
+        ("name", ctypes.c_char * (UBS_MEM_NAME_BUFFER_SIZE)),
         ("numa_id", ctypes.c_int64),
         ("export_node", UbsTopoNodeT),
         ("import_node", UbsTopoNodeT),
@@ -336,7 +339,7 @@ class UbsMemShmImportDescT(ctypes.Structure):
 
 class UbsMemShmDescT(ctypes.Structure):
     _fields_ = [
-        ("name", ctypes.c_char * UBS_MEM_MAX_NAME_LENGTH),
+        ("name", ctypes.c_char * UBS_MEM_NAME_BUFFER_SIZE),
         ("mem_size", ctypes.c_uint64),
         ("unit_size", ctypes.c_size_t),
         ("export_node", UbsTopoNodeT),
@@ -391,7 +394,7 @@ class UbsMemProcessLenderT(ctypes.Structure):
 
 class UbsMemAddrDescT(ctypes.Structure):
     _fields_ = [
-        ("name", ctypes.c_char * UBS_MEM_MAX_NAME_LENGTH),
+        ("name", ctypes.c_char * UBS_MEM_NAME_BUFFER_SIZE),
         ("numa_id", ctypes.c_uint64),
         ("size", ctypes.c_uint64)
     ]
@@ -1326,7 +1329,8 @@ class UbseMemApp(cmd.Cmd):
             args = parser.parse_args(shlex.split(arg))
 
             mem_desc = UbsMemExportMemIdDescT()
-            result = self.lib_ubse.ubs_mem_fd_get_memid_by_import(args.name.encode('utf-8'), args.memid, ctypes.byref(mem_desc))
+            result = self.lib_ubse.ubs_mem_fd_get_memid_by_import(args.name.encode('utf-8'), args.memid,
+                                                                  ctypes.byref(mem_desc))
             # 处理结果
             if result == 0:
                 logger.info("Successfully retrieved FD-form memory resource")
@@ -1345,7 +1349,8 @@ class UbseMemApp(cmd.Cmd):
             args = parser.parse_args(shlex.split(arg))
 
             mem_desc = UbsMemExportMemIdDescT()
-            result = self.lib_ubse.ubs_mem_numa_get_memid_by_import(args.name.encode('utf-8'), args.memid, ctypes.byref(mem_desc))
+            result = self.lib_ubse.ubs_mem_numa_get_memid_by_import(args.name.encode('utf-8'), args.memid,
+                                                                    ctypes.byref(mem_desc))
             # 处理结果
             if result == 0:
                 logger.info("Successfully retrieved NUMA-form memory resource")
@@ -1364,7 +1369,8 @@ class UbseMemApp(cmd.Cmd):
             args = parser.parse_args(shlex.split(arg))
 
             mem_desc = UbsMemExportMemIdDescT()
-            result = self.lib_ubse.ubs_mem_shm_get_memid_by_import(args.name.encode('utf-8'), args.memid, ctypes.byref(mem_desc))
+            result = self.lib_ubse.ubs_mem_shm_get_memid_by_import(args.name.encode('utf-8'), args.memid,
+                                                                   ctypes.byref(mem_desc))
             # 处理结果
             if result == 0:
                 logger.info("Successfully retrieved SHARE-form memory resource")
@@ -2471,7 +2477,7 @@ class UbseMemApp(cmd.Cmd):
             lender_ptr = ctypes.pointer(lender)
 
             result = self.lib_ubse.ubs_mem_shm_create_with_lender(name_bytes, ctypes.byref(usr_info_arr),
-                    flag, region_ptr, lender_ptr)
+                                                                  flag, region_ptr, lender_ptr)
 
             if result == 0:
                 logger.info(f"Successfully created Share-form memory with lender: {actual_name}")
