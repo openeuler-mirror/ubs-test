@@ -82,6 +82,7 @@ def borrow_strategy_to_dict(ret: Any) -> Dict:
             "srcNumaId": int(src_numa_id)
         },
         "borrowSize": int(borrow_size),
+        "pageSize": 2048,
         "destParam": dest_param
     }
 

@@ -52,6 +52,7 @@ class TestRmrsFragmentSameplanePriority002(MempoolingBaseCase):
                 "srcNumaId": self.socket2numa[self.socket[0]][0]
             },
             "borrowSize": 1048576,
+            "pageSize": 2048,
             "destParam": [
                 {
                     "destNid": "2",

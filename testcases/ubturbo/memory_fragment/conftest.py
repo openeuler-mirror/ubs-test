@@ -10,6 +10,7 @@ from libs.ubturbo.hooks import hook_mem_pooling
 MEM_POOLING_OBMM_SIZE_PER_NUMA = 8
 UBSE_PLUGIN_ADMISSION_PATH = "/etc/ubse/ubse_plugin_admission.conf"
 UBTURBO_PLUGIN_ADMISSION_PATH = "/opt/ubturbo/conf/ubturbo_plugin_admission.conf"
+UBSE_RMRS_PLUGIN_CONF_PATH = "/etc/ubse/plugins/plugin_mempooling.conf"
 VIRT_AGENT_UBSE_PLUGIN = "virt_agent"
 RMRS_UBSE_PLUGIN = "mempooling"
 RMRS_UBTURBO_PLUGIN = "rmrs"
@@ -49,6 +50,7 @@ def mempooling_common_hook(resource_config: dict):
         system.update_conf_file(node, UBSE_PLUGIN_ADMISSION_PATH, VIRT_AGENT_UBSE_PLUGIN, mode="uncomment")
         system.update_conf_file(node, UBSE_PLUGIN_ADMISSION_PATH, RMRS_UBSE_PLUGIN, mode="uncomment")
         system.update_conf_file(node, UBTURBO_PLUGIN_ADMISSION_PATH, RMRS_UBTURBO_PLUGIN, mode="uncomment")
+        system.update_conf_file(node, UBSE_RMRS_PLUGIN_CONF_PATH, "rmrs.ipc.timeout","300", mode="set")
         os_turbo.reset_osturbo(node)
     rack_manager.restart_cluster_scbus(nodes_list, sync=False)
     rack_manager.wait_master_consistent(node_list=nodes_list)
