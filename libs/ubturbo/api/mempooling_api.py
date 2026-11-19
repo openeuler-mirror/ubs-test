@@ -161,6 +161,7 @@ def function_borrow_execute(node, borrow_execute_input_parameter: Union[BorrowEx
                 "srcNumaId": borrow_execute_input_parameter.srcNumaId
             },
             "borrowSize": 1048576,
+            "pageSize": 2048,
             "destParam": borrow_execute_input_parameter.destParam
         }
         json_cmd = json.dumps(payload)
