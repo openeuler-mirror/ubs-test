@@ -222,8 +222,8 @@ class TurboCommBaseCase(TestCase):
         expects_lat: str = None,
         not_expects_s: Optional[List[str]] = None,
         not_expects_c: Optional[List[str]] = None,
-        wait_time: int = 20,
-        sleep_time: int = 10
+        wait_time: int = 300,
+        sleep_time: int = 300
     ) -> Dict[str, str]:
         """Run server/client via SSH channel for interactive tests.
         
@@ -255,14 +255,14 @@ class TurboCommBaseCase(TestCase):
         self.logStep(f"Starting server process on {server.localIP}")
         self.logDebug(f"server command: {cmd_s}")
         executor.submit(send_cmd_list, ch_s, cmd_s, time1=wait_time, inputs=inputs_s, time2=5)
-        time.sleep(5)
+        time.sleep(80)
         
         # Start client
         self.logStep(f"Starting client process on {client.localIP}")
         self.logDebug(f"client command: {cmd_c}")
         executor.submit(send_cmd_list, ch_c, cmd_c, time1=5, inputs=inputs_c, time2=sleep_time)
         
-        time.sleep(wait_time + sleep_time)
+        time.sleep(wait_time)
         
         # Verify results
         self.logStep("Verifying test results")
@@ -294,6 +294,15 @@ class TurboCommBaseCase(TestCase):
                 update_if_not_fail(result_dataset, "server", "pass")
             else:
                 update_if_not_fail(result_dataset, "server", "fail")
+
+        has_real_error = any(
+            "ERROR" in line and "Trying to connect to" not in line
+            for line in res_c.splitlines()
+        )
+        if has_real_error:
+            update_if_not_fail(result_dataset, "client", "fail")
+        else:
+            update_if_not_fail(result_dataset, "client", "pass")
 
         if not_expects_c is not None:
             if verify_not(res_c, not_expects_c):

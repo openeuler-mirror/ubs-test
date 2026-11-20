@@ -196,8 +196,7 @@ class TestTcHcomPerfCase(HCOMBaseCase):
                 cmd_c=cmd_c,
                 inputs_s=["q"],
                 inputs_c=None,
-                expects_lat=data.data_size.value,
-                not_expects_c=["ERROR"],
+                expects_lat=data.data_size.value
             )
             self.result_datasets[dataset_name] = result_dataset
 

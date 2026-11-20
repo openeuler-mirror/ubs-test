@@ -46,8 +46,8 @@ def node_run(node, command, directory=None, input_str=None, waitstr="@#>", timeo
 
 def create_ssh(node):
     """Create SSH session connection."""
-    if hasattr(node, 'phy_address'):
-        ip = node.phy_address if node.phy_address else node.localIP
+    if hasattr(node, 'ip'):
+        ip = node.ip if node.ip else node.localIP
     else:
         ip = node.localIP
     port = int(node.port)
