@@ -8,11 +8,11 @@ from libs.modules.ubsvirt.basecase.kubernetes_basecase import KubernetesBaseCase
 
 
 @pytest.mark.smoke
-class TestSsuPlugin03(KubernetesBaseCase):
+class TestSsuPlugin04(KubernetesBaseCase):
     """验证ubse-helper组件功能正常.
 
     CaseNumber:
-        test_ssu_plugin_03
+        test_ssu_plugin_04
     RunLevel:
         Level 3
     EnvType:
