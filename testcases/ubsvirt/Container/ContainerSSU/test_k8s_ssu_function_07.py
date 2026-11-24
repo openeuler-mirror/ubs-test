@@ -222,3 +222,4 @@ class TestK8sSsuFunction07(KubernetesBaseCase):
 
     def teardown_method(self) -> None:
         self.delete_resources(check=False)
+        self.cleanup_volumes()

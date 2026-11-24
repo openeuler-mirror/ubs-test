@@ -158,3 +158,4 @@ class TestK8sSsuFunction03(KubernetesBaseCase):
 
     def teardown_method(self) -> None:
         self.delete_resources(check=False)
+        self.cleanup_volumes()
