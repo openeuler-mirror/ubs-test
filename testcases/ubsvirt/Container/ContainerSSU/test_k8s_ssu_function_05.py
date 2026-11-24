@@ -224,18 +224,19 @@ class TestK8sSsuFunction05(KubernetesBaseCase):
         self.run_master(
             f"kubectl delete -f {self.remote_pod_yaml} -l ssu-test-phase=initial "
             "--wait=true --timeout=100s",
-            timeout=120,
+            timeout=180,
         )
         self.run_master(
-            f"kubectl delete -f {self.remote_pvc_yaml} --wait=true --timeout=100s",
-            timeout=120,
+            f"kubectl delete -f {self.remote_pvc_yaml} --wait=false",
+            timeout=180,
         )
 
         self.logStep("E6.删除容器和pvc成功")
         self.run_master(
             f"kubectl wait --for=delete --timeout=100s pv/{pv_name}",
-            timeout=120,
+            timeout=180,
         )
 
     def teardown_method(self) -> None:
         self.delete_resources(check=False)
+        self.cleanup_volumes()

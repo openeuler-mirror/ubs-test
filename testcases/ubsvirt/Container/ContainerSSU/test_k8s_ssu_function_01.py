@@ -39,7 +39,8 @@ class TestK8sSsuFunction01(KubernetesBaseCase):
     def init_ssu_params(self) -> None:
         self.remote_dir = "/tmp/container_ssu/test_k8s_ssu_function_01"
         self.yaml_name = "scenario-1-pvcs.yaml"
-        self.remote_yaml = f"{self.remote_dir}/{self.yaml_name}"
+        self.remote_pvc_yaml = f"{self.remote_dir}/{self.yaml_name}"
+        self.remote_pod_yaml = f""
         self.yaml_base_path = (
             Path(__file__).parent.parent.parent.parent.parent
             / "resource"
@@ -124,7 +125,7 @@ class TestK8sSsuFunction01(KubernetesBaseCase):
             "master",
             {
                 "source_file": f"{self.yaml_base_path}/{self.yaml_name}",
-                "destination_file": self.remote_yaml,
+                "destination_file": self.remote_pvc_yaml,
             },
         )
         self.delete_resources(check=False)
@@ -134,7 +135,7 @@ class TestK8sSsuFunction01(KubernetesBaseCase):
     @pytest.mark.case_info(level="P0", type="Functional")
     def test_k8s_ssu_function_01(self) -> None:
         self.logStep("S1.创建2个1Gi PVC，分别使用Filesystem和Block模式")
-        apply_output = self.run_master(f"kubectl apply -f {self.remote_yaml}")
+        apply_output = self.run_master(f"kubectl apply -f {self.remote_pvc_yaml}")
         self.assertTrue(
             "created" in apply_output or "configured" in apply_output,
             f"应用PVC场景YAML失败: {apply_output}",

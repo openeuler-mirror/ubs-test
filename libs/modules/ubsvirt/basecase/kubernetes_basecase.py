@@ -1802,7 +1802,20 @@ class KubernetesBaseCase(UBSVirtBaseCase):
                 check=check,
             )
 
-    def bound_volume(self, pvc_name: str, expected_mode: str) -> tuple[str, str]:
+    def cleanup_volumes(self) -> None:
+        """清理残留的SSU PV"""
+        pv_list = self.run_master(
+            "kubectl get pv --no-headers "
+            "-o custom-columns=NAME:.metadata.name,DRIVER:.spec.csi.driver 2>/dev/null | "
+            "awk '$2 == \"csi.unifiedbus.com\" {print $1}'",
+            check=False,
+        )
+        for pv in pv_list.splitlines():
+            pv = pv.strip()
+            if pv:
+                self.run_master(f"kubectl delete pv {pv}", check=False)
+
+    def bound_volume(self, pvc_name: str, expected_size: str, expected_mode: str) -> tuple[str, str]:
         self.run_master(
             f"kubectl wait --for=jsonpath='{{.status.phase}}'=Bound "
             f"--timeout=300s pvc/{pvc_name}",
@@ -1815,7 +1828,7 @@ class KubernetesBaseCase(UBSVirtBaseCase):
         )
         pvc_fields = pvc_info.split("|")
         self.assertEqual(len(pvc_fields), 3, f"PVC信息格式异常: {pvc_info}")
-        self.assertEqual(pvc_fields[1], "3Gi", f"PVC {pvc_name}申请容量不正确")
+        self.assertEqual(pvc_fields[1], expected_size, f"PVC {pvc_name}申请容量不正确")
         self.assertEqual(pvc_fields[2], expected_mode, f"PVC {pvc_name}使用模式不正确")
         pv_info = self.run_master(
             f"kubectl get pv {pvc_fields[0]} "

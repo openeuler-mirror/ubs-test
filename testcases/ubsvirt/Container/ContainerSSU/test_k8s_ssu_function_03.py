@@ -81,8 +81,8 @@ class TestK8sSsuFunction03(KubernetesBaseCase):
             f"pod/{self.linear_pod} pod/{self.striped_pod}",
             timeout=360,
         )
-        self.linear_pv, self.linear_volume_id = self.bound_volume(self.linear_pvc, "Filesystem")
-        self.striped_pv, self.striped_volume_id = self.bound_volume(self.striped_pvc, "Block")
+        self.linear_pv, self.linear_volume_id = self.bound_volume(self.linear_pvc, "3Gi", "Filesystem")
+        self.striped_pv, self.striped_volume_id = self.bound_volume(self.striped_pvc, "3Gi", "Block")
         linear_context = self.run_master(
             f"kubectl get pv {self.linear_pv} "
             "-o jsonpath='{.spec.csi.volumeAttributes.nsnum}|"
@@ -158,3 +158,4 @@ class TestK8sSsuFunction03(KubernetesBaseCase):
 
     def teardown_method(self) -> None:
         self.delete_resources(check=False)
+        self.cleanup_volumes()

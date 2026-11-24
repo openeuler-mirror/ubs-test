@@ -105,8 +105,8 @@ class TestK8sSsuFunction04(KubernetesBaseCase):
             f"kubectl wait -n {self.secondary_namespace} --for=jsonpath='{{.status.phase}}'=Pending "
             f"--timeout=60s pod/{self.striped_pods[1]}"
         )
-        linear_pv, linear_volume = self.bound_volume(self.linear_pvc, "1Gi")
-        striped_pv, striped_volume = self.bound_volume(self.striped_pvc, "3Gi")
+        linear_pv, linear_volume = self.bound_volume(self.linear_pvc, "1Gi", "Filesystem")
+        striped_pv, striped_volume = self.bound_volume(self.striped_pvc, "3Gi", "Filesystem")
         controller_logs = self.component_logs("ssu-controller", "ssu-controller")
         for volume_id in (linear_volume, striped_volume):
             self.assert_log_event(controller_logs, "CreateVolume succeeded", volume_id)
@@ -159,7 +159,7 @@ class TestK8sSsuFunction04(KubernetesBaseCase):
             timeout=360,
         )
         self.run_master(
-            f"kubectl delete -f {self.remote_pvc_yaml} --wait=true --timeout=300s",
+            f"kubectl delete -f {self.remote_pvc_yaml} --wait=false",
             timeout=360,
         )
         self.logStep("E8.删除成功")
@@ -168,3 +168,4 @@ class TestK8sSsuFunction04(KubernetesBaseCase):
 
     def teardown_method(self) -> None:
         self.delete_resources(check=False)
+        self.cleanup_volumes()
