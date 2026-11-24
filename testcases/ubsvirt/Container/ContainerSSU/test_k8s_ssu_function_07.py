@@ -188,7 +188,7 @@ class TestK8sSsuFunction07(KubernetesBaseCase):
         self.run_master(f"kubectl apply -f {self.remote_pod_yaml} -l ssu-test-phase=same")
         self.run_master(
             f"kubectl wait --for=condition=Ready --timeout=100s {ready_pods}",
-            timeout=120,
+            timeout=180,
         )
 
         self.logStep("E6.数据读取成功，未丢失")

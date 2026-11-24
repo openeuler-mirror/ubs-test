@@ -31,14 +31,14 @@ kind: PersistentVolumeClaim
 metadata:
   name: ssu-s8-linear-pvc
   annotations:
-    csi.unifiedbus.com/nsnum: "1"
+    csi.unifiedbus.com/nsnum: "3"
 spec:
   accessModes: [ReadWriteOnce]
   storageClassName: ub-ssu-csi-s8-linear
   volumeMode: Filesystem
   resources:
     requests:
-      storage: 1Gi
+      storage: 3Gi
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

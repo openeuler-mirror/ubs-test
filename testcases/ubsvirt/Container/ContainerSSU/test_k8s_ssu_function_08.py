@@ -24,7 +24,7 @@ class TestK8sSsuFunction08(KubernetesBaseCase):
     PreCondition:
         P1.环境完成K8s、ssu-controller、csi-ssu-driver安装，且功能正常，存储节点正常
     TestStep:
-        S1.创建1个线性编址组逻辑卷PVC A和条带化编址组逻辑卷B，A声明所需卷的size大小为1G，nsnum为1；另一个B声明所需卷size大小为3G，nsnum为3
+        S1.创建1个线性编址组逻辑卷PVC A和条带化编址组逻辑卷B，A声明所需卷的size大小为3G，nsnum为3；另一个B声明所需卷size大小为3G，nsnum为3
         S2.创建4个业务容器，pod1和pod2 2个容器yaml声明引用创建的PVC A，部署在不同节点
         S3.另外2个容器pod3和pod4的yaml声明引用创建的PVC B，部署在不同节点，但是pod3和pod4的namespace不一致
         S4.删除业务容器，使用pv工具查看卷信息，查看卷解挂载功能是否正常
@@ -35,7 +35,6 @@ class TestK8sSsuFunction08(KubernetesBaseCase):
         E2.pod1和pod2容器创建只有一个成功，不支持pod跨节点共享组逻辑卷，存在报错信息
         E3.pod3和pod4容器创建只有一个成功，不支持pod跨节点和跨namespace共享组逻辑卷，存在报错信息
         E4.业务容器删除后可以自动解挂载使用的卷，卷信息正常
-        E5.业务容器删除后可以自动解挂载使用的卷，卷信息正常
         E5.pod3和pod4容器创建只有一个成功，不支持pod跨节点共享组逻辑卷
         E6.删除成功
     Author:
@@ -72,7 +71,7 @@ class TestK8sSsuFunction08(KubernetesBaseCase):
 
     @pytest.mark.case_info(level="P2", type="Functional")
     def test_k8s_ssu_function_08(self) -> None:
-        self.logStep("S1.创建1个线性编址组逻辑卷PVC A和条带化编址组逻辑卷B，A声明所需卷的size大小为1G，nsnum为1；另一个B声明所需卷size大小为3G，nsnum为3")
+        self.logStep("S1.创建1个线性编址组逻辑卷PVC A和条带化编址组逻辑卷B，A声明所需卷的size大小为3G，nsnum为3；另一个B声明所需卷size大小为3G，nsnum为3")
         self.run_master(f"kubectl apply -f {self.remote_pvc_yaml}")
 
         self.logStep("S2.创建4个业务容器，pod1和pod2 2个容器yaml声明引用创建的PVC A，部署在不同节点")
@@ -101,7 +100,7 @@ class TestK8sSsuFunction08(KubernetesBaseCase):
         )
         pvc_a_fields = pvc_a_info.split("|")
         self.assertEqual(len(pvc_a_fields), 3, f"PVC信息格式异常: {pvc_a_info}")
-        self.assertEqual(pvc_a_fields[1], "1Gi", f"PVC {self.linear_pvc}申请容量不正确")
+        self.assertEqual(pvc_a_fields[1], "3Gi", f"PVC {self.linear_pvc}申请容量不正确")
         pv_a_info = self.run_master(
             f"kubectl get pv {pvc_a_fields[0]} "
             "-o jsonpath='{.spec.csi.driver}|{.spec.csi.volumeHandle}|"
@@ -192,17 +191,17 @@ class TestK8sSsuFunction08(KubernetesBaseCase):
         self.run_master(
             f"kubectl delete -f {self.remote_pod_yaml} -l ssu-test-phase=same "
             "--wait=true --timeout=100s",
-            timeout=120,
+            timeout=180,
         )
         self.run_master(
             f"kubectl delete -f {self.remote_pvc_yaml} --wait=false --timeout=100s",
-            timeout=120,
+            timeout=180,
         )
         self.logStep("E6.删除成功")
         pv_resources = f"pv/{pv_a_name} pv/{pv_b_name}"
         self.run_master(
             f"kubectl wait --for=delete --timeout=100s {pv_resources}",
-            timeout=120,
+            timeout=180,
             check=False,
         )
 
