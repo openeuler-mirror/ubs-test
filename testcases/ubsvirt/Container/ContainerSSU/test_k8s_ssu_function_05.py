@@ -227,7 +227,7 @@ class TestK8sSsuFunction05(KubernetesBaseCase):
             timeout=180,
         )
         self.run_master(
-            f"kubectl delete -f {self.remote_pvc_yaml} --wait=false --timeout=100s",
+            f"kubectl delete -f {self.remote_pvc_yaml} --wait=false",
             timeout=180,
         )
 
@@ -235,7 +235,6 @@ class TestK8sSsuFunction05(KubernetesBaseCase):
         self.run_master(
             f"kubectl wait --for=delete --timeout=100s pv/{pv_name}",
             timeout=180,
-            check=False,
         )
 
     def teardown_method(self) -> None:

@@ -1803,9 +1803,11 @@ class KubernetesBaseCase(UBSVirtBaseCase):
             )
 
     def cleanup_volumes(self) -> None:
-        """清理残留的PV"""
+        """清理残留的SSU PV"""
         pv_list = self.run_master(
-            "kubectl get pv --no-headers -o custom-columns=NAME:.metadata.name 2>/dev/null",
+            "kubectl get pv --no-headers "
+            "-o custom-columns=NAME:.metadata.name,DRIVER:.spec.csi.driver 2>/dev/null | "
+            "awk '$2 == \"csi.unifiedbus.com\" {print $1}'",
             check=False,
         )
         for pv in pv_list.splitlines():

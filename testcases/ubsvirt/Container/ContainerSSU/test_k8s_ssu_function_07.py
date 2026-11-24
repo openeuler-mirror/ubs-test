@@ -69,7 +69,7 @@ class TestK8sSsuFunction07(KubernetesBaseCase):
         self.controller_namespace = ""
         self.log_start_time = ""
 
-    def _verify_bound_pvcs(self) -> list[str]:
+    def _verify_bound_pvcs(self) -> tuple[list[str], list[str]]:
         pvc_names = [name for name, _, _ in self.pvc_specs]
         resources = " ".join(f"pvc/{name}" for name in pvc_names)
         self.run_master(

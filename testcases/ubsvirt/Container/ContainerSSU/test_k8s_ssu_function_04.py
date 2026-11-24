@@ -159,12 +159,12 @@ class TestK8sSsuFunction04(KubernetesBaseCase):
             timeout=360,
         )
         self.run_master(
-            f"kubectl delete -f {self.remote_pvc_yaml} --wait=false --timeout=300s",
+            f"kubectl delete -f {self.remote_pvc_yaml} --wait=false",
             timeout=360,
         )
         self.logStep("E8.删除成功")
         pv_resources = " ".join(f"pv/{pv}" for pv in (linear_pv, striped_pv))
-        self.run_master(f"kubectl wait --for=delete --timeout=300s {pv_resources}", timeout=360, check=False)
+        self.run_master(f"kubectl wait --for=delete --timeout=300s {pv_resources}", timeout=360)
 
     def teardown_method(self) -> None:
         self.delete_resources(check=False)
