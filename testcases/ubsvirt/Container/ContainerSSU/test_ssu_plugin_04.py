@@ -63,7 +63,7 @@ class TestSsuPlugin04(KubernetesBaseCase):
         time.sleep(5)
 
     @pytest.mark.case_info(level="P2", type="Functional")
-    def test_ssu_plugin_03(self) -> None:
+    def test_ssu_plugin_04(self) -> None:
         self.logStep("S1.查看ubse-helper组件状态")
         helper_pod_info = self.run_master(
             f"kubectl get pods -n {self.helper_namespace} --no-headers "
