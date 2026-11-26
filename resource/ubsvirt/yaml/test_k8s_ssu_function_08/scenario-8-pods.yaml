@@ -3,7 +3,7 @@ kind: Pod
 metadata:
   name: ssu-s8-linear-1
   labels:
-    ssu-test-phase: initial
+    ssu-test-phase: initial-master
 spec:
   nodeSelector:
     kubernetes.io/hostname: master
@@ -28,7 +28,7 @@ kind: Pod
 metadata:
   name: ssu-s8-linear-2
   labels:
-    ssu-test-phase: initial
+    ssu-test-phase: initial-worker
 spec:
   nodeSelector:
     kubernetes.io/hostname: worker1
@@ -53,7 +53,7 @@ kind: Pod
 metadata:
   name: ssu-s8-striped-3
   labels:
-    ssu-test-phase: initial
+    ssu-test-phase: initial-master
 spec:
   nodeSelector:
     kubernetes.io/hostname: master
@@ -79,7 +79,7 @@ metadata:
   name: ssu-s8-striped-4
   namespace: ssu-s8-secondary
   labels:
-    ssu-test-phase: initial
+    ssu-test-phase: initial-worker
 spec:
   nodeSelector:
     kubernetes.io/hostname: worker1
@@ -104,7 +104,7 @@ kind: Pod
 metadata:
   name: ssu-s8-striped-3
   labels:
-    ssu-test-phase: same
+    ssu-test-phase: same-master
 spec:
   nodeSelector:
     kubernetes.io/hostname: master
@@ -129,7 +129,7 @@ kind: Pod
 metadata:
   name: ssu-s8-striped-4
   labels:
-    ssu-test-phase: same
+    ssu-test-phase: same-worker
 spec:
   nodeSelector:
     kubernetes.io/hostname: worker1

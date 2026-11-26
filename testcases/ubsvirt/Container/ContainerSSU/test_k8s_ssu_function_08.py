@@ -75,17 +75,13 @@ class TestK8sSsuFunction08(KubernetesBaseCase):
         self.run_master(f"kubectl apply -f {self.remote_pvc_yaml}")
 
         self.logStep("S2.创建4个业务容器，pod1和pod2 2个容器yaml声明引用创建的PVC A，部署在不同节点")
-        self.run_master(f"kubectl apply -f {self.remote_pod_yaml} -l ssu-test-phase=initial")
+        self.run_master(f"kubectl apply -f {self.remote_pod_yaml} -l ssu-test-phase=initial-master")
         self.run_master(
             f"kubectl wait --for=condition=Ready --timeout=100s "
             f"pod/{self.linear_pods[0]} pod/{self.striped_pods[0]}",
             timeout=120,
         )
-        self.run_master(
-            f"kubectl wait --for=jsonpath='{{.status.phase}}'=Pending "
-            f"--timeout=60s pod/{self.linear_pods[1]}",
-            timeout=120,
-        )
+        self.run_master(f"kubectl apply -f {self.remote_pod_yaml} -l ssu-test-phase=initial-worker")
 
         self.logStep("E1.ssu-controller调用ubse创建组逻辑卷成功")
         self.run_master(
@@ -142,6 +138,11 @@ class TestK8sSsuFunction08(KubernetesBaseCase):
         self.assert_log_event(controller_logs, "CreateVolume succeeded", volume_b_id)
 
         self.logStep("E2.pod1和pod2容器创建只有一个成功，不支持pod跨节点共享组逻辑卷，存在报错信息")
+        self.run_master(
+            f"kubectl wait --for=jsonpath='{{.status.phase}}'=Pending "
+            f"--timeout=60s pod/{self.linear_pods[1]}",
+            timeout=120,
+        )
         self.run_master(f"kubectl exec {self.linear_pods[0]} -- test -d /data")
 
         self.logStep("S3.另外2个容器pod3和pod4的yaml声明引用创建的PVC B，部署在不同节点，但是pod3和pod4的namespace不一致")
@@ -156,7 +157,12 @@ class TestK8sSsuFunction08(KubernetesBaseCase):
 
         self.logStep("S4.删除业务容器，使用pv工具查看卷信息，查看卷解挂载功能是否正常")
         self.run_master(
-            f"kubectl delete -f {self.remote_pod_yaml} -l ssu-test-phase=initial "
+            f"kubectl delete -f {self.remote_pod_yaml} -l ssu-test-phase=initial-master "
+            "--wait=true --timeout=100s",
+            timeout=120,
+        )
+        self.run_master(
+            f"kubectl delete -f {self.remote_pod_yaml} -l ssu-test-phase=initial-worker "
             "--wait=true --timeout=100s",
             timeout=120,
         )
@@ -174,11 +180,12 @@ class TestK8sSsuFunction08(KubernetesBaseCase):
         self.assert_log_event(node_logs, "NodeUnstageVolume called", volume_b_id)
 
         self.logStep("S5.另外2个容器pod3和pod4的yaml引用创建的PVC B，部署在不同节点，但是pod3和pod4的namespace一致，创建容器")
-        self.run_master(f"kubectl apply -f {self.remote_pod_yaml} -l ssu-test-phase=same")
+        self.run_master(f"kubectl apply -f {self.remote_pod_yaml} -l ssu-test-phase=same-master")
         self.run_master(
             f"kubectl wait --for=condition=Ready --timeout=100s pod/{self.striped_pods[0]}",
             timeout=120,
         )
+        self.run_master(f"kubectl apply -f {self.remote_pod_yaml} -l ssu-test-phase=same-worker")
         self.run_master(
             f"kubectl wait --for=jsonpath='{{.status.phase}}'=Pending "
             f"--timeout=60s pod/{self.striped_pods[1]}",
@@ -189,7 +196,12 @@ class TestK8sSsuFunction08(KubernetesBaseCase):
 
         self.logStep("S6.删除容器和PVC")
         self.run_master(
-            f"kubectl delete -f {self.remote_pod_yaml} -l ssu-test-phase=same "
+            f"kubectl delete -f {self.remote_pod_yaml} -l ssu-test-phase=same-master "
+            "--wait=true --timeout=100s",
+            timeout=180,
+        )
+        self.run_master(
+            f"kubectl delete -f {self.remote_pod_yaml} -l ssu-test-phase=same-worker "
             "--wait=true --timeout=100s",
             timeout=180,
         )
