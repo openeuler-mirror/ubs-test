@@ -88,10 +88,12 @@ class TestSsuPlugin02(KubernetesBaseCase):
         self.logStep(
             "E1.按照deployment模式部署，不止部署在一个节点，存在主备，状态信息可以正常查询"
         )
-        self.logInfo(f"ssu-controller Pod信息:\n{controller_pod_info}")
-        self.logInfo(
-            f"部署节点: {controller_nodes}, Pod数: {len(pod_lines)}"
+        self.assertGreaterEqual(len(pod_lines), 2, "ssu-controller Pod数不足2个，不存在主备")
+        self.assertGreaterEqual(
+            len(controller_nodes), 2,
+            f"ssu-controller只部署在{controller_nodes}个节点，不止部署在一个节点",
         )
+        self.logInfo(f"部署节点: {controller_nodes}, Pod数: {len(pod_lines)}")
 
         self.controller_pod_name = pod_lines[0].split()[0]
 
