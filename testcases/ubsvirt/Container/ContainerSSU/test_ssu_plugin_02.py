@@ -91,7 +91,7 @@ class TestSsuPlugin02(KubernetesBaseCase):
         self.assertGreaterEqual(len(pod_lines), 2, "ssu-controller Pod数不足2个，不存在主备")
         self.assertGreaterEqual(
             len(controller_nodes), 2,
-            f"ssu-controller只部署在{controller_nodes}个节点，不止部署在一个节点",
+            f"ssu-controller只部署在{len(controller_nodes)}个节点: {controller_nodes}，缺少主备",
         )
         self.logInfo(f"部署节点: {controller_nodes}, Pod数: {len(pod_lines)}")
 
@@ -142,6 +142,8 @@ class TestSsuPlugin02(KubernetesBaseCase):
         mem_mi = float(fields[1]) / 1024
         self.logInfo(f"资源占用: CPU={cpu_percent}%, MEM={mem_mi:.1f}Mi")
         self.logStep("E3.cpu < 500m，mem < 512M")
+        self.assertLess(cpu_percent, 500, f"CPU使用量 {cpu_percent}% 不小于 500m")
+        self.assertLess(mem_mi, 512, f"内存使用量 {mem_mi:.1f}Mi 不小于 512Mi")
 
     def teardown_method(self) -> None:
         if self.controller_pod_name and self.controller_namespace:

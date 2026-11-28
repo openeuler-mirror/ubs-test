@@ -135,6 +135,8 @@ class TestSsuPlugin01(KubernetesBaseCase):
         mem_mi = float(fields[1]) / 1024
         self.logInfo(f"资源占用: CPU={cpu_percent}%, MEM={mem_mi:.1f}Mi")
         self.logStep("E3.cpu < 100m，mem < 128M")
+        self.assertLess(cpu_percent, 100, f"CPU使用量 {cpu_percent}% 不小于 100m")
+        self.assertLess(mem_mi, 128, f"内存使用量 {mem_mi:.1f}Mi 不小于 128Mi")
 
     def teardown_method(self) -> None:
         if self.node_pod_name and self.controller_namespace:
